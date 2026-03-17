@@ -1,0 +1,51 @@
+version: 2
+
+project_name: grafana-cli
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    exclude:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w -X github.com/piyush-gambhir/grafana-cli/internal/build.Version={{.Version}} -X github.com/piyush-gambhir/grafana-cli/internal/build.Commit={{.Commit}} -X github.com/piyush-gambhir/grafana-cli/internal/build.Date={{.Date}}
+    binary: grafana
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+
+brews:
+  - repository:
+      owner: piyush-gambhir
+      name: homebrew-tap
+    name: grafana-cli
+    homepage: "https://github.com/piyush-gambhir/grafana-cli"
+    description: "CLI for managing Grafana instances, dashboards, datasources, alerts, and more"
+    license: "MIT"
+    install: |
+      bin.install "grafana"
+    test: |
+      system "#{bin}/grafana", "version"
