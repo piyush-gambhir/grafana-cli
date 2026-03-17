@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"sync"
 
 	"github.com/spf13/cobra"
 
@@ -21,9 +23,11 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cmd/snapshot"
 	"github.com/piyush-gambhir/grafana-cli/cmd/team"
 	"github.com/piyush-gambhir/grafana-cli/cmd/user"
+	"github.com/piyush-gambhir/grafana-cli/internal/build"
 	"github.com/piyush-gambhir/grafana-cli/internal/client"
 	"github.com/piyush-gambhir/grafana-cli/internal/cmdutil"
 	"github.com/piyush-gambhir/grafana-cli/internal/config"
+	"github.com/piyush-gambhir/grafana-cli/internal/update"
 )
 
 var (
@@ -46,6 +50,11 @@ func newRootCmd() *cobra.Command {
 		IOStreams: cmdutil.DefaultIOStreams(),
 	}
 
+	// Used to pass update check result from PersistentPreRun to PersistentPostRun.
+	var updateInfo *update.UpdateInfo
+	var updateMu sync.Mutex
+	var updateWg sync.WaitGroup
+
 	rootCmd := &cobra.Command{
 		Use:   "grafana",
 		Short: "Grafana CLI - manage Grafana from the command line",
@@ -53,8 +62,24 @@ func newRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			// Start background update check for most commands.
+			cmdName := cmd.Name()
+			skipUpdateCheck := cmdName == "update" || cmdName == "version" || cmdName == "completion" || cmdName == "help"
+			if !skipUpdateCheck && build.Version != "dev" && build.Version != "" {
+				updateWg.Add(1)
+				go func() {
+					defer updateWg.Done()
+					info, err := update.CheckForUpdate(build.Version, updateRepo, config.ConfigDir())
+					if err == nil && info != nil && info.Available {
+						updateMu.Lock()
+						updateInfo = info
+						updateMu.Unlock()
+					}
+				}()
+			}
+
 			// Skip auth setup for commands that don't need it.
-			if cmd.Name() == "version" || cmd.Name() == "completion" || cmd.Name() == "help" {
+			if cmdName == "version" || cmdName == "completion" || cmdName == "help" || cmdName == "update" {
 				return nil
 			}
 			// Also skip for config subcommands.
@@ -103,6 +128,16 @@ func newRootCmd() *cobra.Command {
 
 			return nil
 		},
+		PersistentPostRun: func(cmd *cobra.Command, args []string) {
+			// Wait for the background update check to complete, then print notice.
+			updateWg.Wait()
+			updateMu.Lock()
+			info := updateInfo
+			updateMu.Unlock()
+			if info != nil && info.Available {
+				update.PrintUpdateNotice(os.Stderr, info)
+			}
+		},
 	}
 
 	// Global persistent flags.
@@ -116,6 +151,7 @@ func newRootCmd() *cobra.Command {
 
 	// Register subcommands.
 	rootCmd.AddCommand(newVersionCmd())
+	rootCmd.AddCommand(newUpdateCmd())
 	rootCmd.AddCommand(newLoginCmd(f))
 	rootCmd.AddCommand(newCompletionCmd())
 	rootCmd.AddCommand(cmdconfig.NewCmdConfig(f))
