@@ -14,6 +14,14 @@ func newCmdContactPointGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <uid>",
 		Short: "Get a contact point by UID",
+		Long: `Retrieve a single contact point by its UID.
+
+Examples:
+  # Get contact point details
+  grafana alert contact-point get cpUid123
+
+  # Get as JSON (for creating update payloads)
+  grafana alert contact-point get cpUid123 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

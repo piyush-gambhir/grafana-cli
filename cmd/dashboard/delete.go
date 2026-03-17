@@ -15,6 +15,17 @@ func newCmdDashboardDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <uid>",
 		Short: "Delete a dashboard",
+		Long: `Permanently delete a dashboard by its UID.
+
+This action cannot be undone. You will be prompted for confirmation unless
+the --confirm flag is set. Use "grafana dashboard list" to find the UID.
+
+Examples:
+  # Delete a dashboard (with confirmation prompt)
+  grafana dashboard delete abc123
+
+  # Delete without confirmation prompt
+  grafana dashboard delete abc123 --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			uid := args[0]

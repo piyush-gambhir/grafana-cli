@@ -11,6 +11,9 @@ func NewCmdToken(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "token",
 		Short: "Manage service account tokens",
+		Long: `List, create, and delete API tokens for a service account.
+
+Tokens authenticate API requests on behalf of the service account.`,
 	}
 
 	cmd.AddCommand(newCmdTokenList(f))

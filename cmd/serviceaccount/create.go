@@ -17,6 +17,16 @@ func newCmdServiceAccountCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a service account",
+		Long: `Create a new service account from a JSON or YAML file.
+
+The file must contain name and role fields. Role can be Viewer, Editor,
+or Admin.
+
+Examples:
+  # Create a service account
+  grafana service-account create -f sa.json
+
+  # Example JSON: {"name":"ci-bot","role":"Editor"}`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

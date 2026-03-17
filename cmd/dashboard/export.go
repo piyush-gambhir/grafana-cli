@@ -17,7 +17,21 @@ func newCmdDashboardExport(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "export <uid>",
 		Short: "Export a dashboard JSON",
-		Long:  "Export the full dashboard JSON to stdout or a file.",
+		Long: `Export the full dashboard JSON to stdout or a file.
+
+Retrieves the complete dashboard model as JSON and writes it to stdout
+or a file. This is useful for backups, version control, or migrating
+dashboards between Grafana instances.
+
+Examples:
+  # Export to stdout
+  grafana dashboard export abc123
+
+  # Export to a file
+  grafana dashboard export abc123 --output-file dashboard-backup.json
+
+  # Pipe to jq for processing
+  grafana dashboard export abc123 | jq '.panels | length'`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

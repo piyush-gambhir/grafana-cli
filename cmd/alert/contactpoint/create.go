@@ -17,6 +17,15 @@ func newCmdContactPointCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a contact point",
+		Long: `Create a new contact point from a JSON or YAML file.
+
+The file must contain name, type, and settings fields. The type determines
+which settings are required (e.g. "email" needs "addresses", "slack"
+needs "url").
+
+Examples:
+  # Create a contact point
+  grafana alert contact-point create -f contact-point.json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

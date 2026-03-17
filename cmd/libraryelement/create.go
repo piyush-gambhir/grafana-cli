@@ -17,6 +17,13 @@ func newCmdLibraryElementCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a library element",
+		Long: `Create a new library element (panel or variable) from a JSON or YAML file.
+
+The file must include name, kind (1=panel, 2=variable), and model.
+
+Examples:
+  # Create a library panel
+  grafana library-element create -f panel.json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

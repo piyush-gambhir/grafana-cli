@@ -15,6 +15,14 @@ func newCmdLibraryElementDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <uid>",
 		Short: "Delete a library element",
+		Long: `Permanently delete a library element. Fails if dashboards still use it.
+
+Examples:
+  # Delete a library element
+  grafana library-element delete leUid123
+
+  # Delete without confirmation
+  grafana library-element delete leUid123 --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			uid := args[0]

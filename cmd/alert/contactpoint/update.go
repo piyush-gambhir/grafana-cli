@@ -16,6 +16,11 @@ func newCmdContactPointUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <uid>",
 		Short: "Update a contact point",
+		Long: `Update an existing contact point from a JSON or YAML file.
+
+Examples:
+  # Update a contact point
+  grafana alert contact-point update cpUid123 -f updated-cp.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

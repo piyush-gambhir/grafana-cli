@@ -15,6 +15,16 @@ func newCmdTemplateList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:     "list",
 		Short:   "List notification templates",
+		Long: `List all notification templates.
+
+The output includes Name and Provenance.
+
+Examples:
+  # List all templates
+  grafana alert template list
+
+  # Output as JSON
+  grafana alert template list -o json`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

@@ -11,6 +11,10 @@ func NewCmdOrgUser(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "user",
 		Short: "Manage organization users",
+		Long: `List, add, update, and remove users in an organization.
+
+Users can have one of three roles within an organization: Viewer, Editor,
+or Admin.`,
 	}
 
 	cmd.AddCommand(newCmdOrgUserList(f))

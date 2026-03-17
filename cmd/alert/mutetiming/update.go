@@ -17,6 +17,11 @@ func newCmdMuteTimingUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <name>",
 		Short: "Update a mute timing",
+		Long: `Update an existing mute timing from a JSON or YAML file.
+
+Examples:
+  # Update a mute timing
+  grafana alert mute-timing update "weekends" -f updated-mt.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

@@ -12,6 +12,10 @@ func NewCmdOrg(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "org",
 		Short: "Manage organizations",
+		Long: `Create, list, get, update, delete organizations, and manage organization users.
+
+Grafana supports multi-tenancy through organizations. Each organization
+has its own dashboards, datasources, and users.`,
 	}
 
 	cmd.AddCommand(newCmdOrgList(f))

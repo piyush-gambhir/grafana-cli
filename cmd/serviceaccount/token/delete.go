@@ -16,6 +16,14 @@ func newCmdTokenDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <service-account-id> <token-id>",
 		Short: "Delete a service account token",
+		Long: `Delete an API token from a service account.
+
+Examples:
+  # Delete token 3 from service account 10
+  grafana service-account token delete 10 3
+
+  # Delete without confirmation
+  grafana service-account token delete 10 3 --confirm`,
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			saID, err := strconv.ParseInt(args[0], 10, 64)

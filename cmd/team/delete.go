@@ -16,6 +16,14 @@ func newCmdTeamDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <id>",
 		Short: "Delete a team",
+		Long: `Permanently delete a team by its ID.
+
+Examples:
+  # Delete team 5
+  grafana team delete 5
+
+  # Delete without confirmation
+  grafana team delete 5 --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)

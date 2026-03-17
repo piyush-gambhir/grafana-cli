@@ -17,6 +17,11 @@ func newCmdPlaylistUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <uid>",
 		Short: "Update a playlist",
+		Long: `Update an existing playlist from a JSON or YAML file.
+
+Examples:
+  # Update a playlist
+  grafana playlist update playlistUid -f playlist.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

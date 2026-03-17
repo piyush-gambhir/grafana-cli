@@ -16,6 +16,14 @@ func newCmdAnnotationGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <id>",
 		Short: "Get an annotation by ID",
+		Long: `Retrieve a single annotation by its numeric ID.
+
+Examples:
+  # Get annotation 42
+  grafana annotation get 42
+
+  # Get as JSON
+  grafana annotation get 42 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)

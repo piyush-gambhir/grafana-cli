@@ -17,6 +17,11 @@ func newCmdTeamUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <id>",
 		Short: "Update a team",
+		Long: `Update a team's name or email from a JSON or YAML file.
+
+Examples:
+  # Update team 5
+  grafana team update 5 -f team.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

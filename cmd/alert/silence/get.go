@@ -14,6 +14,14 @@ func newCmdSilenceGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <id>",
 		Short: "Get a silence by ID",
+		Long: `Retrieve a single silence by its ID.
+
+Examples:
+  # Get silence details
+  grafana alert silence get silenceId123
+
+  # Get as JSON
+  grafana alert silence get silenceId123 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

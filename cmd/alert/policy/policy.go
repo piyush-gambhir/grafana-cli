@@ -11,6 +11,10 @@ func NewCmdPolicy(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "policy",
 		Short: "Manage notification policies",
+		Long: `View, update, and reset the notification policy routing tree.
+
+Notification policies define how alerts are routed to contact points,
+including grouping, timing, and label matching.`,
 	}
 
 	cmd.AddCommand(newCmdPolicyGet(f))

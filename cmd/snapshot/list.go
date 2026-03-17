@@ -12,17 +12,36 @@ import (
 )
 
 func newCmdSnapshotList(f *cmdutil.Factory) *cobra.Command {
-	return &cobra.Command{
+	var limit int
+
+	cmd := &cobra.Command{
 		Use:     "list",
 		Short:   "List snapshots",
 		Aliases: []string{"ls"},
+		Long: `List dashboard snapshots for the current organization.
+
+The output includes ID, Name, Key, whether the snapshot is external, and
+its expiration date. The --limit flag controls how many snapshots to return
+(the Grafana API defaults to returning all snapshots).
+
+The snapshot key is used to retrieve or delete a specific snapshot.
+
+Examples:
+  # List all snapshots
+  grafana snapshot list
+
+  # List the first 10 snapshots
+  grafana snapshot list --limit 10
+
+  # Output as JSON
+  grafana snapshot list -o json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {
 				return err
 			}
 
-			results, err := c.ListSnapshots(context.Background())
+			results, err := c.ListSnapshots(context.Background(), limit)
 			if err != nil {
 				return err
 			}
@@ -47,4 +66,8 @@ func newCmdSnapshotList(f *cmdutil.Factory) *cobra.Command {
 			})
 		},
 	}
+
+	cmd.Flags().IntVar(&limit, "limit", 0, "Maximum number of snapshots to return (0 = all)")
+
+	return cmd
 }

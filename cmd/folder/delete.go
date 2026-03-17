@@ -15,6 +15,17 @@ func newCmdFolderDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <uid>",
 		Short: "Delete a folder",
+		Long: `Permanently delete a folder by its UID.
+
+WARNING: This also deletes all dashboards contained in the folder. You
+will be prompted for confirmation unless --confirm is set.
+
+Examples:
+  # Delete a folder (with confirmation)
+  grafana folder delete folderUid123
+
+  # Delete without confirmation
+  grafana folder delete folderUid123 --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			uid := args[0]

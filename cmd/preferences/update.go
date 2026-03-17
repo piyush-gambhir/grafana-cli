@@ -16,6 +16,13 @@ func newCmdPreferencesUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update current user preferences",
+		Long: `Update the authenticated user's preferences from a JSON or YAML file.
+
+Examples:
+  # Update preferences
+  grafana preferences update -f prefs.json
+
+  # Example JSON: {"theme":"dark","timezone":"utc","weekStart":"monday"}`,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

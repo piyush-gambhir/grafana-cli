@@ -12,6 +12,10 @@ func NewCmdServiceAccount(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "service-account",
 		Short:   "Manage service accounts",
+		Long: `Create, list, get, update, and delete service accounts and their tokens.
+
+Service accounts are non-human accounts used for API access and
+automation. Each service account can have multiple API tokens.`,
 		Aliases: []string{"sa"},
 	}
 

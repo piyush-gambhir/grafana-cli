@@ -14,6 +14,19 @@ func newCmdDashboardRestore(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "restore <uid> <version>",
 		Short: "Restore a dashboard to a specific version",
+		Long: `Restore a dashboard to a specific historical version.
+
+Use "grafana dashboard versions <uid>" to see available versions, then
+restore to a previous version by specifying the dashboard UID and version
+number.
+
+Examples:
+  # Restore dashboard to version 3
+  grafana dashboard restore abc123 3
+
+  # Check versions first, then restore
+  grafana dashboard versions abc123
+  grafana dashboard restore abc123 5`,
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			uid := args[0]

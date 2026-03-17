@@ -18,6 +18,16 @@ func newCmdTokenCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create <service-account-id>",
 		Short: "Create a token for a service account",
+		Long: `Create a new API token for a service account.
+
+The token key is only shown once at creation time. Save it immediately.
+The file must contain a "name" field and optionally "secondsToLive".
+
+Examples:
+  # Create a token
+  grafana service-account token create 10 -f token.json
+
+  # Example JSON: {"name":"deploy-token","secondsToLive":86400}`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

@@ -15,6 +15,14 @@ func newCmdSnapshotDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <key>",
 		Short: "Delete a snapshot",
+		Long: `Delete a snapshot by its key.
+
+Examples:
+  # Delete a snapshot
+  grafana snapshot delete abc123key
+
+  # Delete without confirmation
+  grafana snapshot delete abc123key --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			key := args[0]

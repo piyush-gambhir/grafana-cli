@@ -17,6 +17,11 @@ func newCmdRuleUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <uid>",
 		Short: "Update an alert rule",
+		Long: `Update an existing alert rule from a JSON or YAML file.
+
+Examples:
+  # Update an alert rule
+  grafana alert rule update ruleUid123 -f updated-rule.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

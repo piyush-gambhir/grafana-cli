@@ -15,6 +15,14 @@ func newCmdOrgGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <id>",
 		Short: "Get an organization by ID",
+		Long: `Retrieve a single organization by its numeric ID.
+
+Examples:
+  # Get org details
+  grafana org get 1
+
+  # Get as JSON
+  grafana org get 1 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)

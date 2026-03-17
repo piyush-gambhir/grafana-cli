@@ -17,6 +17,11 @@ func newCmdMuteTimingCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a mute timing",
+		Long: `Create a new mute timing from a JSON or YAML file.
+
+Examples:
+  # Create a mute timing
+  grafana alert mute-timing create -f mute-timing.json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

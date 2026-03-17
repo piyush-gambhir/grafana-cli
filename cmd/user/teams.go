@@ -16,6 +16,11 @@ func newCmdUserTeams(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "teams <user-id>",
 		Short: "List teams a user belongs to",
+		Long: `List all teams a user is a member of (requires server admin).
+
+Examples:
+  # List teams for user 5
+  grafana user teams 5`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			userID, err := strconv.ParseInt(args[0], 10, 64)

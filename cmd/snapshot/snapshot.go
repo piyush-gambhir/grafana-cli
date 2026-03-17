@@ -11,6 +11,10 @@ func NewCmdSnapshot(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "snapshot",
 		Short: "Manage dashboard snapshots",
+		Long: `Create, list, get, and delete dashboard snapshots.
+
+Snapshots are point-in-time copies of dashboard data that can be shared
+externally without requiring access to the Grafana instance.`,
 	}
 
 	cmd.AddCommand(newCmdSnapshotList(f))

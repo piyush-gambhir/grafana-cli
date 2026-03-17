@@ -15,6 +15,14 @@ func newCmdSilenceDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <id>",
 		Short: "Delete a silence",
+		Long: `Expire (delete) a silence by its ID.
+
+Examples:
+  # Delete a silence
+  grafana alert silence delete silenceId123
+
+  # Delete without confirmation
+  grafana alert silence delete silenceId123 --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id := args[0]

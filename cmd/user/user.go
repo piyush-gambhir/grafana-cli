@@ -11,6 +11,8 @@ func NewCmdUser(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "user",
 		Short: "Manage users",
+		Long: `List, get, look up, and update Grafana users. Also view user organizations
+and teams, show the current authenticated user, and star/unstar dashboards.`,
 	}
 
 	cmd.AddCommand(newCmdUserList(f))

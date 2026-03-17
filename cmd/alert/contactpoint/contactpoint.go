@@ -11,6 +11,10 @@ func NewCmdContactPoint(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "contact-point",
 		Short:   "Manage contact points",
+		Long: `Create, list, get, update, and delete alert notification contact points.
+
+Contact points define where alert notifications are sent (email, Slack,
+PagerDuty, webhook, etc.).`,
 		Aliases: []string{"cp"},
 	}
 

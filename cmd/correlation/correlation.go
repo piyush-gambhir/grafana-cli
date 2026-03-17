@@ -11,6 +11,10 @@ func NewCmdCorrelation(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "correlation",
 		Short: "Manage correlations",
+		Long: `Create, list, get, update, and delete datasource correlations.
+
+Correlations link data between datasources, enabling navigation from
+one datasource query result to another.`,
 	}
 
 	cmd.AddCommand(newCmdCorrelationList(f))

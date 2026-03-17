@@ -15,6 +15,14 @@ func newCmdContactPointDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <uid>",
 		Short: "Delete a contact point",
+		Long: `Permanently delete a contact point by its UID.
+
+Examples:
+  # Delete (with confirmation)
+  grafana alert contact-point delete cpUid123
+
+  # Delete without confirmation
+  grafana alert contact-point delete cpUid123 --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			uid := args[0]

@@ -15,6 +15,16 @@ func newCmdContactPointList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:     "list",
 		Short:   "List contact points",
+		Long: `List all configured contact points.
+
+The output includes UID, Name, Type (email, slack, etc.), and Provenance.
+
+Examples:
+  # List all contact points
+  grafana alert contact-point list
+
+  # Output as JSON
+  grafana alert contact-point list -o json`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

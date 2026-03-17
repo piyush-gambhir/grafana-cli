@@ -14,6 +14,14 @@ func newCmdCorrelationGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <source-uid> <correlation-uid>",
 		Short: "Get a correlation",
+		Long: `Retrieve a correlation by source datasource UID and correlation UID.
+
+Examples:
+  # Get a correlation
+  grafana correlation get sourceUid corrUid
+
+  # Get as JSON
+  grafana correlation get sourceUid corrUid -o json`,
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

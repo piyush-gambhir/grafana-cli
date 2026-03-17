@@ -22,7 +22,33 @@ func newCmdDashboardCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a dashboard",
-		Long:  "Create a new dashboard from a JSON or YAML file.",
+		Long: `Create a new dashboard from a JSON or YAML file.
+
+The input file must contain a valid Grafana dashboard model. The "id"
+field is automatically removed to ensure a new dashboard is created.
+Use --folder to place the dashboard in a specific folder. Use --overwrite
+to replace an existing dashboard with the same UID.
+
+The --message flag sets a commit message for the dashboard version history.
+
+Examples:
+  # Create a dashboard from a JSON file
+  grafana dashboard create -f dashboard.json
+
+  # Create in a specific folder
+  grafana dashboard create -f dashboard.json --folder folderUid123
+
+  # Create from YAML
+  grafana dashboard create -f dashboard.yaml
+
+  # Overwrite if UID already exists
+  grafana dashboard create -f dashboard.json --overwrite
+
+  # Read from stdin
+  cat dashboard.json | grafana dashboard create -f -
+
+  # Set a version history message
+  grafana dashboard create -f dashboard.json -m "Initial version"`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

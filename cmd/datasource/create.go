@@ -17,7 +17,21 @@ func newCmdDatasourceCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a datasource",
-		Long:  "Create a new datasource from a JSON or YAML file.",
+		Long: `Create a new datasource from a JSON or YAML file.
+
+The file must contain at minimum: name, type, access, and url fields.
+Sensitive fields like passwords should be placed in the secureJsonData
+object.
+
+Examples:
+  # Create a Prometheus datasource
+  grafana datasource create -f prometheus.json
+
+  # Create from YAML
+  grafana datasource create -f datasource.yaml
+
+  # Read from stdin
+  echo '{"name":"test","type":"prometheus","access":"proxy","url":"http://prom:9090"}' | grafana datasource create -f -`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

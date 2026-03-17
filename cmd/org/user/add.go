@@ -17,6 +17,15 @@ func newCmdOrgUserAdd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add <org-id>",
 		Short: "Add a user to an organization",
+		Long: `Add a user to an organization with a specified role.
+
+The file must contain loginOrEmail and role fields.
+
+Examples:
+  # Add a user to org 1
+  grafana org user add 1 -f user.json
+
+  # Example JSON: {"loginOrEmail":"admin@example.com","role":"Editor"}`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

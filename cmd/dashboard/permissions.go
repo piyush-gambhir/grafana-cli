@@ -15,6 +15,11 @@ func newCmdDashboardPermissions(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "permissions",
 		Short: "Manage dashboard permissions",
+		Long: `View and update access control permissions for a specific dashboard.
+
+Subcommands:
+  get    - Retrieve current permissions
+  update - Replace permissions from a JSON/YAML file`,
 	}
 
 	cmd.AddCommand(newCmdDashboardPermissionsGet(f))
@@ -27,6 +32,17 @@ func newCmdDashboardPermissionsGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <uid>",
 		Short: "Get dashboard permissions",
+		Long: `Retrieve the current permissions for a dashboard.
+
+The output includes User, Team, Role, and Permission level for each
+access control entry.
+
+Examples:
+  # Get permissions for a dashboard
+  grafana dashboard permissions get abc123
+
+  # Output as JSON
+  grafana dashboard permissions get abc123 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
@@ -73,7 +89,14 @@ func newCmdDashboardPermissionsUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <uid>",
 		Short: "Update dashboard permissions",
-		Long:  "Update dashboard permissions from a JSON or YAML file.",
+		Long: `Update dashboard permissions from a JSON or YAML file.
+
+The file should contain a permissions object with an "items" array. Each
+item specifies a user, team, or role and their permission level.
+
+Examples:
+  # Update permissions from file
+  grafana dashboard permissions update abc123 -f perms.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

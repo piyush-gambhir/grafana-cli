@@ -13,6 +13,14 @@ func newCmdSnapshotGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <key>",
 		Short: "Get a snapshot by key",
+		Long: `Retrieve a snapshot's full dashboard data by its key.
+
+Examples:
+  # Get snapshot
+  grafana snapshot get abc123key
+
+  # Get as JSON
+  grafana snapshot get abc123key -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

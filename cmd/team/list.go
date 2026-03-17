@@ -21,6 +21,22 @@ func newCmdTeamList(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Short:   "List teams",
+		Long: `Search and list teams in the current organization.
+
+The output includes ID, Name, Email, and Member count.
+
+Examples:
+  # List all teams
+  grafana team list
+
+  # Search teams by name
+  grafana team list -q "backend"
+
+  # Paginate results
+  grafana team list --page 1 --limit 20
+
+  # Output as JSON
+  grafana team list -o json`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

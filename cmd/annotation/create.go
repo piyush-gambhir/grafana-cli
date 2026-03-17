@@ -17,6 +17,16 @@ func newCmdAnnotationCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create an annotation",
+		Long: `Create a new annotation from a JSON or YAML file.
+
+The file must contain a "text" field. Optionally include dashboardId,
+panelId, time (epoch ms), timeEnd, and tags.
+
+Examples:
+  # Create an annotation
+  grafana annotation create -f annotation.json
+
+  # Example JSON: {"text":"Deployed v1.2.3","tags":["deploy"]}`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

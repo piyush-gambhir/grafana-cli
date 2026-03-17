@@ -22,7 +22,24 @@ func newCmdDashboardImport(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Import a dashboard from a file",
-		Long:  "Import a dashboard from a JSON or YAML file. This is an alias for 'dashboard create'.",
+		Long: `Import a dashboard from a JSON or YAML file.
+
+This is functionally equivalent to "dashboard create". The "id" field is
+automatically stripped to allow clean imports. Use --folder to specify the
+target folder and --overwrite to replace an existing dashboard.
+
+Examples:
+  # Import a dashboard
+  grafana dashboard import -f exported-dashboard.json
+
+  # Import into a specific folder
+  grafana dashboard import -f dashboard.json --folder folderUid
+
+  # Import and overwrite if exists
+  grafana dashboard import -f dashboard.json --overwrite
+
+  # Import from stdin
+  cat dashboard.json | grafana dashboard import -f -`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

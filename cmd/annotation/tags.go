@@ -15,6 +15,14 @@ func newCmdAnnotationTags(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "tags",
 		Short: "List all annotation tags",
+		Long: `List all unique annotation tags with their usage counts.
+
+Examples:
+  # List all tags
+  grafana annotation tags
+
+  # Output as JSON
+  grafana annotation tags -o json`,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

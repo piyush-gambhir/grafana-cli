@@ -14,6 +14,14 @@ func newCmdLibraryElementGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <uid>",
 		Short: "Get a library element by UID",
+		Long: `Retrieve a library element by its UID.
+
+Examples:
+  # Get library element
+  grafana library-element get leUid123
+
+  # Get as JSON
+  grafana library-element get leUid123 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

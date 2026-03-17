@@ -21,6 +21,22 @@ func newCmdUserList(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Short:   "List users",
+		Long: `List all users (requires server admin permissions).
+
+The output includes ID, Login, Email, Name, Admin status, and Disabled status.
+
+Examples:
+  # List all users
+  grafana user list
+
+  # Search users
+  grafana user list -q "john"
+
+  # Paginate
+  grafana user list --page 2 --limit 50
+
+  # Output as JSON
+  grafana user list -o json`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

@@ -11,6 +11,10 @@ func NewCmdAnnotation(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "annotation",
 		Short: "Manage annotations",
+		Long: `Create, list, get, update, and delete annotations, and view annotation tags.
+
+Annotations mark points in time on Grafana graphs, commonly used for
+deployments, incidents, or other significant events.`,
 	}
 
 	cmd.AddCommand(newCmdAnnotationList(f))

@@ -15,6 +15,16 @@ func newCmdCorrelationList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:     "list",
 		Short:   "List correlations",
+		Long: `List all correlations.
+
+The output includes UID, Source UID, Target UID, Label, and Description.
+
+Examples:
+  # List all correlations
+  grafana correlation list
+
+  # Output as JSON
+  grafana correlation list -o json`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

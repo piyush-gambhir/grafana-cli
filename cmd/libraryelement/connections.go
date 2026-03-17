@@ -15,6 +15,14 @@ func newCmdLibraryElementConnections(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "connections <uid>",
 		Short: "List dashboards connected to a library element",
+		Long: `List all dashboards that use a specific library element.
+
+Examples:
+  # List connections
+  grafana library-element connections leUid123
+
+  # Output as JSON
+  grafana library-element connections leUid123 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

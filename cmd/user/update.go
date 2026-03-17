@@ -17,6 +17,11 @@ func newCmdUserUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <id>",
 		Short: "Update a user",
+		Long: `Update a user's profile from a JSON or YAML file.
+
+Examples:
+  # Update user 5
+  grafana user update 5 -f user.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

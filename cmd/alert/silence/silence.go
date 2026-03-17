@@ -11,6 +11,10 @@ func NewCmdSilence(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "silence",
 		Short: "Manage alert silences",
+		Long: `Create, list, get, and delete alert silences.
+
+Silences suppress alert notifications that match specific label matchers
+during a defined time window.`,
 	}
 
 	cmd.AddCommand(newCmdSilenceList(f))

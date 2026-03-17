@@ -14,6 +14,16 @@ func newCmdFolderGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <uid>",
 		Short: "Get a folder by UID",
+		Long: `Retrieve a single folder by its UID.
+
+Displays ID, UID, Title, URL, Version, Created, and Updated timestamps.
+
+Examples:
+  # Get folder details
+  grafana folder get folderUid123
+
+  # Get as JSON
+  grafana folder get folderUid123 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

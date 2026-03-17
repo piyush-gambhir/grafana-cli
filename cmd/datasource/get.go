@@ -14,6 +14,18 @@ func newCmdDatasourceGet(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get <uid>",
 		Short: "Get a datasource by UID",
+		Long: `Retrieve a single datasource by its UID.
+
+In table mode, displays ID, UID, Name, Type, URL, Access mode, Default
+status, and ReadOnly status. In JSON/YAML mode, returns the full datasource
+object including jsonData configuration.
+
+Examples:
+  # Get datasource details
+  grafana datasource get P1234
+
+  # Get full datasource JSON (useful for creating update payloads)
+  grafana datasource get P1234 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

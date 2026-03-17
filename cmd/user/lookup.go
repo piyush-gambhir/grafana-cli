@@ -14,6 +14,14 @@ func newCmdUserLookup(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "lookup <login-or-email>",
 		Short: "Look up a user by login or email",
+		Long: `Find a user by their login username or email address.
+
+Examples:
+  # Look up by login
+  grafana user lookup admin
+
+  # Look up by email
+  grafana user lookup admin@example.com`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

@@ -15,6 +15,11 @@ func newCmdMemberAdd(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "add <team-id> <user-id>",
 		Short: "Add a member to a team",
+		Long: `Add a user to a team by team ID and user ID.
+
+Examples:
+  # Add user 10 to team 5
+  grafana team member add 5 10`,
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			teamID, err := strconv.ParseInt(args[0], 10, 64)

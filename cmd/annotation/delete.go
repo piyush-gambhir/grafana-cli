@@ -16,6 +16,14 @@ func newCmdAnnotationDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <id>",
 		Short: "Delete an annotation",
+		Long: `Permanently delete an annotation by its numeric ID.
+
+Examples:
+  # Delete annotation 42
+  grafana annotation delete 42
+
+  # Delete without confirmation
+  grafana annotation delete 42 --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)

@@ -17,6 +17,14 @@ func newCmdSnapshotCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a snapshot",
+		Long: `Create a dashboard snapshot from a JSON or YAML file.
+
+The file must contain a "dashboard" object with the dashboard data.
+Optionally include name, expires (seconds), and external flag.
+
+Examples:
+  # Create a snapshot
+  grafana snapshot create -f snapshot.json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

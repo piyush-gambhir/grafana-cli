@@ -15,6 +15,17 @@ func newCmdDatasourceDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <uid>",
 		Short: "Delete a datasource",
+		Long: `Permanently delete a datasource by its UID.
+
+This action cannot be undone. Dashboards using this datasource will show
+errors. You will be prompted for confirmation unless --confirm is set.
+
+Examples:
+  # Delete a datasource (with confirmation prompt)
+  grafana datasource delete P1234
+
+  # Delete without confirmation
+  grafana datasource delete P1234 --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			uid := args[0]

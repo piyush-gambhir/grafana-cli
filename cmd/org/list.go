@@ -20,6 +20,19 @@ func newCmdOrgList(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Short:   "List organizations",
+		Long: `List all organizations (requires server admin permissions).
+
+The output includes ID and Name for each organization.
+
+Examples:
+  # List all organizations
+  grafana org list
+
+  # Paginate
+  grafana org list --page 1 --limit 50
+
+  # Output as JSON
+  grafana org list -o json`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

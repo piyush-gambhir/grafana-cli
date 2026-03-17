@@ -15,6 +15,14 @@ func newCmdUserGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <id>",
 		Short: "Get a user by ID",
+		Long: `Retrieve a user by their numeric ID (requires server admin).
+
+Examples:
+  # Get user details
+  grafana user get 5
+
+  # Get as JSON
+  grafana user get 5 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)

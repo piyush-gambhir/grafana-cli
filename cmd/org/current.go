@@ -14,6 +14,14 @@ func newCmdOrgCurrent(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "current",
 		Short: "Show the current organization",
+		Long: `Display the currently active organization for the authenticated user.
+
+Examples:
+  # Show current org
+  grafana org current
+
+  # Output as JSON
+  grafana org current -o json`,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

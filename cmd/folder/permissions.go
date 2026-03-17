@@ -15,6 +15,11 @@ func newCmdFolderPermissions(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "permissions",
 		Short: "Manage folder permissions",
+		Long: `View and update access control permissions for a specific folder.
+
+Subcommands:
+  get    - Retrieve current permissions
+  update - Replace permissions from a JSON/YAML file`,
 	}
 
 	cmd.AddCommand(newCmdFolderPermissionsGet(f))
@@ -27,6 +32,14 @@ func newCmdFolderPermissionsGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <uid>",
 		Short: "Get folder permissions",
+		Long: `Retrieve the current permissions for a folder.
+
+Examples:
+  # Get folder permissions
+  grafana folder permissions get folderUid123
+
+  # Output as JSON
+  grafana folder permissions get folderUid123 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
@@ -73,6 +86,11 @@ func newCmdFolderPermissionsUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <uid>",
 		Short: "Update folder permissions",
+		Long: `Update folder permissions from a JSON or YAML file.
+
+Examples:
+  # Update folder permissions
+  grafana folder permissions update folderUid123 -f perms.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

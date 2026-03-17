@@ -16,6 +16,14 @@ func newCmdPolicyUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update the notification policy tree",
+		Long: `Replace the entire notification policy routing tree from a JSON or YAML file.
+
+WARNING: This replaces the entire policy tree, not just parts of it.
+Export the current tree first with "grafana alert policy get -o json".
+
+Examples:
+  # Update notification policy
+  grafana alert policy update -f policy.json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

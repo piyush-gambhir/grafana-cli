@@ -15,6 +15,14 @@ func newCmdCorrelationDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <source-uid> <correlation-uid>",
 		Short: "Delete a correlation",
+		Long: `Delete a correlation by source datasource UID and correlation UID.
+
+Examples:
+  # Delete a correlation
+  grafana correlation delete sourceUid corrUid
+
+  # Delete without confirmation
+  grafana correlation delete sourceUid corrUid --confirm`,
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ok, err := cmdutil.ConfirmAction(f.IOStreams.In, f.IOStreams.Out,

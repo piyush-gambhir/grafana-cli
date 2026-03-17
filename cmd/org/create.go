@@ -17,6 +17,15 @@ func newCmdOrgCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create an organization",
+		Long: `Create a new organization from a JSON or YAML file.
+
+The file must contain a "name" field.
+
+Examples:
+  # Create an organization
+  grafana org create -f org.json
+
+  # Example: echo '{"name":"My Org"}' | grafana org create -f -`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

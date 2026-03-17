@@ -18,6 +18,15 @@ func newLoginCmd(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "login",
 		Short: "Interactively log in to a Grafana instance and save a profile",
+		Long: `Interactively configure and test a connection to a Grafana instance.
+
+Prompts for the server URL, authentication method (token or basic auth),
+and credentials. Tests the connection, then saves the configuration as
+a named profile.
+
+Examples:
+  # Start interactive login
+  grafana login`,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			reader := bufio.NewReader(os.Stdin)

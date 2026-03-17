@@ -16,6 +16,14 @@ func newCmdMemberList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:     "list <team-id>",
 		Short:   "List team members",
+		Long: `List all members of a team.
+
+Examples:
+  # List members of team 5
+  grafana team member list 5
+
+  # Output as JSON
+  grafana team member list 5 -o json`,
 		Aliases: []string{"ls"},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {

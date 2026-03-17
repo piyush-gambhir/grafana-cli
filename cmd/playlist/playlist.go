@@ -11,6 +11,9 @@ func NewCmdPlaylist(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "playlist",
 		Short: "Manage playlists",
+		Long: `Create, list, get, update, and delete dashboard playlists.
+
+Playlists cycle through a sequence of dashboards at a configurable interval.`,
 	}
 
 	cmd.AddCommand(newCmdPlaylistList(f))

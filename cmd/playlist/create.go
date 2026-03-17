@@ -17,6 +17,13 @@ func newCmdPlaylistCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a playlist",
+		Long: `Create a new playlist from a JSON or YAML file.
+
+The file must contain name, interval, and items.
+
+Examples:
+  # Create a playlist
+  grafana playlist create -f playlist.json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

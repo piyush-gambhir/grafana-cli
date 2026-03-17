@@ -17,6 +17,13 @@ func newCmdTemplateUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <name>",
 		Short: "Create or update a notification template",
+		Long: `Create or update a notification template from a JSON or YAML file.
+
+If the template does not exist, it is created. If it exists, it is updated.
+
+Examples:
+  # Create or update a template
+  grafana alert template update "my-template" -f template.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

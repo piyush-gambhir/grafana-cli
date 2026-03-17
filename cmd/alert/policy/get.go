@@ -14,6 +14,17 @@ func newCmdPolicyGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get",
 		Short: "Get the notification policy tree",
+		Long: `Retrieve the current notification policy routing tree.
+
+In table mode, shows the root receiver, group by labels, timing settings,
+and route count. Use JSON/YAML output for the full policy tree.
+
+Examples:
+  # View notification policy
+  grafana alert policy get
+
+  # Get full policy tree as JSON
+  grafana alert policy get -o json`,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

@@ -14,6 +14,14 @@ func newCmdPlaylistGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <uid>",
 		Short: "Get a playlist by UID",
+		Long: `Retrieve a playlist by its UID, including its items.
+
+Examples:
+  # Get playlist
+  grafana playlist get playlistUid
+
+  # Get as JSON
+  grafana playlist get playlistUid -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

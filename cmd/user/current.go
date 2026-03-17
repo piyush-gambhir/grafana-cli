@@ -14,6 +14,17 @@ func newCmdUserCurrent(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:     "current",
 		Short:   "Show the current authenticated user",
+		Long: `Display information about the currently authenticated user.
+
+Examples:
+  # Show current user
+  grafana user current
+
+  # Alias
+  grafana user whoami
+
+  # Output as JSON
+  grafana user current -o json`,
 		Aliases: []string{"whoami"},
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {

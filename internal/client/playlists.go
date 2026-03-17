@@ -37,11 +37,14 @@ type PlaylistUpdateRequest struct {
 	Items    []PlaylistItem `json:"items"`
 }
 
-// ListPlaylists returns all playlists.
-func (c *Client) ListPlaylists(ctx context.Context, query string) ([]Playlist, error) {
+// ListPlaylists returns all playlists. If limit > 0, only that many are returned.
+func (c *Client) ListPlaylists(ctx context.Context, query string, limit int) ([]Playlist, error) {
 	v := url.Values{}
 	if query != "" {
 		v.Set("query", query)
+	}
+	if limit > 0 {
+		v.Set("limit", fmt.Sprintf("%d", limit))
 	}
 	path := "/api/playlists"
 	if len(v) > 0 {

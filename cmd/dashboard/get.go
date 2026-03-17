@@ -14,6 +14,23 @@ func newCmdDashboardGet(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get <uid>",
 		Short: "Get a dashboard by UID",
+		Long: `Retrieve a single dashboard by its UID.
+
+In table mode, displays key fields: Title, UID, URL, Slug, Folder UID,
+Version, and Starred status. In JSON/YAML mode, returns the full dashboard
+model including all panels, templating, and metadata.
+
+Use "grafana dashboard list" to find dashboard UIDs.
+
+Examples:
+  # Get dashboard details
+  grafana dashboard get abc123
+
+  # Get full dashboard JSON (for export/backup)
+  grafana dashboard get abc123 -o json
+
+  # Get dashboard as YAML
+  grafana dashboard get abc123 -o yaml`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

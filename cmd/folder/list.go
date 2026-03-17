@@ -20,6 +20,21 @@ func newCmdFolderList(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Short:   "List all folders",
+		Long: `List all folders in the current organization.
+
+The output includes ID, UID, and Title. Folders are used to organize
+dashboards and alert rules. Use folder UIDs when filtering dashboards
+or placing new dashboards.
+
+Examples:
+  # List all folders
+  grafana folder list
+
+  # Paginate results
+  grafana folder list --page 1 --limit 50
+
+  # Output as JSON
+  grafana folder list -o json`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

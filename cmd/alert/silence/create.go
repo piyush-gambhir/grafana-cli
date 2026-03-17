@@ -17,6 +17,13 @@ func newCmdSilenceCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a silence",
+		Long: `Create a new alert silence from a JSON or YAML file.
+
+The file must contain matchers, startsAt, endsAt, createdBy, and comment.
+
+Examples:
+  # Create a silence
+  grafana alert silence create -f silence.json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

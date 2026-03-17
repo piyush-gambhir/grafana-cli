@@ -18,7 +18,20 @@ func newCmdDatasourceUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <id>",
 		Short: "Update a datasource",
-		Long:  "Update an existing datasource from a JSON or YAML file.",
+		Long: `Update an existing datasource from a JSON or YAML file.
+
+The file must contain the full datasource definition. Use
+"grafana datasource get <uid> -o json" to retrieve the current state,
+modify it, and pass it back.
+
+Examples:
+  # Update datasource with numeric ID 5
+  grafana datasource update 5 -f updated-ds.json
+
+  # Typical workflow: export, edit, update
+  grafana datasource get P1234 -o json > ds.json
+  # edit ds.json
+  grafana datasource update 5 -f ds.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

@@ -16,6 +16,14 @@ func newCmdMemberRemove(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove <team-id> <user-id>",
 		Short: "Remove a member from a team",
+		Long: `Remove a user from a team by team ID and user ID.
+
+Examples:
+  # Remove user 10 from team 5
+  grafana team member remove 5 10
+
+  # Remove without confirmation
+  grafana team member remove 5 10 --confirm`,
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			teamID, err := strconv.ParseInt(args[0], 10, 64)

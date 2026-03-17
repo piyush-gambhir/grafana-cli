@@ -24,7 +24,36 @@ func newCmdDashboardList(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List dashboards",
-		Long:  "Search and list dashboards with optional filters.",
+		Long: `Search and list dashboards with optional filters.
+
+The output includes UID, Title, Folder, Tags, and URL for each dashboard.
+Results can be filtered by search query, tag, and folder UID.
+
+The --query flag performs a full-text search on dashboard titles. The --tag
+flag filters by a specific tag. The --folder flag filters by folder UID
+(use "grafana folder list" to find folder UIDs).
+
+Examples:
+  # List all dashboards
+  grafana dashboard list
+
+  # Search by title
+  grafana dashboard list -q "production"
+
+  # Filter by tag
+  grafana dashboard list --tag monitoring
+
+  # Filter by folder UID
+  grafana dashboard list --folder abc123
+
+  # Paginate results
+  grafana dashboard list --page 2 --limit 50
+
+  # Output as JSON for scripting
+  grafana dashboard list -o json
+
+  # Output as YAML
+  grafana dashboard list -o yaml`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

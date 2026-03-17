@@ -16,6 +16,14 @@ func newCmdOrgDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <id>",
 		Short: "Delete an organization",
+		Long: `Permanently delete an organization by its ID.
+
+Examples:
+  # Delete org 2
+  grafana org delete 2
+
+  # Delete without confirmation
+  grafana org delete 2 --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)

@@ -11,6 +11,7 @@ func NewCmdPreferences(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "preferences",
 		Short:   "Manage user preferences",
+		Long: `View and update the current user's preferences (theme, timezone, etc.).`,
 		Aliases: []string{"prefs"},
 	}
 

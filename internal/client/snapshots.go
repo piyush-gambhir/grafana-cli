@@ -2,6 +2,8 @@ package client
 
 import (
 	"context"
+	"fmt"
+	"net/url"
 )
 
 // Snapshot represents a dashboard snapshot.
@@ -52,10 +54,19 @@ type SnapshotCreateResponse struct {
 	DeleteURL string `json:"deleteUrl"`
 }
 
-// ListSnapshots returns all snapshots.
-func (c *Client) ListSnapshots(ctx context.Context) ([]Snapshot, error) {
+// ListSnapshots returns all snapshots. If limit > 0, only that many are returned.
+func (c *Client) ListSnapshots(ctx context.Context, limit int) ([]Snapshot, error) {
+	v := url.Values{}
+	if limit > 0 {
+		v.Set("limit", fmt.Sprintf("%d", limit))
+	}
+	path := "/api/dashboard/snapshots"
+	if len(v) > 0 {
+		path += "?" + v.Encode()
+	}
+
 	var results []Snapshot
-	resp, err := c.Get(ctx, "/api/dashboard/snapshots")
+	resp, err := c.Get(ctx, path)
 	if err != nil {
 		return nil, err
 	}

@@ -15,6 +15,14 @@ func newCmdServiceAccountGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <id>",
 		Short: "Get a service account by ID",
+		Long: `Retrieve a service account by its numeric ID.
+
+Examples:
+  # Get service account details
+  grafana service-account get 10
+
+  # Get as JSON
+  grafana service-account get 10 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)

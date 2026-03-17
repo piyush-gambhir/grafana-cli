@@ -17,6 +17,15 @@ func newCmdTeamCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a team",
+		Long: `Create a new team from a JSON or YAML file.
+
+The file must contain a "name" field and optionally an "email" field.
+
+Examples:
+  # Create a team
+  grafana team create -f team.json
+
+  # Example: echo '{"name":"Backend Team","email":"backend@example.com"}' | grafana team create -f -`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

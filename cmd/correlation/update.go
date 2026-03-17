@@ -17,6 +17,11 @@ func newCmdCorrelationUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <source-uid> <correlation-uid>",
 		Short: "Update a correlation",
+		Long: `Update a correlation from a JSON or YAML file.
+
+Examples:
+  # Update a correlation
+  grafana correlation update sourceUid corrUid -f correlation.json`,
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

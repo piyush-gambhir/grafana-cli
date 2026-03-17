@@ -12,6 +12,10 @@ func NewCmdTeam(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "team",
 		Short: "Manage teams",
+		Long: `Create, list, get, update, delete teams, and manage team members and preferences.
+
+Teams group users for easier permission management across dashboards
+and folders.`,
 	}
 
 	cmd.AddCommand(newCmdTeamList(f))

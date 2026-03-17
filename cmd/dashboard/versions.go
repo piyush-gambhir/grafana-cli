@@ -20,7 +20,21 @@ func newCmdDashboardVersions(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "versions <uid>",
 		Short: "List dashboard versions",
-		Long:  "List all versions of a dashboard for version history.",
+		Long: `List all versions of a dashboard for version history.
+
+The output includes Version number, Created By, Created date, and the
+commit Message. Use this to inspect change history before restoring to
+a previous version with "grafana dashboard restore".
+
+Examples:
+  # List all versions
+  grafana dashboard versions abc123
+
+  # Paginate results
+  grafana dashboard versions abc123 --page 1 --limit 10
+
+  # Output as JSON
+  grafana dashboard versions abc123 -o json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

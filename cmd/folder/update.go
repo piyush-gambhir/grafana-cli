@@ -17,6 +17,13 @@ func newCmdFolderUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <uid>",
 		Short: "Update a folder",
+		Long: `Update an existing folder's title or other properties.
+
+The file must contain the updated folder properties (e.g. title).
+
+Examples:
+  # Update a folder
+  grafana folder update folderUid123 -f updated-folder.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

@@ -16,6 +16,17 @@ func newCmdTokenList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:     "list <service-account-id>",
 		Short:   "List tokens for a service account",
+		Long: `List all API tokens for a service account.
+
+The output includes ID, Name, Created date, Expiration date, and whether
+the token has expired.
+
+Examples:
+  # List tokens for service account 10
+  grafana service-account token list 10
+
+  # Output as JSON
+  grafana service-account token list 10 -o json`,
 		Aliases: []string{"ls"},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {

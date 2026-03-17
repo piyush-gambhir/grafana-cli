@@ -16,6 +16,14 @@ func newCmdOrgUserRemove(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove <org-id> <user-id>",
 		Short: "Remove a user from an organization",
+		Long: `Remove a user from an organization.
+
+Examples:
+  # Remove user 5 from org 1
+  grafana org user remove 1 5
+
+  # Remove without confirmation
+  grafana org user remove 1 5 --confirm`,
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			orgID, err := strconv.ParseInt(args[0], 10, 64)

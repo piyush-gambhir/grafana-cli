@@ -16,6 +16,7 @@ func newCmdTeamPreferences(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "preferences",
 		Short: "Manage team preferences",
+		Long:  `View and update preferences (theme, timezone, week start) for a team.`,
 	}
 
 	cmd.AddCommand(newCmdTeamPreferencesGet(f))
@@ -28,6 +29,11 @@ func newCmdTeamPreferencesGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get <team-id>",
 		Short: "Get team preferences",
+		Long: `Get the current preferences for a team.
+
+Examples:
+  # Get preferences for team 5
+  grafana team preferences get 5`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)
@@ -63,6 +69,11 @@ func newCmdTeamPreferencesUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <team-id>",
 		Short: "Update team preferences",
+		Long: `Update team preferences from a JSON or YAML file.
+
+Examples:
+  # Update preferences for team 5
+  grafana team preferences update 5 -f prefs.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

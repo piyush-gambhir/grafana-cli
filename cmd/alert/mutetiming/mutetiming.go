@@ -11,6 +11,10 @@ func NewCmdMuteTiming(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "mute-timing",
 		Short:   "Manage mute timings",
+		Long: `Create, list, get, update, and delete mute timings.
+
+Mute timings define time periods during which alert notifications are
+suppressed. They are referenced by name in notification policies.`,
 		Aliases: []string{"mt"},
 	}
 

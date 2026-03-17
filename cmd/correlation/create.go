@@ -17,6 +17,11 @@ func newCmdCorrelationCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create <source-uid>",
 		Short: "Create a correlation",
+		Long: `Create a correlation from a source datasource to a target.
+
+Examples:
+  # Create a correlation
+  grafana correlation create sourceUid -f correlation.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

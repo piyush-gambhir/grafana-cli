@@ -15,6 +15,14 @@ func newCmdRuleDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <uid>",
 		Short: "Delete an alert rule",
+		Long: `Permanently delete an alert rule by its UID.
+
+Examples:
+  # Delete an alert rule (with confirmation)
+  grafana alert rule delete ruleUid123
+
+  # Delete without confirmation
+  grafana alert rule delete ruleUid123 --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			uid := args[0]

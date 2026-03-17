@@ -16,6 +16,14 @@ func newCmdServiceAccountDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <id>",
 		Short: "Delete a service account",
+		Long: `Permanently delete a service account and all its tokens.
+
+Examples:
+  # Delete service account 10
+  grafana service-account delete 10
+
+  # Delete without confirmation
+  grafana service-account delete 10 --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)

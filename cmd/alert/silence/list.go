@@ -16,6 +16,17 @@ func newCmdSilenceList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:     "list",
 		Short:   "List silences",
+		Long: `List all alert silences.
+
+The output includes ID, State, Matchers, Starts At, Ends At, Comment,
+and Created By.
+
+Examples:
+  # List all silences
+  grafana alert silence list
+
+  # Output as JSON
+  grafana alert silence list -o json`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

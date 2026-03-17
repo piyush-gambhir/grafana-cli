@@ -15,6 +15,17 @@ func newCmdPolicyReset(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "reset",
 		Short: "Reset the notification policy to defaults",
+		Long: `Reset the notification policy routing tree to Grafana defaults.
+
+This removes all custom routes and restores the default receiver
+configuration. You will be prompted for confirmation.
+
+Examples:
+  # Reset notification policy (with confirmation)
+  grafana alert policy reset
+
+  # Reset without confirmation
+  grafana alert policy reset --confirm`,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ok, err := cmdutil.ConfirmAction(f.IOStreams.In, f.IOStreams.Out,

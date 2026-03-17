@@ -14,6 +14,16 @@ func newCmdAdminStats(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "stats",
 		Short: "Show Grafana server statistics",
+		Long: `Display Grafana server usage statistics (requires admin permissions).
+
+Shows counts of orgs, dashboards, datasources, users, alerts, etc.
+
+Examples:
+  # Show statistics
+  grafana admin stats
+
+  # Output as JSON
+  grafana admin stats -o json`,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

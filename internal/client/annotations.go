@@ -62,7 +62,7 @@ type AnnotationTag struct {
 }
 
 // ListAnnotations returns annotations matching the given filters.
-func (c *Client) ListAnnotations(ctx context.Context, dashboardID, panelID int64, from, to int64, tags []string, limit int64) ([]Annotation, error) {
+func (c *Client) ListAnnotations(ctx context.Context, dashboardID, panelID int64, from, to int64, tags []string, limit int64, annType string) ([]Annotation, error) {
 	v := url.Values{}
 	if dashboardID > 0 {
 		v.Set("dashboardId", fmt.Sprintf("%d", dashboardID))
@@ -81,6 +81,9 @@ func (c *Client) ListAnnotations(ctx context.Context, dashboardID, panelID int64
 	}
 	if limit > 0 {
 		v.Set("limit", fmt.Sprintf("%d", limit))
+	}
+	if annType != "" {
+		v.Set("type", annType)
 	}
 
 	path := "/api/annotations?" + v.Encode()

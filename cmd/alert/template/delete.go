@@ -15,6 +15,14 @@ func newCmdTemplateDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <name>",
 		Short: "Delete a notification template",
+		Long: `Permanently delete a notification template by name.
+
+Examples:
+  # Delete a template
+  grafana alert template delete "my-template"
+
+  # Delete without confirmation
+  grafana alert template delete "my-template" --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			name := args[0]

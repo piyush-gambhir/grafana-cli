@@ -17,6 +17,11 @@ func newCmdLibraryElementUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <uid>",
 		Short: "Update a library element",
+		Long: `Update a library element from a JSON or YAML file. Include the version field.
+
+Examples:
+  # Update a library element
+  grafana library-element update leUid123 -f updated-panel.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

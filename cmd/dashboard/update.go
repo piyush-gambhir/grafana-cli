@@ -22,7 +22,24 @@ func newCmdDashboardUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update a dashboard",
-		Long:  "Update an existing dashboard from a JSON or YAML file.",
+		Long: `Update an existing dashboard from a JSON or YAML file.
+
+The input file must contain a valid Grafana dashboard model with a UID
+that matches an existing dashboard. The --overwrite flag defaults to true
+for updates. Use --folder to move the dashboard to a different folder.
+
+Examples:
+  # Update a dashboard from a JSON file
+  grafana dashboard update -f dashboard.json
+
+  # Move dashboard to a new folder
+  grafana dashboard update -f dashboard.json --folder newFolderUid
+
+  # Update with a version history message
+  grafana dashboard update -f dashboard.json -m "Add new panels"
+
+  # Read from stdin
+  cat dashboard.json | grafana dashboard update -f -`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

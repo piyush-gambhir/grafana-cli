@@ -12,6 +12,10 @@ func newVersionCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
 		Short: "Print the version information",
+		Long: `Print the grafana-cli version, commit hash, and build date.
+
+Examples:
+  grafana version`,
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Fprintf(cmd.OutOrStdout(), "grafana-cli version %s\n", build.Version)

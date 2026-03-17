@@ -17,6 +17,17 @@ func newCmdRuleCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create an alert rule",
+		Long: `Create a new alert rule from a JSON or YAML file.
+
+The file must contain a valid alert rule definition including title,
+folderUID, ruleGroup, condition, data queries, and for duration.
+
+Examples:
+  # Create an alert rule
+  grafana alert rule create -f rule.json
+
+  # Create from YAML
+  grafana alert rule create -f rule.yaml`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

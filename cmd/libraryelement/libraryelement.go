@@ -11,6 +11,11 @@ func NewCmdLibraryElement(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "library-element",
 		Short:   "Manage library elements",
+		Long: `Create, list, get, update, delete library elements, and view connections.
+
+Library elements are reusable panels and variables that can be shared
+across multiple dashboards. When updated, changes propagate to all
+connected dashboards.`,
 		Aliases: []string{"le"},
 	}
 

@@ -18,6 +18,11 @@ func newCmdServiceAccountUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <id>",
 		Short: "Update a service account",
+		Long: `Update a service account from a JSON or YAML file.
+
+Examples:
+  # Update service account 10
+  grafana service-account update 10 -f sa.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {

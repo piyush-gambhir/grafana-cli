@@ -21,6 +21,22 @@ func newCmdServiceAccountList(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Short:   "List service accounts",
+		Long: `List all service accounts in the current organization.
+
+The output includes ID, Name, Login, Role, Token count, and Disabled status.
+
+Examples:
+  # List all service accounts
+  grafana service-account list
+
+  # Search by name
+  grafana service-account list -q "ci-bot"
+
+  # Paginate
+  grafana service-account list --page 1 --limit 20
+
+  # Output as JSON
+  grafana service-account list -o json`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

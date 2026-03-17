@@ -14,6 +14,14 @@ func newCmdPreferencesGet(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "get",
 		Short: "Get current user preferences",
+		Long: `Display the authenticated user's preferences.
+
+Examples:
+  # Get preferences
+  grafana preferences get
+
+  # Get as JSON
+  grafana preferences get -o json`,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()

@@ -94,13 +94,16 @@ type LibraryElementConnectionsResult struct {
 }
 
 // ListLibraryElements searches for library elements.
-func (c *Client) ListLibraryElements(ctx context.Context, searchString string, kind int, page PageParams) (*LibraryElementSearchResult, error) {
+func (c *Client) ListLibraryElements(ctx context.Context, searchString string, kind int, folderFilter string, page PageParams) (*LibraryElementSearchResult, error) {
 	v := url.Values{}
 	if searchString != "" {
 		v.Set("searchString", searchString)
 	}
 	if kind > 0 {
 		v.Set("kind", fmt.Sprintf("%d", kind))
+	}
+	if folderFilter != "" {
+		v.Set("folderFilter", folderFilter)
 	}
 	page.Apply(v)
 

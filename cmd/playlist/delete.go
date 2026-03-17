@@ -15,6 +15,14 @@ func newCmdPlaylistDelete(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete <uid>",
 		Short: "Delete a playlist",
+		Long: `Permanently delete a playlist by its UID.
+
+Examples:
+  # Delete a playlist
+  grafana playlist delete playlistUid
+
+  # Delete without confirmation
+  grafana playlist delete playlistUid --confirm`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			uid := args[0]

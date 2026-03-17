@@ -17,7 +17,17 @@ func newCmdFolderCreate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a folder",
-		Long:  "Create a new folder from a JSON/YAML file or with flags.",
+		Long: `Create a new folder from a JSON/YAML file.
+
+The file must contain at minimum a "title" field. Optionally include
+a "uid" field to set a specific UID, otherwise one is auto-generated.
+
+Examples:
+  # Create from file
+  grafana folder create -f folder.json
+
+  # Example JSON: {"title": "Production", "uid": "prod-folder"}
+  echo '{"title":"Production"}' | grafana folder create -f -`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {

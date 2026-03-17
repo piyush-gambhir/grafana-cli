@@ -17,6 +17,11 @@ func newCmdOrgUpdate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <id>",
 		Short: "Update an organization",
+		Long: `Update an organization's name from a JSON or YAML file.
+
+Examples:
+  # Update org 2
+  grafana org update 2 -f org.json`,
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
