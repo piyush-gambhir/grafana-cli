@@ -1,5 +1,6 @@
 bin/
 dist/
 grafana
+!grafana/
 grafana-cli
 *.exe
