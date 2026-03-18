@@ -15,8 +15,9 @@ func newCmdTemplateUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <name>",
-		Short: "Create or update a notification template",
+		Use:         "update <name>",
+		Short:       "Create or update a notification template",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create or update a notification template from a JSON or YAML file.
 
 If the template does not exist, it is created. If it exists, it is updated.

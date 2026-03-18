@@ -15,6 +15,7 @@ type Profile struct {
 	Username string `yaml:"username,omitempty"`
 	Password string `yaml:"password,omitempty"`
 	OrgID    int64  `yaml:"org_id,omitempty"`
+	ReadOnly bool   `yaml:"read_only,omitempty"`
 }
 
 // Defaults holds default output preferences.

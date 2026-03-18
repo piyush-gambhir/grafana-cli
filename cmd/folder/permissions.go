@@ -84,8 +84,9 @@ func newCmdFolderPermissionsUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <uid>",
-		Short: "Update folder permissions",
+		Use:         "update <uid>",
+		Short:       "Update folder permissions",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update folder permissions from a JSON or YAML file.
 
 Examples:

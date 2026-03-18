@@ -15,8 +15,9 @@ func newCmdOrgUserUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <org-id> <user-id>",
-		Short: "Update a user's role in an organization",
+		Use:         "update <org-id> <user-id>",
+		Short:       "Update a user's role in an organization",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update a user's role within an organization.
 
 The file must contain a "role" field (Viewer, Editor, or Admin).

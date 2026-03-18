@@ -15,8 +15,9 @@ func newCmdLibraryElementCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a library element",
+		Use:         "create",
+		Short:       "Create a library element",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a new library element (panel or variable) from a JSON or YAML file.
 
 The file must include name, kind (1=panel, 2=variable), and model.

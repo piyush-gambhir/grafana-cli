@@ -13,8 +13,9 @@ func newCmdMuteTimingDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <name>",
-		Short: "Delete a mute timing",
+		Use:         "delete <name>",
+		Short:       "Delete a mute timing",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Permanently delete a mute timing by name.
 
 Examples:

@@ -16,8 +16,9 @@ func newCmdServiceAccountUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <id>",
-		Short: "Update a service account",
+		Use:         "update <id>",
+		Short:       "Update a service account",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update a service account from a JSON or YAML file.
 
 Examples:

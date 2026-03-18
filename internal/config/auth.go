@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 // ResolvedConfig holds the final resolved configuration after layering
 // flags > env vars > profile values.
@@ -11,6 +14,7 @@ type ResolvedConfig struct {
 	Password string
 	OrgID    int64
 	Output   string
+	ReadOnly bool
 }
 
 // Resolve merges flag values, environment variables, and profile values.
@@ -63,6 +67,14 @@ func Resolve(flagURL, flagToken, flagUsername, flagPassword string, flagOrgID in
 	rc.Output = defaults.Output
 	if rc.Output == "" {
 		rc.Output = "table"
+	}
+
+	// ReadOnly: profile value first, then env var overrides.
+	if profile != nil {
+		rc.ReadOnly = profile.ReadOnly
+	}
+	if envRO := os.Getenv("GRAFANA_READ_ONLY"); envRO != "" {
+		rc.ReadOnly = strings.EqualFold(envRO, "true") || envRO == "1"
 	}
 
 	return rc

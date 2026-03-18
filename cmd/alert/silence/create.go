@@ -15,8 +15,9 @@ func newCmdSilenceCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a silence",
+		Use:         "create",
+		Short:       "Create a silence",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a new alert silence from a JSON or YAML file.
 
 The file must contain matchers, startsAt, endsAt, createdBy, and comment.

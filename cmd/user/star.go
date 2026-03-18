@@ -25,8 +25,9 @@ func newCmdUserStar(f *cmdutil.Factory) *cobra.Command {
 
 func newCmdUserStarAdd(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
-		Use:   "add <dashboard-id>",
-		Short: "Star a dashboard",
+		Use:         "add <dashboard-id>",
+		Short:       "Star a dashboard",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Star a dashboard by its numeric ID.
 
 Examples:
@@ -56,8 +57,9 @@ Examples:
 
 func newCmdUserStarRemove(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
-		Use:   "remove <dashboard-id>",
-		Short: "Unstar a dashboard",
+		Use:         "remove <dashboard-id>",
+		Short:       "Unstar a dashboard",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Remove a star from a dashboard by its numeric ID.
 
 Examples:

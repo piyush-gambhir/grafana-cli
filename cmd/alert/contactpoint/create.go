@@ -15,8 +15,9 @@ func newCmdContactPointCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a contact point",
+		Use:         "create",
+		Short:       "Create a contact point",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a new contact point from a JSON or YAML file.
 
 The file must contain name, type, and settings fields. The type determines

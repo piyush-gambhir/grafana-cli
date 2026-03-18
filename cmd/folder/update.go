@@ -15,8 +15,9 @@ func newCmdFolderUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <uid>",
-		Short: "Update a folder",
+		Use:         "update <uid>",
+		Short:       "Update a folder",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update an existing folder's title or other properties.
 
 The file must contain the updated folder properties (e.g. title).

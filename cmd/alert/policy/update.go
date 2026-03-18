@@ -14,8 +14,9 @@ func newCmdPolicyUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update",
-		Short: "Update the notification policy tree",
+		Use:         "update",
+		Short:       "Update the notification policy tree",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Replace the entire notification policy routing tree from a JSON or YAML file.
 
 WARNING: This replaces the entire policy tree, not just parts of it.

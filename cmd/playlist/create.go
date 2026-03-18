@@ -15,8 +15,9 @@ func newCmdPlaylistCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a playlist",
+		Use:         "create",
+		Short:       "Create a playlist",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a new playlist from a JSON or YAML file.
 
 The file must contain name, interval, and items.

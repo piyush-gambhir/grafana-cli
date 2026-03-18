@@ -15,8 +15,9 @@ func newCmdMuteTimingUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <name>",
-		Short: "Update a mute timing",
+		Use:         "update <name>",
+		Short:       "Update a mute timing",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update an existing mute timing from a JSON or YAML file.
 
 Examples:

@@ -13,8 +13,9 @@ func newCmdRuleDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <uid>",
-		Short: "Delete an alert rule",
+		Use:         "delete <uid>",
+		Short:       "Delete an alert rule",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Permanently delete an alert rule by its UID.
 
 Examples:

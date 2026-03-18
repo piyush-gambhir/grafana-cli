@@ -13,8 +13,9 @@ func newCmdDashboardDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <uid>",
-		Short: "Delete a dashboard",
+		Use:         "delete <uid>",
+		Short:       "Delete a dashboard",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Permanently delete a dashboard by its UID.
 
 This action cannot be undone. You will be prompted for confirmation unless

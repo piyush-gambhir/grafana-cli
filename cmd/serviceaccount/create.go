@@ -15,8 +15,9 @@ func newCmdServiceAccountCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a service account",
+		Use:         "create",
+		Short:       "Create a service account",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a new service account from a JSON or YAML file.
 
 The file must contain name and role fields. Role can be Viewer, Editor,

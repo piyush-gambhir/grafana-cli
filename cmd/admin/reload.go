@@ -11,8 +11,9 @@ import (
 
 func newCmdAdminReload(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "reload <resource>",
-		Short: "Reload provisioned resources",
+		Use:         "reload <resource>",
+		Short:       "Reload provisioned resources",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Reload provisioned resources. Supported resources:
   dashboards, datasources, plugins, access-control, alerting`,
 		ValidArgs: []string{"dashboards", "datasources", "plugins", "access-control", "alerting"},

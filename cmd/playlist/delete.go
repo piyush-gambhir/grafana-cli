@@ -13,8 +13,9 @@ func newCmdPlaylistDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <uid>",
-		Short: "Delete a playlist",
+		Use:         "delete <uid>",
+		Short:       "Delete a playlist",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Permanently delete a playlist by its UID.
 
 Examples:

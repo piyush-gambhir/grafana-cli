@@ -15,8 +15,9 @@ func newCmdOrgCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create an organization",
+		Use:         "create",
+		Short:       "Create an organization",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a new organization from a JSON or YAML file.
 
 The file must contain a "name" field.

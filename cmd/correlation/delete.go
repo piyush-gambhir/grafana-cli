@@ -13,8 +13,9 @@ func newCmdCorrelationDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <source-uid> <correlation-uid>",
-		Short: "Delete a correlation",
+		Use:         "delete <source-uid> <correlation-uid>",
+		Short:       "Delete a correlation",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Delete a correlation by source datasource UID and correlation UID.
 
 Examples:

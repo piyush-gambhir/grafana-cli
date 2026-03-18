@@ -15,8 +15,9 @@ func newCmdOrgUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <id>",
-		Short: "Update an organization",
+		Use:         "update <id>",
+		Short:       "Update an organization",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update an organization's name from a JSON or YAML file.
 
 Examples:

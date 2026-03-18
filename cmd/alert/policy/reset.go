@@ -13,8 +13,9 @@ func newCmdPolicyReset(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "reset",
-		Short: "Reset the notification policy to defaults",
+		Use:         "reset",
+		Short:       "Reset the notification policy to defaults",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Reset the notification policy routing tree to Grafana defaults.
 
 This removes all custom routes and restores the default receiver

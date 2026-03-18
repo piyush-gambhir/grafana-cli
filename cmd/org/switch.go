@@ -12,8 +12,9 @@ import (
 
 func newCmdOrgSwitch(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
-		Use:   "switch <org-id>",
-		Short: "Switch the active organization",
+		Use:         "switch <org-id>",
+		Short:       "Switch the active organization",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Switch the authenticated user's active organization.
 
 Use "grafana org list" to see available organization IDs.

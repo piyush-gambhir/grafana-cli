@@ -20,8 +20,9 @@ func newCmdDashboardUpdate(f *cmdutil.Factory) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:   "update",
-		Short: "Update a dashboard",
+		Use:         "update",
+		Short:       "Update a dashboard",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update an existing dashboard from a JSON or YAML file.
 
 The input file must contain a valid Grafana dashboard model with a UID

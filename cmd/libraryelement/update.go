@@ -15,8 +15,9 @@ func newCmdLibraryElementUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <uid>",
-		Short: "Update a library element",
+		Use:         "update <uid>",
+		Short:       "Update a library element",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update a library element from a JSON or YAML file. Include the version field.
 
 Examples:

@@ -13,8 +13,9 @@ func newCmdTemplateDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <name>",
-		Short: "Delete a notification template",
+		Use:         "delete <name>",
+		Short:       "Delete a notification template",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Permanently delete a notification template by name.
 
 Examples:

@@ -14,8 +14,9 @@ func newCmdTeamDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <id>",
-		Short: "Delete a team",
+		Use:         "delete <id>",
+		Short:       "Delete a team",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Permanently delete a team by its ID.
 
 Examples:

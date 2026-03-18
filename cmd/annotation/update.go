@@ -15,8 +15,9 @@ func newCmdAnnotationUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <id>",
-		Short: "Update an annotation",
+		Use:         "update <id>",
+		Short:       "Update an annotation",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update an annotation's text, tags, or time range.
 
 Examples:

@@ -15,8 +15,9 @@ func newCmdTeamCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a team",
+		Use:         "create",
+		Short:       "Create a team",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a new team from a JSON or YAML file.
 
 The file must contain a "name" field and optionally an "email" field.

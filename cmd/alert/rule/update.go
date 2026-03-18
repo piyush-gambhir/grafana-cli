@@ -15,8 +15,9 @@ func newCmdRuleUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <uid>",
-		Short: "Update an alert rule",
+		Use:         "update <uid>",
+		Short:       "Update an alert rule",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update an existing alert rule from a JSON or YAML file.
 
 Examples:

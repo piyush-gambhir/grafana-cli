@@ -14,8 +14,9 @@ func newCmdMemberRemove(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "remove <team-id> <user-id>",
-		Short: "Remove a member from a team",
+		Use:         "remove <team-id> <user-id>",
+		Short:       "Remove a member from a team",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Remove a user from a team by team ID and user ID.
 
 Examples:

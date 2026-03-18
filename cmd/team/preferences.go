@@ -67,8 +67,9 @@ func newCmdTeamPreferencesUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <team-id>",
-		Short: "Update team preferences",
+		Use:         "update <team-id>",
+		Short:       "Update team preferences",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update team preferences from a JSON or YAML file.
 
 Examples:

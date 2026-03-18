@@ -12,8 +12,9 @@ import (
 
 func newCmdDashboardRestore(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "restore <uid> <version>",
-		Short: "Restore a dashboard to a specific version",
+		Use:         "restore <uid> <version>",
+		Short:       "Restore a dashboard to a specific version",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Restore a dashboard to a specific historical version.
 
 Use "grafana dashboard versions <uid>" to see available versions, then

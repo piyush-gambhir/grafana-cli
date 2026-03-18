@@ -13,8 +13,9 @@ func newCmdFolderDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <uid>",
-		Short: "Delete a folder",
+		Use:         "delete <uid>",
+		Short:       "Delete a folder",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Permanently delete a folder by its UID.
 
 WARNING: This also deletes all dashboards contained in the folder. You

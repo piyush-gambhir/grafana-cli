@@ -13,8 +13,9 @@ func newCmdLibraryElementDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <uid>",
-		Short: "Delete a library element",
+		Use:         "delete <uid>",
+		Short:       "Delete a library element",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Permanently delete a library element. Fails if dashboards still use it.
 
 Examples:

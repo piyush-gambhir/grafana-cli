@@ -15,8 +15,9 @@ func newCmdCorrelationCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create <source-uid>",
-		Short: "Create a correlation",
+		Use:         "create <source-uid>",
+		Short:       "Create a correlation",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a correlation from a source datasource to a target.
 
 Examples:

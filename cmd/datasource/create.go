@@ -15,8 +15,9 @@ func newCmdDatasourceCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a datasource",
+		Use:         "create",
+		Short:       "Create a datasource",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a new datasource from a JSON or YAML file.
 
 The file must contain at minimum: name, type, access, and url fields.

@@ -14,8 +14,9 @@ func newCmdAnnotationDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <id>",
-		Short: "Delete an annotation",
+		Use:         "delete <id>",
+		Short:       "Delete an annotation",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Permanently delete an annotation by its numeric ID.
 
 Examples:

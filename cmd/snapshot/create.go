@@ -15,8 +15,9 @@ func newCmdSnapshotCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a snapshot",
+		Use:         "create",
+		Short:       "Create a snapshot",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a dashboard snapshot from a JSON or YAML file.
 
 The file must contain a "dashboard" object with the dashboard data.

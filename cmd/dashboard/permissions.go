@@ -87,8 +87,9 @@ func newCmdDashboardPermissionsUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <uid>",
-		Short: "Update dashboard permissions",
+		Use:         "update <uid>",
+		Short:       "Update dashboard permissions",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update dashboard permissions from a JSON or YAML file.
 
 The file should contain a permissions object with an "items" array. Each

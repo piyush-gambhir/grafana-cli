@@ -20,8 +20,9 @@ func newCmdDashboardImport(f *cmdutil.Factory) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:   "import",
-		Short: "Import a dashboard from a file",
+		Use:         "import",
+		Short:       "Import a dashboard from a file",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Import a dashboard from a JSON or YAML file.
 
 This is functionally equivalent to "dashboard create". The "id" field is

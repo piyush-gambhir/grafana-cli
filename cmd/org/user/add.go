@@ -15,8 +15,9 @@ func newCmdOrgUserAdd(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "add <org-id>",
-		Short: "Add a user to an organization",
+		Use:         "add <org-id>",
+		Short:       "Add a user to an organization",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Add a user to an organization with a specified role.
 
 The file must contain loginOrEmail and role fields.

@@ -15,8 +15,9 @@ func newCmdRuleCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create an alert rule",
+		Use:         "create",
+		Short:       "Create an alert rule",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a new alert rule from a JSON or YAML file.
 
 The file must contain a valid alert rule definition including title,

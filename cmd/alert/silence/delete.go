@@ -13,8 +13,9 @@ func newCmdSilenceDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <id>",
-		Short: "Delete a silence",
+		Use:         "delete <id>",
+		Short:       "Delete a silence",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Expire (delete) a silence by its ID.
 
 Examples:

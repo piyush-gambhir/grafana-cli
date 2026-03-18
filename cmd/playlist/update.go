@@ -15,8 +15,9 @@ func newCmdPlaylistUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <uid>",
-		Short: "Update a playlist",
+		Use:         "update <uid>",
+		Short:       "Update a playlist",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update an existing playlist from a JSON or YAML file.
 
 Examples:

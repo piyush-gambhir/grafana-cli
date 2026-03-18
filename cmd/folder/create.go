@@ -15,8 +15,9 @@ func newCmdFolderCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a folder",
+		Use:         "create",
+		Short:       "Create a folder",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a new folder from a JSON/YAML file.
 
 The file must contain at minimum a "title" field. Optionally include

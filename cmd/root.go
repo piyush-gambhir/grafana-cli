@@ -38,6 +38,7 @@ var (
 	flagUsername string
 	flagPassword string
 	flagOrgID    int64
+	flagReadOnly bool
 )
 
 // Execute is the main entry point for the CLI.
@@ -126,6 +127,15 @@ func newRootCmd() *cobra.Command {
 				return client.NewClient(resolved)
 			}
 
+			// Read-only enforcement
+			effectiveReadOnly := resolved.ReadOnly // from env > config
+			if cmd.Flags().Changed("read-only") {
+				effectiveReadOnly = flagReadOnly
+			}
+			if effectiveReadOnly && cmd.Annotations != nil && cmd.Annotations["mutates"] == "true" {
+				return fmt.Errorf("command '%s' is blocked in read-only mode.\nTo disable, use --read-only=false or remove read_only from your config profile.", cmd.CommandPath())
+			}
+
 			return nil
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
@@ -148,6 +158,7 @@ func newRootCmd() *cobra.Command {
 	rootCmd.PersistentFlags().StringVar(&flagUsername, "username", "", "Username for basic auth")
 	rootCmd.PersistentFlags().StringVar(&flagPassword, "password", "", "Password for basic auth")
 	rootCmd.PersistentFlags().Int64Var(&flagOrgID, "org-id", 0, "Organization ID")
+	rootCmd.PersistentFlags().BoolVar(&flagReadOnly, "read-only", false, "Block write operations (safety mode for agents)")
 
 	// Register subcommands.
 	rootCmd.AddCommand(newVersionCmd())

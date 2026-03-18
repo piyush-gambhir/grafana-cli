@@ -13,8 +13,9 @@ import (
 
 func newCmdMemberAdd(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
-		Use:   "add <team-id> <user-id>",
-		Short: "Add a member to a team",
+		Use:         "add <team-id> <user-id>",
+		Short:       "Add a member to a team",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Add a user to a team by team ID and user ID.
 
 Examples:

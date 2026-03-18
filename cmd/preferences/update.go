@@ -14,8 +14,9 @@ func newCmdPreferencesUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update",
-		Short: "Update current user preferences",
+		Use:         "update",
+		Short:       "Update current user preferences",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update the authenticated user's preferences from a JSON or YAML file.
 
 Examples:

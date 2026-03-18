@@ -15,8 +15,9 @@ func newCmdCorrelationUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <source-uid> <correlation-uid>",
-		Short: "Update a correlation",
+		Use:         "update <source-uid> <correlation-uid>",
+		Short:       "Update a correlation",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update a correlation from a JSON or YAML file.
 
 Examples:

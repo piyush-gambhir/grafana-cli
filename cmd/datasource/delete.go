@@ -13,8 +13,9 @@ func newCmdDatasourceDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <uid>",
-		Short: "Delete a datasource",
+		Use:         "delete <uid>",
+		Short:       "Delete a datasource",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Permanently delete a datasource by its UID.
 
 This action cannot be undone. Dashboards using this datasource will show

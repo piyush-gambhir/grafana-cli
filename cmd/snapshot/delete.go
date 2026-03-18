@@ -13,8 +13,9 @@ func newCmdSnapshotDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <key>",
-		Short: "Delete a snapshot",
+		Use:         "delete <key>",
+		Short:       "Delete a snapshot",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Delete a snapshot by its key.
 
 Examples:

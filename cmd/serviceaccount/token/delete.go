@@ -14,8 +14,9 @@ func newCmdTokenDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <service-account-id> <token-id>",
-		Short: "Delete a service account token",
+		Use:         "delete <service-account-id> <token-id>",
+		Short:       "Delete a service account token",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Delete an API token from a service account.
 
 Examples:

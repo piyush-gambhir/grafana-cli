@@ -14,8 +14,9 @@ func newCmdOrgDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "delete <id>",
-		Short: "Delete an organization",
+		Use:         "delete <id>",
+		Short:       "Delete an organization",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Permanently delete an organization by its ID.
 
 Examples:

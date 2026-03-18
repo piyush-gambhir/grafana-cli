@@ -16,8 +16,9 @@ func newCmdTokenCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "create <service-account-id>",
-		Short: "Create a token for a service account",
+		Use:         "create <service-account-id>",
+		Short:       "Create a token for a service account",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a new API token for a service account.
 
 The token key is only shown once at creation time. Save it immediately.

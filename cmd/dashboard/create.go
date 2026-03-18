@@ -20,8 +20,9 @@ func newCmdDashboardCreate(f *cmdutil.Factory) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a dashboard",
+		Use:         "create",
+		Short:       "Create a dashboard",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Create a new dashboard from a JSON or YAML file.
 
 The input file must contain a valid Grafana dashboard model. The "id"

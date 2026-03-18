@@ -14,8 +14,9 @@ func newCmdContactPointUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <uid>",
-		Short: "Update a contact point",
+		Use:         "update <uid>",
+		Short:       "Update a contact point",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update an existing contact point from a JSON or YAML file.
 
 Examples:

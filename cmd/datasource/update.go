@@ -16,8 +16,9 @@ func newCmdDatasourceUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <id>",
-		Short: "Update a datasource",
+		Use:         "update <id>",
+		Short:       "Update a datasource",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update an existing datasource from a JSON or YAML file.
 
 The file must contain the full datasource definition. Use

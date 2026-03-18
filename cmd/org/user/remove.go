@@ -14,8 +14,9 @@ func newCmdOrgUserRemove(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
 
 	cmd := &cobra.Command{
-		Use:   "remove <org-id> <user-id>",
-		Short: "Remove a user from an organization",
+		Use:         "remove <org-id> <user-id>",
+		Short:       "Remove a user from an organization",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Remove a user from an organization.
 
 Examples:

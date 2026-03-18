@@ -15,8 +15,9 @@ func newCmdUserUpdate(f *cmdutil.Factory) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
-		Use:   "update <id>",
-		Short: "Update a user",
+		Use:         "update <id>",
+		Short:       "Update a user",
+		Annotations: map[string]string{"mutates": "true"},
 		Long: `Update a user's profile from a JSON or YAML file.
 
 Examples:
