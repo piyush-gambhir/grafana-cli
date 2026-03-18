@@ -13,6 +13,7 @@ import (
 
 func newCmdContactPointCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
+	var ifNotExists bool
 
 	cmd := &cobra.Command{
 		Use:         "create",
@@ -26,7 +27,10 @@ needs "url").
 
 Examples:
   # Create a contact point
-  grafana alert contact-point create -f contact-point.json`,
+  grafana alert contact-point create -f contact-point.json
+
+  # Create idempotently (no error if already exists)
+  grafana alert contact-point create -f contact-point.json --if-not-exists`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")
@@ -44,11 +48,19 @@ Examples:
 
 			result, err := c.CreateContactPoint(context.Background(), req)
 			if err != nil {
+				if ifNotExists && client.IsConflict(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: contact point already exists, skipping.\n")
+					}
+					return nil
+				}
 				return err
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Contact point created: %s (UID: %s)\n", result.Name, result.UID)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Contact point created: %s (UID: %s)\n", result.Name, result.UID)
+				}
 				return nil
 			}
 
@@ -57,6 +69,7 @@ Examples:
 	}
 
 	cmdutil.AddFileFlag(cmd, &file)
+	cmdutil.AddIfNotExistsFlag(cmd, &ifNotExists)
 
 	return cmd
 }

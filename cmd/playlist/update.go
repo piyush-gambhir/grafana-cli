@@ -45,7 +45,9 @@ Examples:
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Playlist updated: %s (UID: %s)\n", result.Name, result.UID)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Playlist updated: %s (UID: %s)\n", result.Name, result.UID)
+				}
 				return nil
 			}
 

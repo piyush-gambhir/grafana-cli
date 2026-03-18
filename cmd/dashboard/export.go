@@ -53,7 +53,9 @@ Examples:
 				if err := os.WriteFile(outputFile, append(data, '\n'), 0o644); err != nil {
 					return fmt.Errorf("writing file: %w", err)
 				}
-				fmt.Fprintf(f.IOStreams.Out, "Dashboard exported to %s\n", outputFile)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Dashboard exported to %s\n", outputFile)
+				}
 				return nil
 			}
 

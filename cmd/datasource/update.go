@@ -60,7 +60,9 @@ Examples:
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Datasource updated: %s (ID: %d)\n", result.Name, result.ID)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Datasource updated: %s (ID: %d)\n", result.Name, result.ID)
+				}
 				return nil
 			}
 

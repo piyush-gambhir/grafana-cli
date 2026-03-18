@@ -15,6 +15,12 @@ type Factory struct {
 	IOStreams IOStreams
 	// Resolved holds the resolved config after PersistentPreRunE.
 	Resolved *config.ResolvedConfig
+	// NoInput disables all interactive prompts (for CI/agent use).
+	NoInput bool
+	// Quiet suppresses informational output.
+	Quiet bool
+	// Verbose enables verbose HTTP logging.
+	Verbose bool
 }
 
 // IOStreams holds standard I/O streams.

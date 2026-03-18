@@ -22,9 +22,16 @@ func PrintError(w io.Writer, err error) {
 }
 
 // ConfirmAction prompts the user for confirmation if not auto-confirmed.
-func ConfirmAction(in io.Reader, out io.Writer, message string, confirmed bool) (bool, error) {
+// If noInput is true and confirmed is false, returns an error indicating
+// that interactive input is required.
+func ConfirmAction(in io.Reader, out io.Writer, message string, confirmed bool, noInput ...bool) (bool, error) {
 	if confirmed {
 		return true, nil
+	}
+
+	// Check if no-input mode is active (optional parameter for backwards compat).
+	if len(noInput) > 0 && noInput[0] {
+		return false, fmt.Errorf("interactive input required but --no-input is set. Use --confirm for destructive operations.")
 	}
 
 	fmt.Fprintf(out, "%s [y/N]: ", message)

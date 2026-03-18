@@ -49,7 +49,9 @@ Examples:
 				return err
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, "Dashboard %d starred.\n", id)
+			if !f.Quiet {
+				fmt.Fprintf(f.IOStreams.Out, "Dashboard %d starred.\n", id)
+			}
 			return nil
 		},
 	}
@@ -81,7 +83,9 @@ Examples:
 				return err
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, "Dashboard %d unstarred.\n", id)
+			if !f.Quiet {
+				fmt.Fprintf(f.IOStreams.Out, "Dashboard %d unstarred.\n", id)
+			}
 			return nil
 		},
 	}

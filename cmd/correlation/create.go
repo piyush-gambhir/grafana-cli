@@ -13,6 +13,7 @@ import (
 
 func newCmdCorrelationCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
+	var ifNotExists bool
 
 	cmd := &cobra.Command{
 		Use:         "create <source-uid>",
@@ -22,8 +23,11 @@ func newCmdCorrelationCreate(f *cmdutil.Factory) *cobra.Command {
 
 Examples:
   # Create a correlation
-  grafana correlation create sourceUid -f correlation.json`,
-		Args:  cobra.ExactArgs(1),
+  grafana correlation create sourceUid -f correlation.json
+
+  # Create idempotently (no error if already exists)
+  grafana correlation create sourceUid -f correlation.json --if-not-exists`,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")
@@ -41,11 +45,19 @@ Examples:
 
 			result, err := c.CreateCorrelation(context.Background(), args[0], req)
 			if err != nil {
+				if ifNotExists && client.IsConflict(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: correlation already exists, skipping.\n")
+					}
+					return nil
+				}
 				return err
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Correlation created: %s (UID: %s)\n", result.Label, result.UID)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Correlation created: %s (UID: %s)\n", result.Label, result.UID)
+				}
 				return nil
 			}
 
@@ -54,6 +66,7 @@ Examples:
 	}
 
 	cmdutil.AddFileFlag(cmd, &file)
+	cmdutil.AddIfNotExistsFlag(cmd, &ifNotExists)
 
 	return cmd
 }

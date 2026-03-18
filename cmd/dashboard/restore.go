@@ -45,7 +45,9 @@ Examples:
 				return err
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, "Dashboard %q restored to version %d.\n", uid, version)
+			if !f.Quiet {
+				fmt.Fprintf(f.IOStreams.Out, "Dashboard %q restored to version %d.\n", uid, version)
+			}
 			return nil
 		},
 	}

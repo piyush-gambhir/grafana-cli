@@ -84,7 +84,9 @@ func newCmdConfigSet(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, "Set %s = %s\n", key, value)
+			if !f.Quiet {
+				fmt.Fprintf(f.IOStreams.Out, "Set %s = %s\n", key, value)
+			}
 			return nil
 		},
 	}
@@ -109,7 +111,9 @@ func newCmdConfigUseProfile(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, "Switched to profile %q\n", args[0])
+			if !f.Quiet {
+				fmt.Fprintf(f.IOStreams.Out, "Switched to profile %q\n", args[0])
+			}
 			return nil
 		},
 	}

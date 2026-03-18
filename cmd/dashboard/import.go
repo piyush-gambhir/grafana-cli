@@ -72,10 +72,12 @@ Examples:
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Dashboard imported successfully.\n")
-				fmt.Fprintf(f.IOStreams.Out, "  UID:     %s\n", result.UID)
-				fmt.Fprintf(f.IOStreams.Out, "  URL:     %s\n", result.URL)
-				fmt.Fprintf(f.IOStreams.Out, "  Version: %d\n", result.Version)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Dashboard imported successfully.\n")
+					fmt.Fprintf(f.IOStreams.Out, "  UID:     %s\n", result.UID)
+					fmt.Fprintf(f.IOStreams.Out, "  URL:     %s\n", result.URL)
+					fmt.Fprintf(f.IOStreams.Out, "  Version: %d\n", result.Version)
+				}
 				return nil
 			}
 

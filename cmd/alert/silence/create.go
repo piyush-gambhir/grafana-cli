@@ -13,6 +13,7 @@ import (
 
 func newCmdSilenceCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
+	var ifNotExists bool
 
 	cmd := &cobra.Command{
 		Use:         "create",
@@ -24,7 +25,10 @@ The file must contain matchers, startsAt, endsAt, createdBy, and comment.
 
 Examples:
   # Create a silence
-  grafana alert silence create -f silence.json`,
+  grafana alert silence create -f silence.json
+
+  # Create idempotently (no error if already exists)
+  grafana alert silence create -f silence.json --if-not-exists`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")
@@ -42,11 +46,19 @@ Examples:
 
 			result, err := c.CreateSilence(context.Background(), req)
 			if err != nil {
+				if ifNotExists && client.IsConflict(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: silence already exists, skipping.\n")
+					}
+					return nil
+				}
 				return err
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Silence created: %s\n", result.SilenceID)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Silence created: %s\n", result.SilenceID)
+				}
 				return nil
 			}
 
@@ -55,6 +67,7 @@ Examples:
 	}
 
 	cmdutil.AddFileFlag(cmd, &file)
+	cmdutil.AddIfNotExistsFlag(cmd, &ifNotExists)
 
 	return cmd
 }

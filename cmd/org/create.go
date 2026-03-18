@@ -13,6 +13,7 @@ import (
 
 func newCmdOrgCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
+	var ifNotExists bool
 
 	cmd := &cobra.Command{
 		Use:         "create",
@@ -26,7 +27,10 @@ Examples:
   # Create an organization
   grafana org create -f org.json
 
-  # Example: echo '{"name":"My Org"}' | grafana org create -f -`,
+  # Example: echo '{"name":"My Org"}' | grafana org create -f -
+
+  # Create idempotently (no error if already exists)
+  grafana org create -f org.json --if-not-exists`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")
@@ -44,11 +48,19 @@ Examples:
 
 			result, err := c.CreateOrg(context.Background(), req)
 			if err != nil {
+				if ifNotExists && client.IsConflict(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: organization already exists, skipping.\n")
+					}
+					return nil
+				}
 				return err
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Organization created (ID: %d): %s\n", result.OrgID, result.Message)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Organization created (ID: %d): %s\n", result.OrgID, result.Message)
+				}
 				return nil
 			}
 
@@ -57,6 +69,7 @@ Examples:
 	}
 
 	cmdutil.AddFileFlag(cmd, &file)
+	cmdutil.AddIfNotExistsFlag(cmd, &ifNotExists)
 
 	return cmd
 }

@@ -13,6 +13,7 @@ import (
 
 func newCmdSnapshotCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
+	var ifNotExists bool
 
 	cmd := &cobra.Command{
 		Use:         "create",
@@ -25,7 +26,10 @@ Optionally include name, expires (seconds), and external flag.
 
 Examples:
   # Create a snapshot
-  grafana snapshot create -f snapshot.json`,
+  grafana snapshot create -f snapshot.json
+
+  # Create idempotently (no error if already exists)
+  grafana snapshot create -f snapshot.json --if-not-exists`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")
@@ -43,14 +47,22 @@ Examples:
 
 			result, err := c.CreateSnapshot(context.Background(), req)
 			if err != nil {
+				if ifNotExists && client.IsConflict(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: snapshot already exists, skipping.\n")
+					}
+					return nil
+				}
 				return err
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Snapshot created.\n")
-				fmt.Fprintf(f.IOStreams.Out, "  Key:        %s\n", result.Key)
-				fmt.Fprintf(f.IOStreams.Out, "  URL:        %s\n", result.URL)
-				fmt.Fprintf(f.IOStreams.Out, "  Delete Key: %s\n", result.DeleteKey)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Snapshot created.\n")
+					fmt.Fprintf(f.IOStreams.Out, "  Key:        %s\n", result.Key)
+					fmt.Fprintf(f.IOStreams.Out, "  URL:        %s\n", result.URL)
+					fmt.Fprintf(f.IOStreams.Out, "  Delete Key: %s\n", result.DeleteKey)
+				}
 				return nil
 			}
 
@@ -59,6 +71,7 @@ Examples:
 	}
 
 	cmdutil.AddFileFlag(cmd, &file)
+	cmdutil.AddIfNotExistsFlag(cmd, &ifNotExists)
 
 	return cmd
 }

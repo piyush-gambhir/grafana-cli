@@ -45,7 +45,9 @@ Examples:
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Library element updated: %s (UID: %s)\n", result.Result.Name, result.Result.UID)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Library element updated: %s (UID: %s)\n", result.Result.Name, result.Result.UID)
+				}
 				return nil
 			}
 

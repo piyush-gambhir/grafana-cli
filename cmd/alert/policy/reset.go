@@ -27,10 +27,10 @@ Examples:
 
   # Reset without confirmation
   grafana alert policy reset --confirm`,
-		Args:  cobra.NoArgs,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ok, err := cmdutil.ConfirmAction(f.IOStreams.In, f.IOStreams.Out,
-				"Are you sure you want to reset the notification policy to defaults?", confirm)
+				"Are you sure you want to reset the notification policy to defaults?", confirm, f.NoInput)
 			if err != nil {
 				return err
 			}
@@ -48,7 +48,9 @@ Examples:
 				return err
 			}
 
-			fmt.Fprintln(f.IOStreams.Out, "Notification policy reset to defaults.")
+			if !f.Quiet {
+				fmt.Fprintln(f.IOStreams.Out, "Notification policy reset to defaults.")
+			}
 			return nil
 		},
 	}

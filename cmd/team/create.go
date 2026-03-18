@@ -13,6 +13,7 @@ import (
 
 func newCmdTeamCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
+	var ifNotExists bool
 
 	cmd := &cobra.Command{
 		Use:         "create",
@@ -26,7 +27,10 @@ Examples:
   # Create a team
   grafana team create -f team.json
 
-  # Example: echo '{"name":"Backend Team","email":"backend@example.com"}' | grafana team create -f -`,
+  # Example: echo '{"name":"Backend Team","email":"backend@example.com"}' | grafana team create -f -
+
+  # Create idempotently (no error if already exists)
+  grafana team create -f team.json --if-not-exists`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")
@@ -44,11 +48,19 @@ Examples:
 
 			result, err := c.CreateTeam(context.Background(), req)
 			if err != nil {
+				if ifNotExists && client.IsConflict(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: team already exists, skipping.\n")
+					}
+					return nil
+				}
 				return err
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Team created (ID: %d): %s\n", result.TeamID, result.Message)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Team created (ID: %d): %s\n", result.TeamID, result.Message)
+				}
 				return nil
 			}
 
@@ -57,6 +69,7 @@ Examples:
 	}
 
 	cmdutil.AddFileFlag(cmd, &file)
+	cmdutil.AddIfNotExistsFlag(cmd, &ifNotExists)
 
 	return cmd
 }

@@ -45,7 +45,9 @@ Examples:
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Alert rule updated: %s (UID: %s)\n", result.Title, result.UID)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Alert rule updated: %s (UID: %s)\n", result.Title, result.UID)
+				}
 				return nil
 			}
 

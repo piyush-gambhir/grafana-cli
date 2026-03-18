@@ -44,7 +44,9 @@ Examples:
 				return err
 			}
 
-			fmt.Fprintln(f.IOStreams.Out, "Notification policy updated.")
+			if !f.Quiet {
+				fmt.Fprintln(f.IOStreams.Out, "Notification policy updated.")
+			}
 			return nil
 		},
 	}

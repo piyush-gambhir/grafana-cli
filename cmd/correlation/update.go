@@ -45,7 +45,9 @@ Examples:
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Correlation updated: %s (UID: %s)\n", result.Label, result.UID)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Correlation updated: %s (UID: %s)\n", result.Label, result.UID)
+				}
 				return nil
 			}
 

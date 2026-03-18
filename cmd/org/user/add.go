@@ -13,6 +13,7 @@ import (
 
 func newCmdOrgUserAdd(f *cmdutil.Factory) *cobra.Command {
 	var file string
+	var ifNotExists bool
 
 	cmd := &cobra.Command{
 		Use:         "add <org-id>",
@@ -26,8 +27,11 @@ Examples:
   # Add a user to org 1
   grafana org user add 1 -f user.json
 
-  # Example JSON: {"loginOrEmail":"admin@example.com","role":"Editor"}`,
-		Args:  cobra.ExactArgs(1),
+  # Example JSON: {"loginOrEmail":"admin@example.com","role":"Editor"}
+
+  # Add idempotently (no error if already a member)
+  grafana org user add 1 -f user.json --if-not-exists`,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")
@@ -49,15 +53,24 @@ Examples:
 			}
 
 			if err := c.AddOrgUser(context.Background(), orgID, req); err != nil {
+				if ifNotExists && client.IsConflict(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: user already in organization, skipping.\n")
+					}
+					return nil
+				}
 				return err
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, "User %q added to organization %d with role %s.\n", req.LoginOrEmail, orgID, req.Role)
+			if !f.Quiet {
+				fmt.Fprintf(f.IOStreams.Out, "User %q added to organization %d with role %s.\n", req.LoginOrEmail, orgID, req.Role)
+			}
 			return nil
 		},
 	}
 
 	cmdutil.AddFileFlag(cmd, &file)
+	cmdutil.AddIfNotExistsFlag(cmd, &ifNotExists)
 
 	return cmd
 }

@@ -57,7 +57,9 @@ Examples:
 				return err
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, "User %d updated in organization %d.\n", userID, orgID)
+			if !f.Quiet {
+				fmt.Fprintf(f.IOStreams.Out, "User %d updated in organization %d.\n", userID, orgID)
+			}
 			return nil
 		},
 	}

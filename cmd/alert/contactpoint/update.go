@@ -42,7 +42,9 @@ Examples:
 				return err
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, "Contact point %q updated.\n", args[0])
+			if !f.Quiet {
+				fmt.Fprintf(f.IOStreams.Out, "Contact point %q updated.\n", args[0])
+			}
 			return nil
 		},
 	}

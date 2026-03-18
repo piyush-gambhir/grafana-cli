@@ -13,6 +13,7 @@ import (
 
 func newCmdDatasourceCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
+	var ifNotExists bool
 
 	cmd := &cobra.Command{
 		Use:         "create",
@@ -32,7 +33,10 @@ Examples:
   grafana datasource create -f datasource.yaml
 
   # Read from stdin
-  echo '{"name":"test","type":"prometheus","access":"proxy","url":"http://prom:9090"}' | grafana datasource create -f -`,
+  echo '{"name":"test","type":"prometheus","access":"proxy","url":"http://prom:9090"}' | grafana datasource create -f -
+
+  # Create idempotently (no error if already exists)
+  grafana datasource create -f prometheus.json --if-not-exists`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")
@@ -50,11 +54,19 @@ Examples:
 
 			result, err := c.CreateDatasource(context.Background(), req)
 			if err != nil {
+				if ifNotExists && client.IsConflict(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: datasource already exists, skipping.\n")
+					}
+					return nil
+				}
 				return err
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Datasource created: %s (ID: %d)\n", result.Name, result.ID)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Datasource created: %s (ID: %d)\n", result.Name, result.ID)
+				}
 				return nil
 			}
 
@@ -63,6 +75,7 @@ Examples:
 	}
 
 	cmdutil.AddFileFlag(cmd, &file)
+	cmdutil.AddIfNotExistsFlag(cmd, &ifNotExists)
 
 	return cmd
 }

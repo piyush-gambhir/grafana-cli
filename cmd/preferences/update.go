@@ -44,7 +44,9 @@ Examples:
 				return err
 			}
 
-			fmt.Fprintln(f.IOStreams.Out, "Preferences updated.")
+			if !f.Quiet {
+				fmt.Fprintln(f.IOStreams.Out, "Preferences updated.")
+			}
 			return nil
 		},
 	}

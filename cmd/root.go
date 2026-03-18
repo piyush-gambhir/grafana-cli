@@ -39,6 +39,9 @@ var (
 	flagPassword string
 	flagOrgID    int64
 	flagReadOnly bool
+	flagNoInput  bool
+	flagQuiet    bool
+	flagVerbose  bool
 )
 
 // Execute is the main entry point for the CLI.
@@ -63,6 +66,20 @@ func newRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			// Check env vars for --no-input, --quiet, --verbose.
+			if !flagNoInput && os.Getenv("GRAFANA_NO_INPUT") != "" {
+				flagNoInput = true
+			}
+			if !flagQuiet && os.Getenv("GRAFANA_QUIET") != "" {
+				flagQuiet = true
+			}
+			if !flagVerbose && os.Getenv("GRAFANA_VERBOSE") != "" {
+				flagVerbose = true
+			}
+			f.NoInput = flagNoInput
+			f.Quiet = flagQuiet
+			f.Verbose = flagVerbose
+
 			// Start background update check for most commands.
 			cmdName := cmd.Name()
 			skipUpdateCheck := cmdName == "update" || cmdName == "version" || cmdName == "completion" || cmdName == "help"
@@ -124,7 +141,14 @@ func newRootCmd() *cobra.Command {
 			}
 
 			f.Client = func() (*client.Client, error) {
-				return client.NewClient(resolved)
+				c, err := client.NewClient(resolved)
+				if err != nil {
+					return nil, err
+				}
+				if flagVerbose {
+					c.EnableVerboseLogging(f.IOStreams.ErrOut)
+				}
+				return c, nil
 			}
 
 			// Read-only enforcement
@@ -159,6 +183,9 @@ func newRootCmd() *cobra.Command {
 	rootCmd.PersistentFlags().StringVar(&flagPassword, "password", "", "Password for basic auth")
 	rootCmd.PersistentFlags().Int64Var(&flagOrgID, "org-id", 0, "Organization ID")
 	rootCmd.PersistentFlags().BoolVar(&flagReadOnly, "read-only", false, "Block write operations (safety mode for agents)")
+	rootCmd.PersistentFlags().BoolVar(&flagNoInput, "no-input", false, "Disable all interactive prompts (for CI/agent use)")
+	rootCmd.PersistentFlags().BoolVarP(&flagQuiet, "quiet", "q", false, "Suppress informational output")
+	rootCmd.PersistentFlags().BoolVarP(&flagVerbose, "verbose", "v", false, "Enable verbose HTTP logging")
 
 	// Register subcommands.
 	rootCmd.AddCommand(newVersionCmd())

@@ -38,7 +38,9 @@ Examples:
 				return err
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, "Switched to organization %d.\n", orgID)
+			if !f.Quiet {
+				fmt.Fprintf(f.IOStreams.Out, "Switched to organization %d.\n", orgID)
+			}
 			return nil
 		},
 	}

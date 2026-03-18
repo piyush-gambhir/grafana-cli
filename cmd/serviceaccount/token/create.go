@@ -14,6 +14,7 @@ import (
 
 func newCmdTokenCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
+	var ifNotExists bool
 
 	cmd := &cobra.Command{
 		Use:         "create <service-account-id>",
@@ -28,8 +29,11 @@ Examples:
   # Create a token
   grafana service-account token create 10 -f token.json
 
-  # Example JSON: {"name":"deploy-token","secondsToLive":86400}`,
-		Args:  cobra.ExactArgs(1),
+  # Example JSON: {"name":"deploy-token","secondsToLive":86400}
+
+  # Create idempotently (no error if already exists)
+  grafana service-account token create 10 -f token.json --if-not-exists`,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")
@@ -52,14 +56,22 @@ Examples:
 
 			result, err := c.CreateServiceAccountToken(context.Background(), saID, req)
 			if err != nil {
+				if ifNotExists && client.IsConflict(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: token already exists, skipping.\n")
+					}
+					return nil
+				}
 				return err
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Token created: %s (ID: %d)\n", result.Name, result.ID)
-				if result.Key != "" {
-					fmt.Fprintf(f.IOStreams.Out, "Key: %s\n", result.Key)
-					fmt.Fprintln(f.IOStreams.Out, "NOTE: Save the key now. You will not be able to see it again.")
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Token created: %s (ID: %d)\n", result.Name, result.ID)
+					if result.Key != "" {
+						fmt.Fprintf(f.IOStreams.Out, "Key: %s\n", result.Key)
+						fmt.Fprintln(f.IOStreams.Out, "NOTE: Save the key now. You will not be able to see it again.")
+					}
 				}
 				return nil
 			}
@@ -69,6 +81,7 @@ Examples:
 	}
 
 	cmdutil.AddFileFlag(cmd, &file)
+	cmdutil.AddIfNotExistsFlag(cmd, &ifNotExists)
 
 	return cmd
 }

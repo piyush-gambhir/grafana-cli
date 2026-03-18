@@ -13,6 +13,7 @@ import (
 
 func newCmdAnnotationCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
+	var ifNotExists bool
 
 	cmd := &cobra.Command{
 		Use:         "create",
@@ -27,7 +28,10 @@ Examples:
   # Create an annotation
   grafana annotation create -f annotation.json
 
-  # Example JSON: {"text":"Deployed v1.2.3","tags":["deploy"]}`,
+  # Example JSON: {"text":"Deployed v1.2.3","tags":["deploy"]}
+
+  # Create idempotently (no error if already exists)
+  grafana annotation create -f annotation.json --if-not-exists`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")
@@ -45,11 +49,19 @@ Examples:
 
 			result, err := c.CreateAnnotation(context.Background(), req)
 			if err != nil {
+				if ifNotExists && client.IsConflict(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: annotation already exists, skipping.\n")
+					}
+					return nil
+				}
 				return err
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Annotation created (ID: %d): %s\n", result.ID, result.Message)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Annotation created (ID: %d): %s\n", result.ID, result.Message)
+				}
 				return nil
 			}
 
@@ -58,6 +70,7 @@ Examples:
 	}
 
 	cmdutil.AddFileFlag(cmd, &file)
+	cmdutil.AddIfNotExistsFlag(cmd, &ifNotExists)
 
 	return cmd
 }

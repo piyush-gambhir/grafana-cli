@@ -13,6 +13,7 @@ import (
 
 func newCmdServiceAccountCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
+	var ifNotExists bool
 
 	cmd := &cobra.Command{
 		Use:         "create",
@@ -27,7 +28,10 @@ Examples:
   # Create a service account
   grafana service-account create -f sa.json
 
-  # Example JSON: {"name":"ci-bot","role":"Editor"}`,
+  # Example JSON: {"name":"ci-bot","role":"Editor"}
+
+  # Create idempotently (no error if already exists)
+  grafana service-account create -f sa.json --if-not-exists`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")
@@ -45,11 +49,19 @@ Examples:
 
 			result, err := c.CreateServiceAccount(context.Background(), req)
 			if err != nil {
+				if ifNotExists && client.IsConflict(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: service account already exists, skipping.\n")
+					}
+					return nil
+				}
 				return err
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Service account created: %s (ID: %d)\n", result.Name, result.ID)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Service account created: %s (ID: %d)\n", result.Name, result.ID)
+				}
 				return nil
 			}
 
@@ -58,6 +70,7 @@ Examples:
 	}
 
 	cmdutil.AddFileFlag(cmd, &file)
+	cmdutil.AddIfNotExistsFlag(cmd, &ifNotExists)
 
 	return cmd
 }

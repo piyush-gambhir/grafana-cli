@@ -47,7 +47,9 @@ Examples:
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Template updated: %s\n", result.Name)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Template updated: %s\n", result.Name)
+				}
 				return nil
 			}
 

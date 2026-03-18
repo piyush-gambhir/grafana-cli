@@ -29,6 +29,10 @@ Examples:
   grafana login`,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if f.NoInput {
+				return fmt.Errorf("interactive input required but --no-input is set. Use environment variables (GRAFANA_URL, GRAFANA_TOKEN) instead of 'grafana login'.")
+			}
+
 			reader := bufio.NewReader(os.Stdin)
 			out := f.IOStreams.Out
 

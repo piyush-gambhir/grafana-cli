@@ -7,11 +7,13 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/piyush-gambhir/grafana-cli/internal/client"
 	"github.com/piyush-gambhir/grafana-cli/internal/cmdutil"
 )
 
 func newCmdAnnotationDelete(f *cmdutil.Factory) *cobra.Command {
 	var confirm bool
+	var ifExists bool
 
 	cmd := &cobra.Command{
 		Use:         "delete <id>",
@@ -24,8 +26,11 @@ Examples:
   grafana annotation delete 42
 
   # Delete without confirmation
-  grafana annotation delete 42 --confirm`,
-		Args:  cobra.ExactArgs(1),
+  grafana annotation delete 42 --confirm
+
+  # Delete idempotently (no error if not found)
+  grafana annotation delete 42 --confirm --if-exists`,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)
 			if err != nil {
@@ -33,7 +38,7 @@ Examples:
 			}
 
 			ok, err := cmdutil.ConfirmAction(f.IOStreams.In, f.IOStreams.Out,
-				fmt.Sprintf("Are you sure you want to delete annotation %d?", id), confirm)
+				fmt.Sprintf("Are you sure you want to delete annotation %d?", id), confirm, f.NoInput)
 			if err != nil {
 				return err
 			}
@@ -48,15 +53,24 @@ Examples:
 			}
 
 			if err := c.DeleteAnnotation(context.Background(), id); err != nil {
+				if ifExists && client.IsNotFound(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: annotation %d not found, skipping.\n", id)
+					}
+					return nil
+				}
 				return err
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, "Annotation %d deleted.\n", id)
+			if !f.Quiet {
+				fmt.Fprintf(f.IOStreams.Out, "Annotation %d deleted.\n", id)
+			}
 			return nil
 		},
 	}
 
 	cmdutil.AddConfirmFlag(cmd, &confirm)
+	cmdutil.AddIfExistsFlag(cmd, &ifExists)
 
 	return cmd
 }

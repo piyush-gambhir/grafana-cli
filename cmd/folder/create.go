@@ -13,6 +13,7 @@ import (
 
 func newCmdFolderCreate(f *cmdutil.Factory) *cobra.Command {
 	var file string
+	var ifNotExists bool
 
 	cmd := &cobra.Command{
 		Use:         "create",
@@ -28,7 +29,10 @@ Examples:
   grafana folder create -f folder.json
 
   # Example JSON: {"title": "Production", "uid": "prod-folder"}
-  echo '{"title":"Production"}' | grafana folder create -f -`,
+  echo '{"title":"Production"}' | grafana folder create -f -
+
+  # Create idempotently (no error if already exists)
+  grafana folder create -f folder.json --if-not-exists`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {
@@ -46,11 +50,19 @@ Examples:
 
 			result, err := c.CreateFolder(context.Background(), req)
 			if err != nil {
+				if ifNotExists && client.IsConflict(err) {
+					if !f.Quiet {
+						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: folder already exists, skipping.\n")
+					}
+					return nil
+				}
 				return err
 			}
 
 			if f.Resolved.Output == "table" {
-				fmt.Fprintf(f.IOStreams.Out, "Folder created: %s (UID: %s)\n", result.Title, result.UID)
+				if !f.Quiet {
+					fmt.Fprintf(f.IOStreams.Out, "Folder created: %s (UID: %s)\n", result.Title, result.UID)
+				}
 				return nil
 			}
 
@@ -59,6 +71,7 @@ Examples:
 	}
 
 	cmdutil.AddFileFlag(cmd, &file)
+	cmdutil.AddIfNotExistsFlag(cmd, &ifNotExists)
 
 	return cmd
 }

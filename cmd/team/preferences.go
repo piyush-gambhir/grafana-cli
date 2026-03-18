@@ -100,7 +100,9 @@ Examples:
 				return err
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, "Team %d preferences updated.\n", id)
+			if !f.Quiet {
+				fmt.Fprintf(f.IOStreams.Out, "Team %d preferences updated.\n", id)
+			}
 			return nil
 		},
 	}
