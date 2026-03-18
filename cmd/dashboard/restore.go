@@ -40,18 +40,7 @@ Examples:
 				return err
 			}
 
-			// Get the dashboard to obtain its numeric ID.
-			dash, err := c.GetDashboardByUID(context.Background(), uid)
-			if err != nil {
-				return err
-			}
-
-			dashID, ok := dash.Dashboard["id"].(float64)
-			if !ok {
-				return fmt.Errorf("could not determine dashboard ID")
-			}
-
-			if err := c.RestoreDashboardVersion(context.Background(), int64(dashID), version); err != nil {
+			if err := c.RestoreDashboardVersion(context.Background(), uid, version); err != nil {
 				return err
 			}
 

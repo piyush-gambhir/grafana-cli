@@ -142,10 +142,23 @@ func (c *Client) DeleteAnnotation(ctx context.Context, id int64) error {
 	return resp.JSON(nil)
 }
 
-// GetAnnotationTags returns all annotation tags.
-func (c *Client) GetAnnotationTags(ctx context.Context) (*AnnotationTagsResult, error) {
+// GetAnnotationTags returns annotation tags, optionally filtered by tag prefix and limited.
+func (c *Client) GetAnnotationTags(ctx context.Context, tag string, limit int64) (*AnnotationTagsResult, error) {
+	v := url.Values{}
+	if tag != "" {
+		v.Set("tag", tag)
+	}
+	if limit > 0 {
+		v.Set("limit", fmt.Sprintf("%d", limit))
+	}
+
+	path := "/api/annotations/tags"
+	if qs := v.Encode(); qs != "" {
+		path += "?" + qs
+	}
+
 	var result AnnotationTagsResult
-	resp, err := c.Get(ctx, "/api/annotations/tags")
+	resp, err := c.Get(ctx, path)
 	if err != nil {
 		return nil, err
 	}

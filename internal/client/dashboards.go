@@ -164,25 +164,40 @@ func (c *Client) DeleteDashboard(ctx context.Context, uid string) error {
 	return resp.JSON(nil)
 }
 
-// GetDashboardVersions lists versions of a dashboard.
-func (c *Client) GetDashboardVersions(ctx context.Context, dashboardID int64, page PageParams) ([]DashboardVersion, error) {
-	path := fmt.Sprintf("/api/dashboards/id/%d/versions", dashboardID)
-	path = page.AppendToPath(path)
+// DashboardVersionsResponse is the wrapped response from GET /api/dashboards/uid/:uid/versions.
+type DashboardVersionsResponse struct {
+	Versions []DashboardVersion `json:"versions"`
+}
 
-	var results []DashboardVersion
+// GetDashboardVersions lists versions of a dashboard by UID.
+func (c *Client) GetDashboardVersions(ctx context.Context, uid string, limit, start int) ([]DashboardVersion, error) {
+	v := url.Values{}
+	if limit > 0 {
+		v.Set("limit", fmt.Sprintf("%d", limit))
+	}
+	if start > 0 {
+		v.Set("start", fmt.Sprintf("%d", start))
+	}
+
+	path := fmt.Sprintf("/api/dashboards/uid/%s/versions", uid)
+	if qs := v.Encode(); qs != "" {
+		path += "?" + qs
+	}
+
+	var result DashboardVersionsResponse
 	resp, err := c.Get(ctx, path)
 	if err != nil {
 		return nil, err
 	}
-	if err := resp.JSON(&results); err != nil {
+	if err := resp.JSON(&result); err != nil {
 		return nil, err
 	}
-	return results, nil
+	return result.Versions, nil
 }
 
-// RestoreDashboardVersion restores a dashboard to a specific version.
-func (c *Client) RestoreDashboardVersion(ctx context.Context, dashboardID int64, version int) error {
-	path := fmt.Sprintf("/api/dashboards/id/%d/restore", dashboardID)
+// RestoreDashboardVersion restores a dashboard to a specific version by UID.
+func (c *Client) RestoreDashboardVersion(ctx context.Context, uid string, version int) error {
+	path := fmt.Sprintf("/api/dashboards/uid/%s/restore", uid)
 	req := DashboardRestoreRequest{Version: version}
 	resp, err := c.Post(ctx, path, req)
 	if err != nil {

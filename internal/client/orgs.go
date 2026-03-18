@@ -128,7 +128,7 @@ func (c *Client) DeleteOrg(ctx context.Context, id int64) error {
 // GetCurrentOrg returns the current organization.
 func (c *Client) GetCurrentOrg(ctx context.Context) (*OrgDetail, error) {
 	var result OrgDetail
-	resp, err := c.Get(ctx, "/api/org/")
+	resp, err := c.Get(ctx, "/api/org")
 	if err != nil {
 		return nil, err
 	}

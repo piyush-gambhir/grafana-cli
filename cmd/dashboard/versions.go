@@ -13,8 +13,8 @@ import (
 
 func newCmdDashboardVersions(f *cmdutil.Factory) *cobra.Command {
 	var (
-		page  int
 		limit int
+		start int
 	)
 
 	cmd := &cobra.Command{
@@ -31,7 +31,7 @@ Examples:
   grafana dashboard versions abc123
 
   # Paginate results
-  grafana dashboard versions abc123 --page 1 --limit 10
+  grafana dashboard versions abc123 --limit 10 --start 5
 
   # Output as JSON
   grafana dashboard versions abc123 -o json`,
@@ -42,18 +42,7 @@ Examples:
 				return err
 			}
 
-			// First get the dashboard to obtain its numeric ID.
-			dash, err := c.GetDashboardByUID(context.Background(), args[0])
-			if err != nil {
-				return err
-			}
-
-			dashID, ok := dash.Dashboard["id"].(float64)
-			if !ok {
-				return fmt.Errorf("could not determine dashboard ID")
-			}
-
-			versions, err := c.GetDashboardVersions(context.Background(), int64(dashID), client.PageParams{Page: page, PerPage: limit})
+			versions, err := c.GetDashboardVersions(context.Background(), args[0], limit, start)
 			if err != nil {
 				return err
 			}
@@ -78,7 +67,8 @@ Examples:
 		},
 	}
 
-	cmdutil.AddPaginationFlags(cmd, &page, &limit)
+	cmd.Flags().IntVar(&limit, "limit", 100, "Maximum number of versions to return")
+	cmd.Flags().IntVar(&start, "start", 0, "Version ID to start from (for pagination)")
 
 	return cmd
 }

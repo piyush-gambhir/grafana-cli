@@ -12,7 +12,12 @@ import (
 )
 
 func newCmdAnnotationTags(f *cmdutil.Factory) *cobra.Command {
-	return &cobra.Command{
+	var (
+		tag   string
+		limit int64
+	)
+
+	cmd := &cobra.Command{
 		Use:   "tags",
 		Short: "List all annotation tags",
 		Long: `List all unique annotation tags with their usage counts.
@@ -21,16 +26,22 @@ Examples:
   # List all tags
   grafana annotation tags
 
+  # Filter by tag prefix
+  grafana annotation tags --tag deploy
+
+  # Limit results
+  grafana annotation tags --limit 10
+
   # Output as JSON
   grafana annotation tags -o json`,
-		Args:  cobra.NoArgs,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {
 				return err
 			}
 
-			result, err := c.GetAnnotationTags(context.Background())
+			result, err := c.GetAnnotationTags(context.Background(), tag, limit)
 			if err != nil {
 				return err
 			}
@@ -49,4 +60,9 @@ Examples:
 			})
 		},
 	}
+
+	cmd.Flags().StringVar(&tag, "tag", "", "Filter tags by prefix")
+	cmd.Flags().Int64Var(&limit, "limit", 0, "Maximum number of tags to return")
+
+	return cmd
 }
