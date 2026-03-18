@@ -4,6 +4,20 @@ A command-line interface for managing Grafana instances -- dashboards, datasourc
 
 Designed for both human operators and coding agents (LLMs). All commands support `--help` for detailed usage, and `-o json` / `-o yaml` for machine-readable output.
 
+[![Go Version](https://img.shields.io/github/go-mod/go-version/piyush-gambhir/grafana-cli)](https://go.dev/)
+[![Release](https://img.shields.io/github/v/release/piyush-gambhir/grafana-cli)](https://github.com/piyush-gambhir/grafana-cli/releases)
+[![License](https://img.shields.io/github/license/piyush-gambhir/grafana-cli)](LICENSE)
+[![CI](https://github.com/piyush-gambhir/grafana-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/piyush-gambhir/grafana-cli/actions/workflows/ci.yml)
+
+## Features
+
+- Full API coverage — every Grafana API endpoint accessible from the command line
+- Multiple output formats — table, JSON, YAML (`-o json`)
+- Profile management — multiple instances with `--profile`
+- Auto-update — checks for new versions, `grafana update` to self-update
+- Agent-friendly — comprehensive help text, structured output for LLM coding agents
+- Cross-platform — macOS, Linux, Windows (amd64 and arm64)
+
 ## Installation
 
 ```bash
@@ -16,6 +30,20 @@ go install github.com/piyush-gambhir/grafana-cli@latest
 # From source
 git clone https://github.com/piyush-gambhir/grafana-cli.git
 cd grafana-cli && make install
+```
+
+## Quick Start
+
+```bash
+# Install
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | sh
+
+# Authenticate
+grafana login
+
+# Start using
+grafana dashboard list
+grafana dashboard get <uid> -o json
 ```
 
 ## Authentication
@@ -1213,6 +1241,20 @@ Commands that accept `--file/-f` support:
 - JSON files (`.json`)
 - YAML files (`.yaml`, `.yml`)
 - Stdin (use `-f -` and pipe input)
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Agent Skills
+
+This CLI ships with an agent skill for coding agents (Claude, Cursor, Copilot, etc.):
+
+```bash
+npx skills add piyush-gambhir/grafana-cli@grafana
+```
+
+Once installed, coding agents automatically know how to use this CLI effectively.
 
 ## License
 
