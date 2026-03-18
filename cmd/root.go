@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"sync"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -44,9 +44,73 @@ var (
 	flagVerbose  bool
 )
 
+// OutputFormat is set during PersistentPreRunE and exported for use by main.go.
+var OutputFormat string
+
 // Execute is the main entry point for the CLI.
 func Execute() error {
 	return newRootCmd().Execute()
+}
+
+// loadAndResolveConfig loads the config file and resolves auth from flags/env/config.
+func loadAndResolveConfig(cmd *cobra.Command) (*config.ResolvedConfig, *config.Config, error) {
+	cfg, err := config.Load()
+	if err != nil {
+		return nil, nil, fmt.Errorf("loading config: %w", err)
+	}
+
+	// Determine which profile to use.
+	profileName := flagProfile
+	if profileName == "" {
+		profileName = cfg.CurrentProfile
+	}
+	var profile *config.Profile
+	if profileName != "" {
+		p, ok := cfg.Profiles[profileName]
+		if ok {
+			profile = &p
+		}
+	}
+
+	// Determine output format.
+	output := flagOutput
+	if output == "" {
+		output = cfg.Defaults.Output
+	}
+
+	// Resolve configuration.
+	resolved := config.Resolve(flagURL, flagToken, flagUsername, flagPassword, flagOrgID, profile, cfg.Defaults)
+	if output != "" {
+		resolved.Output = output
+	}
+
+	return resolved, cfg, nil
+}
+
+// createClient sets up the HTTP client factory on the factory.
+func createClient(f *cmdutil.Factory, resolved *config.ResolvedConfig) {
+	f.Client = func() (*client.Client, error) {
+		c, err := client.NewClient(resolved)
+		if err != nil {
+			return nil, err
+		}
+		if flagVerbose {
+			c.EnableVerboseLogging(f.IOStreams.ErrOut)
+		}
+		return c, nil
+	}
+}
+
+// checkPermissions enforces read-only and no-input checks.
+func checkPermissions(cmd *cobra.Command, resolved *config.ResolvedConfig) error {
+	effectiveReadOnly := resolved.ReadOnly // from env > config
+	if cmd.Flags().Changed("read-only") {
+		effectiveReadOnly = flagReadOnly
+	}
+	if effectiveReadOnly && cmd.Annotations != nil && cmd.Annotations["mutates"] == "true" {
+		return fmt.Errorf("command '%s' is blocked in read-only mode.\nTo disable, use --read-only=false or remove read_only from your config profile.", cmd.CommandPath())
+	}
+	return nil
 }
 
 func newRootCmd() *cobra.Command {
@@ -54,10 +118,8 @@ func newRootCmd() *cobra.Command {
 		IOStreams: cmdutil.DefaultIOStreams(),
 	}
 
-	// Used to pass update check result from PersistentPreRun to PersistentPostRun.
-	var updateInfo *update.UpdateInfo
-	var updateMu sync.Mutex
-	var updateWg sync.WaitGroup
+	// Channel-based update check result passing from PersistentPreRun to PersistentPostRun.
+	var updateResult chan *update.UpdateInfo
 
 	rootCmd := &cobra.Command{
 		Use:   "grafana",
@@ -84,15 +146,10 @@ func newRootCmd() *cobra.Command {
 			cmdName := cmd.Name()
 			skipUpdateCheck := cmdName == "update" || cmdName == "version" || cmdName == "completion" || cmdName == "help"
 			if !skipUpdateCheck && build.Version != "dev" && build.Version != "" {
-				updateWg.Add(1)
+				updateResult = make(chan *update.UpdateInfo, 1)
 				go func() {
-					defer updateWg.Done()
-					info, err := update.CheckForUpdate(build.Version, updateRepo, config.ConfigDir())
-					if err == nil && info != nil && info.Available {
-						updateMu.Lock()
-						updateInfo = info
-						updateMu.Unlock()
-					}
+					info, _ := update.CheckForUpdate(build.Version, updateRepo, config.ConfigDir())
+					updateResult <- info
 				}()
 			}
 
@@ -105,71 +162,35 @@ func newRootCmd() *cobra.Command {
 				return nil
 			}
 
-			cfg, err := config.Load()
+			resolved, cfg, err := loadAndResolveConfig(cmd)
 			if err != nil {
-				return fmt.Errorf("loading config: %w", err)
+				return err
 			}
 
-			// Determine which profile to use.
-			profileName := flagProfile
-			if profileName == "" {
-				profileName = cfg.CurrentProfile
-			}
-			var profile *config.Profile
-			if profileName != "" {
-				p, ok := cfg.Profiles[profileName]
-				if ok {
-					profile = &p
-				}
-			}
+			// Set exported OutputFormat for use by main.go error handler.
+			OutputFormat = resolved.Output
 
-			// Determine output format.
-			output := flagOutput
-			if output == "" {
-				output = cfg.Defaults.Output
-			}
-
-			// Resolve configuration.
-			resolved := config.Resolve(flagURL, flagToken, flagUsername, flagPassword, flagOrgID, profile, cfg.Defaults)
-			if output != "" {
-				resolved.Output = output
-			}
 			f.Resolved = resolved
 
 			f.Config = func() (*config.Config, error) {
 				return cfg, nil
 			}
 
-			f.Client = func() (*client.Client, error) {
-				c, err := client.NewClient(resolved)
-				if err != nil {
-					return nil, err
-				}
-				if flagVerbose {
-					c.EnableVerboseLogging(f.IOStreams.ErrOut)
-				}
-				return c, nil
-			}
+			createClient(f, resolved)
 
-			// Read-only enforcement
-			effectiveReadOnly := resolved.ReadOnly // from env > config
-			if cmd.Flags().Changed("read-only") {
-				effectiveReadOnly = flagReadOnly
-			}
-			if effectiveReadOnly && cmd.Annotations != nil && cmd.Annotations["mutates"] == "true" {
-				return fmt.Errorf("command '%s' is blocked in read-only mode.\nTo disable, use --read-only=false or remove read_only from your config profile.", cmd.CommandPath())
-			}
-
-			return nil
+			return checkPermissions(cmd, resolved)
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
-			// Wait for the background update check to complete, then print notice.
-			updateWg.Wait()
-			updateMu.Lock()
-			info := updateInfo
-			updateMu.Unlock()
-			if info != nil && info.Available {
-				update.PrintUpdateNotice(os.Stderr, info)
+			if updateResult == nil {
+				return
+			}
+			select {
+			case info := <-updateResult:
+				if info != nil && info.Available {
+					update.PrintUpdateNotice(os.Stderr, info)
+				}
+			case <-time.After(2 * time.Second):
+				// Don't block command output waiting for update check.
 			}
 		},
 	}

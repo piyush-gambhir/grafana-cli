@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/piyush-gambhir/grafana-cli/cmd"
@@ -10,21 +11,16 @@ import (
 
 func main() {
 	if err := cmd.Execute(); err != nil {
-		// Determine output format from flags/env.
-		format := os.Getenv("GRAFANA_OUTPUT")
-		for i, arg := range os.Args {
-			if (arg == "-o" || arg == "--output") && i+1 < len(os.Args) {
-				format = os.Args[i+1]
-				break
-			}
-		}
-
 		statusCode := 0
 		if apiErr, ok := err.(*client.APIError); ok {
 			statusCode = apiErr.StatusCode
 		}
 
-		output.WriteError(os.Stderr, format, err, statusCode)
+		if cmd.OutputFormat == "json" {
+			output.WriteError(os.Stderr, "json", err, statusCode)
+		} else {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		}
 		os.Exit(1)
 	}
 }

@@ -7,6 +7,29 @@ import (
 	"time"
 )
 
+// authHeaders is the set of headers that contain secrets and must be redacted.
+var authHeaders = map[string]bool{
+	"Authorization": true,
+	"Cookie":        true,
+	"Set-Cookie":    true,
+	"X-Api-Key":     true,
+}
+
+// redactAuthHeaders returns a shallow copy of the header map with auth-sensitive
+// headers replaced by "[REDACTED]". Non-secret headers (X-Request-Id,
+// X-Ratelimit-*, Content-Type, X-Grafana-Org-Id, etc.) are kept intact.
+func redactAuthHeaders(h http.Header) http.Header {
+	redacted := make(http.Header, len(h))
+	for key, values := range h {
+		if authHeaders[key] {
+			redacted[key] = []string{"[REDACTED]"}
+		} else {
+			redacted[key] = values
+		}
+	}
+	return redacted
+}
+
 // verboseTransport wraps an http.RoundTripper and logs requests/responses to stderr.
 type verboseTransport struct {
 	inner  http.RoundTripper
@@ -19,14 +42,10 @@ func (t *verboseTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	// Log request.
 	fmt.Fprintf(t.output, "--> %s %s\n", req.Method, req.URL.String())
 
-	// Log headers, redacting Authorization.
-	for key, values := range req.Header {
+	// Log headers with auth secrets redacted.
+	for key, values := range redactAuthHeaders(req.Header) {
 		for _, v := range values {
-			if key == "Authorization" {
-				fmt.Fprintf(t.output, "    %s: [REDACTED]\n", key)
-			} else {
-				fmt.Fprintf(t.output, "    %s: %s\n", key, v)
-			}
+			fmt.Fprintf(t.output, "    %s: %s\n", key, v)
 		}
 	}
 
@@ -37,6 +56,14 @@ func (t *verboseTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	}
 
 	fmt.Fprintf(t.output, "<-- %d %s (%s)\n", resp.StatusCode, http.StatusText(resp.StatusCode), time.Since(start).Round(time.Millisecond))
+
+	// Log response headers with auth secrets redacted.
+	for key, values := range redactAuthHeaders(resp.Header) {
+		for _, v := range values {
+			fmt.Fprintf(t.output, "    %s: %s\n", key, v)
+		}
+	}
+
 	return resp, nil
 }
 

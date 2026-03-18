@@ -49,10 +49,19 @@ func (r *Response) JSON(v interface{}) error {
 }
 
 // Error checks if the response indicates an error and returns an APIError.
+// It always closes the response body to prevent leaks.
 func (r *Response) Error() error {
+	defer r.HTTPResponse.Body.Close()
+
 	if r.HTTPResponse.StatusCode >= 400 {
-		defer r.HTTPResponse.Body.Close()
-		body, _ := io.ReadAll(r.HTTPResponse.Body)
+		body, err := io.ReadAll(r.HTTPResponse.Body)
+		if err != nil {
+			return &APIError{
+				StatusCode: r.HTTPResponse.StatusCode,
+				Message:    fmt.Sprintf("failed to read error body: %v", err),
+				URL:        r.RequestURL,
+			}
+		}
 		msg := string(body)
 		var apiMsg struct {
 			Message string `json:"message"`

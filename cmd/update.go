@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"archive/tar"
+	"bufio"
 	"compress/gzip"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
@@ -108,6 +111,18 @@ func performUpdate(w io.Writer, version string) error {
 	archivePath := filepath.Join(tmpDir, "grafana-cli.tar.gz")
 	if err := downloadFile(archivePath, downloadURL); err != nil {
 		return fmt.Errorf("downloading update: %w", err)
+	}
+
+	// Download and verify SHA256 checksum.
+	checksumURL := fmt.Sprintf(
+		"https://github.com/%s/releases/download/v%s/checksums.txt",
+		updateRepo, version,
+	)
+	archiveFilename := fmt.Sprintf("grafana-cli_%s_%s.tar.gz", osName, archName)
+
+	fmt.Fprintf(w, "Verifying checksum...\n")
+	if err := verifyChecksum(archivePath, checksumURL, archiveFilename); err != nil {
+		return fmt.Errorf("checksum verification failed: %w", err)
 	}
 
 	fmt.Fprintf(w, "Extracting...\n")
@@ -264,6 +279,59 @@ func atomicReplace(src, dst string) error {
 
 	// Clear tmpPath so the deferred cleanup doesn't remove the installed binary.
 	tmpPath = ""
+	return nil
+}
+
+// verifyChecksum downloads checksums.txt from the release, finds the expected
+// SHA256 for the given filename, and compares it against the actual file hash.
+func verifyChecksum(filePath, checksumURL, expectedFilename string) error {
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Get(checksumURL)
+	if err != nil {
+		return fmt.Errorf("downloading checksums: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("checksums download failed with status %d", resp.StatusCode)
+	}
+
+	// Parse checksums.txt to find the expected hash.
+	// Format: "<sha256>  <filename>"
+	var expectedHash string
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Fields(line)
+		if len(parts) == 2 && parts[1] == expectedFilename {
+			expectedHash = parts[0]
+			break
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("reading checksums: %w", err)
+	}
+	if expectedHash == "" {
+		return fmt.Errorf("no checksum found for %s in checksums.txt", expectedFilename)
+	}
+
+	// Compute SHA256 of the downloaded file.
+	f, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("opening file for checksum: %w", err)
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return fmt.Errorf("computing checksum: %w", err)
+	}
+	actualHash := hex.EncodeToString(h.Sum(nil))
+
+	if !strings.EqualFold(actualHash, expectedHash) {
+		return fmt.Errorf("SHA256 mismatch: expected %s, got %s", expectedHash, actualHash)
+	}
+
 	return nil
 }
 

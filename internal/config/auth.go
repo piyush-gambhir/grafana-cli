@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -49,14 +50,8 @@ func Resolve(flagURL, flagToken, flagUsername, flagPassword string, flagOrgID in
 	// OrgID
 	if flagOrgID > 0 {
 		rc.OrgID = flagOrgID
-	} else if envOrgID := os.Getenv("GRAFANA_ORG_ID"); envOrgID != "" {
-		var id int64
-		for _, c := range envOrgID {
-			if c >= '0' && c <= '9' {
-				id = id*10 + int64(c-'0')
-			}
-		}
-		if id > 0 {
+	} else if v := os.Getenv("GRAFANA_ORG_ID"); v != "" {
+		if id, err := strconv.ParseInt(v, 10, 64); err == nil {
 			rc.OrgID = id
 		}
 	} else if profile != nil {
