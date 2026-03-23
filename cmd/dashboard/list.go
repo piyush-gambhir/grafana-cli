@@ -87,7 +87,7 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVarP(&query, "query", "q", "", "Search query")
+	cmd.Flags().StringVar(&query, "query", "", "Search query")
 	cmd.Flags().StringVarP(&tag, "tag", "t", "", "Filter by tag")
 	cmd.Flags().StringVar(&folderUID, "folder", "", "Filter by folder UID")
 	cmdutil.AddPaginationFlags(cmd, &page, &limit)

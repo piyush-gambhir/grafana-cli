@@ -46,12 +46,12 @@ Examples:
 				return err
 			}
 
-			if len(result.Result) == 0 {
+			if len(result.Result.Tags) == 0 {
 				fmt.Fprintln(f.IOStreams.Out, "No annotation tags found.")
 				return nil
 			}
 
-			return output.Print(f.IOStreams.Out, f.Resolved.Output, result.Result, &output.TableDef{
+			return output.Print(f.IOStreams.Out, f.Resolved.Output, result.Result.Tags, &output.TableDef{
 				Headers: []string{"Tag", "Count"},
 				RowFunc: func(item interface{}) []string {
 					t := item.(client.AnnotationTag)

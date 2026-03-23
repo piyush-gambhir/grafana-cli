@@ -64,7 +64,7 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVarP(&query, "query", "q", "", "Search query")
+	cmd.Flags().StringVar(&query, "query", "", "Search query")
 	cmd.Flags().IntVar(&limit, "limit", 0, "Maximum number of playlists to return (0 = all)")
 
 	return cmd

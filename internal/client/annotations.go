@@ -52,7 +52,9 @@ type AnnotationUpdateRequest struct {
 
 // AnnotationTagsResult represents the result of listing annotation tags.
 type AnnotationTagsResult struct {
-	Result []AnnotationTag `json:"result"`
+	Result struct {
+		Tags []AnnotationTag `json:"tags"`
+	} `json:"result"`
 }
 
 // AnnotationTag represents a tag with its count.

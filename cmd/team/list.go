@@ -69,7 +69,7 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVarP(&query, "query", "q", "", "Search query")
+	cmd.Flags().StringVar(&query, "query", "", "Search query")
 	cmdutil.AddPaginationFlags(cmd, &page, &limit)
 
 	return cmd

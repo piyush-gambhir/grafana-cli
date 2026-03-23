@@ -104,7 +104,7 @@ Examples:
 	}
 
 	cmd.Flags().StringVar(&role, "role", "", "Filter by role (Viewer, Editor, Admin)")
-	cmd.Flags().StringVarP(&query, "query", "q", "", "Search by login, email, or name")
+	cmd.Flags().StringVar(&query, "query", "", "Search by login, email, or name")
 
 	return cmd
 }
