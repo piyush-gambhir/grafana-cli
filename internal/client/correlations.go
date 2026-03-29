@@ -54,15 +54,15 @@ type CorrelationsResponse struct {
 
 // ListCorrelations returns all correlations.
 func (c *Client) ListCorrelations(ctx context.Context) ([]Correlation, error) {
-	var results []Correlation
+	var result CorrelationsResponse
 	resp, err := c.Get(ctx, "/api/datasources/correlations")
 	if err != nil {
 		return nil, err
 	}
-	if err := resp.JSON(&results); err != nil {
+	if err := resp.JSON(&result); err != nil {
 		return nil, err
 	}
-	return results, nil
+	return result.Correlations, nil
 }
 
 // GetCorrelation returns a correlation by source UID and correlation UID.

@@ -91,7 +91,7 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVarP(&search, "search", "q", "", "Search string for element name")
+	cmd.Flags().StringVar(&search, "search", "", "Search string for element name")
 	cmd.Flags().IntVar(&kind, "kind", 0, "Kind filter (1=panel, 2=variable)")
 	cmd.Flags().StringVar(&folderFilter, "folder", "", "Filter by folder name")
 	cmdutil.AddPaginationFlags(cmd, &page, &limit)

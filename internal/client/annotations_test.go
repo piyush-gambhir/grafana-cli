@@ -174,9 +174,13 @@ func TestGetAnnotationTags(t *testing.T) {
 			t.Errorf("expected limit=10, got %s", r.URL.Query().Get("limit"))
 		}
 		json.NewEncoder(w).Encode(AnnotationTagsResult{
-			Result: []AnnotationTag{
-				{Tag: "deploy", Count: 15},
-				{Tag: "deploy:production", Count: 8},
+			Result: struct {
+				Tags []AnnotationTag `json:"tags"`
+			}{
+				Tags: []AnnotationTag{
+					{Tag: "deploy", Count: 15},
+					{Tag: "deploy:production", Count: 8},
+				},
 			},
 		})
 	}))
@@ -187,13 +191,13 @@ func TestGetAnnotationTags(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(result.Result) != 2 {
-		t.Fatalf("expected 2 tags, got %d", len(result.Result))
+	if len(result.Result.Tags) != 2 {
+		t.Fatalf("expected 2 tags, got %d", len(result.Result.Tags))
 	}
-	if result.Result[0].Tag != "deploy" {
-		t.Errorf("got tag %q, want %q", result.Result[0].Tag, "deploy")
+	if result.Result.Tags[0].Tag != "deploy" {
+		t.Errorf("got tag %q, want %q", result.Result.Tags[0].Tag, "deploy")
 	}
-	if result.Result[0].Count != 15 {
-		t.Errorf("got count %d, want %d", result.Result[0].Count, 15)
+	if result.Result.Tags[0].Count != 15 {
+		t.Errorf("got count %d, want %d", result.Result.Tags[0].Count, 15)
 	}
 }

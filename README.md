@@ -292,6 +292,31 @@ grafana datasource delete P1234
 grafana datasource delete P1234 --confirm
 ```
 
+#### `grafana datasource query <uid>`
+
+Query a Loki or Prometheus datasource through Grafana's datasource proxy API. The datasource type is auto-detected from its UID.
+
+```bash
+# Query Loki logs
+grafana datasource query <loki-uid> --expr '{job="api-server"}' --last 1h
+grafana datasource query <loki-uid> --expr '{job="api"} |= "error"' --last 30m -o json
+
+# Query Prometheus metrics
+grafana datasource query <prom-uid> --expr 'up' --query-type instant -o json
+grafana datasource query <prom-uid> --expr 'rate(http_requests_total[5m])' --last 1h --step 30s -o json
+```
+
+| Flag | Description |
+|------|-------------|
+| `--expr`, `-e` | Query expression (LogQL or PromQL). Required. |
+| `--last` | Lookback duration, e.g. `1h`, `30m` (default `1h`) |
+| `--from` | Start time (RFC3339 or Unix epoch). Overrides `--last`. |
+| `--to` | End time (RFC3339 or Unix epoch). Defaults to now. |
+| `--limit` | Max log entries (Loki only, default `100`) |
+| `--direction` | Log ordering: `backward` (default) or `forward` (Loki only) |
+| `--step` | Query resolution step, e.g. `15s` (Prometheus range queries only) |
+| `--query-type` | `range` (default) or `instant` |
+
 ---
 
 ### Folder

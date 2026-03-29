@@ -20,6 +20,7 @@ func NewCmdDatasource(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(newCmdDatasourceCreate(f))
 	cmd.AddCommand(newCmdDatasourceUpdate(f))
 	cmd.AddCommand(newCmdDatasourceDelete(f))
+	cmd.AddCommand(newCmdDatasourceQuery(f))
 
 	return cmd
 }

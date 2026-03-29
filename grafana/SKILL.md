@@ -1,6 +1,6 @@
 ---
 name: grafana
-description: "Expert guide for using the grafana CLI to manage Grafana instances. Use this skill whenever the user mentions Grafana dashboards, datasources, alerts, alert rules, contact points, silences, mute timings, notification policies, notification templates, organizations, teams, users, service accounts, API tokens, annotations, snapshots, playlists, library elements, correlations, folders, preferences, or Grafana admin operations. Also trigger when the user wants to query Grafana, search dashboards, export or import dashboards, manage Grafana permissions, set up monitoring, configure alerting, create or manage service account tokens, mark deployments with annotations, automate any Grafana operations from the command line, back up or restore dashboards, manage Grafana org users, switch Grafana orgs, reload provisioning, or check Grafana server stats. This skill provides the exact CLI commands, flags, and workflows needed to accomplish any Grafana management task."
+description: "Expert guide for using the grafana CLI to manage Grafana instances. Use this skill whenever the user mentions Grafana dashboards, datasources, alerts, alert rules, contact points, silences, mute timings, notification policies, notification templates, organizations, teams, users, service accounts, API tokens, annotations, snapshots, playlists, library elements, correlations, folders, preferences, or Grafana admin operations. Also trigger when the user wants to query Grafana, search dashboards, export or import dashboards, manage Grafana permissions, set up monitoring, configure alerting, create or manage service account tokens, mark deployments with annotations, automate any Grafana operations from the command line, back up or restore dashboards, manage Grafana org users, switch Grafana orgs, reload provisioning, check Grafana server stats, query Loki logs, query Prometheus metrics, or run LogQL/PromQL queries through Grafana datasource proxy. This skill provides the exact CLI commands, flags, and workflows needed to accomplish any Grafana management task."
 ---
 
 # Grafana CLI Skill
@@ -152,6 +152,37 @@ grafana datasource update <id> -f updated-ds.json
 # Delete a datasource
 grafana datasource delete <uid> --confirm
 ```
+
+### Query datasources (Loki / Prometheus)
+
+```bash
+# Query Loki logs (auto-detects datasource type from UID)
+grafana datasource query <loki-uid> --expr '{job="my-service"}' --last 1h -o json
+
+# Search for errors in the last 30 minutes
+grafana datasource query <loki-uid> --expr '{job="my-service"} |= "error"' --last 30m -o json
+
+# Limit results and control ordering
+grafana datasource query <loki-uid> --expr '{job="api"}' --last 1h --limit 50 --direction forward -o json
+
+# Query Prometheus metrics (instant)
+grafana datasource query <prom-uid> --expr 'up' --query-type instant -o json
+
+# Prometheus range query with step
+grafana datasource query <prom-uid> --expr 'rate(http_requests_total[5m])' --last 1h --step 30s -o json
+
+# Absolute time range
+grafana datasource query <loki-uid> --expr '{job="api"}' --from 2026-01-01T00:00:00Z --to 2026-01-01T01:00:00Z -o json
+```
+
+**Flags:**
+- `--expr` / `-e` — Query expression (LogQL for Loki, PromQL for Prometheus). Required.
+- `--last` — Lookback duration (default `1h`). Ignored if `--from` is set.
+- `--from` / `--to` — Absolute time range (RFC3339 or Unix epoch).
+- `--limit` — Max entries (Loki only, default 100).
+- `--direction` — `backward` (newest first, default) or `forward` (Loki only).
+- `--step` — Resolution step for Prometheus range queries (e.g. `15s`, `1m`).
+- `--query-type` — `range` (default) or `instant`.
 
 ### Manage folders
 
