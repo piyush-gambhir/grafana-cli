@@ -122,14 +122,89 @@ func queryLoki(ctx context.Context, c *client.Client, f *cmdutil.Factory, uid, q
 		return fmt.Errorf("loki query failed with status: %s", result.Status)
 	}
 
-	// For JSON/YAML, output the raw response.
+	// JSON/YAML output: emit a shape-aware envelope so consumers can
+	// distinguish streams (log lines) from vector/matrix (sample series).
+	// Without this, callers parsing .data.result generically got either a
+	// crash (vector → expected []LokiStream of strings) or a silently
+	// stripped payload.
 	if f.Resolved.Output != "table" && f.Resolved.Output != "" {
-		return output.Print(f.IOStreams.Out, f.Resolved.Output, result, nil)
+		envelope, err := lokiJSONEnvelope(result)
+		if err != nil {
+			return err
+		}
+		return output.Print(f.IOStreams.Out, f.Resolved.Output, envelope, nil)
 	}
 
-	// Flatten streams into rows for table output.
+	// Table output is shape-specific.
+	switch result.Data.ResultType {
+	case "streams", "":
+		return renderLokiStreams(f, result)
+	case "vector", "matrix":
+		return renderLokiSamples(f, result)
+	default:
+		return fmt.Errorf("loki returned unsupported resultType %q", result.Data.ResultType)
+	}
+}
+
+// lokiJSONEnvelope decodes the shape-specific result and returns a struct
+// suitable for JSON/YAML serialization with stable field names.
+func lokiJSONEnvelope(r *client.LokiQueryResponse) (interface{}, error) {
+	switch r.Data.ResultType {
+	case "streams", "":
+		streams, err := r.Data.Streams()
+		if err != nil {
+			// Fall back to empty so we still emit a well-formed envelope.
+			streams = nil
+		}
+		return struct {
+			Status string `json:"status"`
+			Data   struct {
+				ResultType string              `json:"resultType"`
+				Result     []client.LokiStream `json:"result"`
+			} `json:"data"`
+		}{
+			Status: r.Status,
+			Data: struct {
+				ResultType string              `json:"resultType"`
+				Result     []client.LokiStream `json:"result"`
+			}{ResultType: r.Data.ResultType, Result: streams},
+		}, nil
+	case "vector", "matrix":
+		var samples []client.PrometheusResult
+		var err error
+		if r.Data.ResultType == "vector" {
+			samples, err = r.Data.Vector()
+		} else {
+			samples, err = r.Data.Matrix()
+		}
+		if err != nil {
+			samples = nil
+		}
+		return struct {
+			Status string `json:"status"`
+			Data   struct {
+				ResultType string                     `json:"resultType"`
+				Result     []client.PrometheusResult  `json:"result"`
+			} `json:"data"`
+		}{
+			Status: r.Status,
+			Data: struct {
+				ResultType string                    `json:"resultType"`
+				Result     []client.PrometheusResult `json:"result"`
+			}{ResultType: r.Data.ResultType, Result: samples},
+		}, nil
+	default:
+		return nil, fmt.Errorf("loki returned unsupported resultType %q", r.Data.ResultType)
+	}
+}
+
+func renderLokiStreams(f *cmdutil.Factory, result *client.LokiQueryResponse) error {
+	streams, err := result.Data.Streams()
+	if err != nil {
+		return err
+	}
 	var rows []queryResultRow
-	for _, stream := range result.Data.Result {
+	for _, stream := range streams {
 		labels := formatLabels(stream.Stream)
 		for _, entry := range stream.Values {
 			if len(entry) < 2 {
@@ -143,12 +218,10 @@ func queryLoki(ctx context.Context, c *client.Client, f *cmdutil.Factory, uid, q
 			})
 		}
 	}
-
 	if len(rows) == 0 {
 		fmt.Fprintln(f.IOStreams.Out, "No results found.")
 		return nil
 	}
-
 	return output.Print(f.IOStreams.Out, "table", rows, &output.TableDef{
 		Headers: []string{"Timestamp", "Labels", "Line"},
 		RowFunc: func(item interface{}) []string {
@@ -158,6 +231,51 @@ func queryLoki(ctx context.Context, c *client.Client, f *cmdutil.Factory, uid, q
 				line = line[:200] + "..."
 			}
 			return []string{r.Timestamp, r.Labels, line}
+		},
+	})
+}
+
+func renderLokiSamples(f *cmdutil.Factory, result *client.LokiQueryResponse) error {
+	var samples []client.PrometheusResult
+	var err error
+	if result.Data.ResultType == "vector" {
+		samples, err = result.Data.Vector()
+	} else {
+		samples, err = result.Data.Matrix()
+	}
+	if err != nil {
+		return err
+	}
+	var rows []queryResultRow
+	for _, r := range samples {
+		labels := formatLabels(r.Metric)
+		if r.Value != nil && len(r.Value) >= 2 {
+			rows = append(rows, queryResultRow{
+				Timestamp: formatPromTimestamp(r.Value[0]),
+				Labels:    labels,
+				Value:     fmt.Sprintf("%v", r.Value[1]),
+			})
+		}
+		for _, v := range r.Values {
+			if len(v) < 2 {
+				continue
+			}
+			rows = append(rows, queryResultRow{
+				Timestamp: formatPromTimestamp(v[0]),
+				Labels:    labels,
+				Value:     fmt.Sprintf("%v", v[1]),
+			})
+		}
+	}
+	if len(rows) == 0 {
+		fmt.Fprintln(f.IOStreams.Out, "No results found.")
+		return nil
+	}
+	return output.Print(f.IOStreams.Out, "table", rows, &output.TableDef{
+		Headers: []string{"Metric", "Timestamp", "Value"},
+		RowFunc: func(item interface{}) []string {
+			r := item.(queryResultRow)
+			return []string{r.Labels, r.Timestamp, r.Value}
 		},
 	})
 }
