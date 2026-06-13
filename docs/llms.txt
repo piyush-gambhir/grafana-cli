@@ -1,0 +1,863 @@
+# Grafana CLI
+
+> An independent, open-source command-line interface (binary name `grafana`) for managing Grafana instances — dashboards, datasources, folders, alerting, organizations, teams, users, service accounts, annotations, snapshots, playlists, library elements, correlations, preferences, and server admin — built for both human operators and AI coding agents, with table/JSON/YAML output on every command.
+
+This is the canonical, machine-readable manual for the Grafana CLI. It is intended to fully describe the tool so an LLM or coding agent can drive it correctly with zero prior knowledge. Everything below reflects the actual command source.
+
+## About
+
+The Grafana CLI talks to the standard Grafana HTTP API. It wraps the API surface as Cobra commands so you can manage Grafana from a terminal, a script, or an agent.
+
+- **Independent / unofficial.** This is a third-party project (`github.com/piyush-gambhir/grafana-cli`). It is NOT affiliated with, endorsed by, or maintained by Grafana Labs. "Grafana" is a trademark of Grafana Labs. Note that Grafana Labs also ships a built-in administrative binary historically called `grafana-cli` (and the `grafana cli` subcommand) for plugin/admin tasks on a Grafana server — this project is a different, separate tool that talks to the HTTP API of a running Grafana instance.
+- **Binary name:** `grafana`.
+- **Supported platforms:** macOS, Linux, and Windows, on `amd64` and `arm64` (Windows `arm64` is not built). Single static Go binary, no runtime dependencies.
+- **Written in Go** (module `github.com/piyush-gambhir/grafana-cli`, Go 1.22, using `spf13/cobra`).
+- **Designed for agents:** comprehensive `--help` on every command, structured `-o json` output, idempotency flags (`--if-not-exists`, `--if-exists`), a non-interactive mode (`--no-input`), and a safety mode (`--read-only`).
+
+## Links
+
+- Home: https://grafana-cli.pages.dev/
+- Source: https://github.com/piyush-gambhir/grafana-cli
+- Issues: https://github.com/piyush-gambhir/grafana-cli/issues
+- Privacy: https://grafana-cli.pages.dev/privacy-policy
+- Terms: https://grafana-cli.pages.dev/terms-of-service
+- Contact: https://grafana-cli.pages.dev/contact
+
+## Install
+
+### curl (recommended)
+
+Downloads the latest release binary for your OS/arch and installs it (default to `/usr/local/bin`):
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | sh
+```
+
+Install a specific version:
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | VERSION=0.1.0 sh
+```
+
+Install to a custom directory (e.g. when you do not have root):
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | INSTALL_DIR=~/.local/bin sh
+```
+
+The installer requires `curl` and `tar`. It detects OS (`linux`/`darwin`) and arch (`amd64`/`arm64`), downloads `grafana-cli_<os>_<arch>.tar.gz` from GitHub Releases, and places the `grafana` binary in `INSTALL_DIR` (using `sudo` if that directory is not writable).
+
+### go install
+
+```bash
+go install github.com/piyush-gambhir/grafana-cli@latest
+```
+
+### From source
+
+```bash
+git clone https://github.com/piyush-gambhir/grafana-cli.git
+cd grafana-cli && make install
+```
+
+### Self-update
+
+Once installed from a release, the binary can update itself in place (downloads the matching release tarball, verifies its SHA256 against `checksums.txt`, and atomically replaces the running binary):
+
+```bash
+grafana update            # check, prompt, and install the latest release
+grafana update --check    # only report whether an update is available
+```
+
+Self-update is disabled for `dev` builds (built from source without release version info). Prebuilt releases also print a one-line update notice to stderr when a newer version exists (this background check is skipped for `update`, `version`, `completion`, and `help`).
+
+## Authentication
+
+The CLI authenticates to Grafana with one of two methods. You can supply credentials interactively (saved to a profile), via environment variables, or via per-command flags.
+
+### Auth methods
+
+1. **API token / service account token (recommended).** A Grafana service account token (starts with `glsa_`) or a legacy API key (starts with `eyJ`). Sent as a bearer token. Use `--token` / `GRAFANA_TOKEN` / `profiles.<name>.token`. Service account tokens bypass external identity providers (OAuth/SAML/LDAP) and are the right choice for SSO-protected instances and CI.
+2. **Basic auth (username + password).** A Grafana username and password. Use `--username`/`--password`, `GRAFANA_USERNAME`/`GRAFANA_PASSWORD`, or `profiles.<name>.username`/`password`. Will not work if the instance has disabled the built-in login form (e.g. SSO-only). Stored in plain text in the config file.
+
+There is no OAuth/SSO browser flow and no AWS SigV4 / IAM auth. For Grafana Cloud, Amazon Managed Grafana, and Azure Managed Grafana, create an instance-level service account token (not a Grafana.com Cloud API key) and use it as `GRAFANA_TOKEN`.
+
+### Log in interactively
+
+```bash
+grafana login
+```
+
+Prompts for, in order:
+
+```
+Grafana URL:            https://grafana.example.com
+Auth method (token/basic) [token]:   token
+API Token:              glsa_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# (or, if you chose "basic": Username: / Password:)
+```
+
+It then tests the connection (calls `GET /api/org/`, falling back to `GET /api/health`), prompts for a profile name (default `default`), saves the profile to the config file, and sets it as the current profile. `grafana login` requires a TTY; it fails if `--no-input` (or `GRAFANA_NO_INPUT`) is set — use environment variables or flags for non-interactive contexts instead.
+
+### Environment variables
+
+| Variable | Purpose |
+|---|---|
+| `GRAFANA_URL` | Grafana instance base URL (include any subpath, e.g. `https://example.com/grafana`) |
+| `GRAFANA_TOKEN` | Service account token or API key (bearer auth) |
+| `GRAFANA_USERNAME` | Username for basic auth |
+| `GRAFANA_PASSWORD` | Password for basic auth |
+| `GRAFANA_ORG_ID` | Organization ID (sets the `X-Grafana-Org-Id` context) |
+| `GRAFANA_READ_ONLY` | If `true` or `1`, block all mutating commands |
+| `GRAFANA_NO_INPUT` | If set (any non-empty value), disable interactive prompts |
+| `GRAFANA_QUIET` | If set (any non-empty value), suppress informational output |
+| `GRAFANA_VERBOSE` | If set (any non-empty value), enable verbose HTTP logging to stderr |
+| `XDG_CONFIG_HOME` | Overrides the base config directory (see Configuration) |
+
+Go-standard certificate variables are also honored: `SSL_CERT_FILE` / `SSL_CERT_DIR` (for custom CA bundles / self-signed certificates). Note: the CLI builds its own HTTP transport without `http.ProxyFromEnvironment`, so the `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` variables are NOT honored — connections always go direct.
+
+```bash
+export GRAFANA_URL=https://grafana.example.com
+export GRAFANA_TOKEN=glsa_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+grafana dashboard list
+```
+
+### Precedence (first non-empty wins)
+
+For each connection value (`url`, `token`, `username`, `password`, `org-id`) the CLI resolves independently in this order:
+
+1. **CLI flag** — `--url`, `--token`, `--username`, `--password`, `--org-id`
+2. **Environment variable** — `GRAFANA_URL`, `GRAFANA_TOKEN`, `GRAFANA_USERNAME`, `GRAFANA_PASSWORD`, `GRAFANA_ORG_ID`
+3. **Config-file profile** — the active profile in `~/.config/grafana-cli/config.yaml`
+
+Notes:
+- `read_only` resolves as: profile value first, then `GRAFANA_READ_ONLY` overrides it, and the `--read-only` flag overrides both when explicitly passed.
+- Output format resolves as: `--output`/`-o` flag, else `defaults.output` from the config file, else `table`.
+
+### Config file path
+
+Profiles and defaults are stored in YAML at:
+
+```
+~/.config/grafana-cli/config.yaml
+```
+
+If `XDG_CONFIG_HOME` is set, the path is `$XDG_CONFIG_HOME/grafana-cli/config.yaml`. The file is written with mode `0600`. See **Configuration & profiles** for the full schema and multi-account usage.
+
+## Global flags
+
+These persistent flags are available on every command:
+
+| Flag | Short | Default | Description |
+|---|---|---|---|
+| `--output` | `-o` | (config / `table`) | Output format: `table`, `json`, or `yaml` |
+| `--profile` | | (config `current_profile`) | Configuration profile to use for this invocation |
+| `--url` | | | Grafana server URL (override) |
+| `--token` | | | API token or service account token (override) |
+| `--username` | | | Username for basic auth (override) |
+| `--password` | | | Password for basic auth (override) |
+| `--org-id` | | `0` | Organization ID (override; sets `X-Grafana-Org-Id`) |
+| `--read-only` | | `false` | Block write/delete commands (safety mode for agents) |
+| `--no-input` | | `false` | Disable all interactive prompts (for CI / agents) |
+| `--quiet` | `-q` | `false` | Suppress informational (non-data) output |
+| `--verbose` | `-v` | `false` | Enable verbose HTTP request/response logging to stderr |
+
+Important for agents: `-q` is the global short flag for `--quiet`. It is NOT a query shorthand. The search/query flags on list commands are spelled out in full (`--query`, `--search`); there is no `-q` alias for them.
+
+### Common per-command flags
+
+Many subcommands share these (each is documented under its command below):
+
+| Flag | Short | Applies to | Description |
+|---|---|---|---|
+| `--file` | `-f` | create / update / *-from-file commands | Path to a JSON or YAML body file; use `-` to read from stdin |
+| `--confirm` | | delete / destructive commands | Skip the interactive confirmation prompt |
+| `--if-not-exists` | | most create commands | Succeed silently if the resource already exists (HTTP 409) |
+| `--if-exists` | | most delete commands | Succeed silently if the resource does not exist (HTTP 404) |
+| `--page` | | paginated list commands | Page number (default `1`) |
+| `--limit` | | list commands | Max results / page size (default varies; see each command) |
+
+The `--if-not-exists` and `--if-exists` flags make create/delete idempotent — ideal for agents and reruns. Mutating commands are blocked when read-only mode is active.
+
+## Commands
+
+Invocation is `grafana <group> [subgroup] <command> [args] [flags]`. Every `list` command also responds to the alias `ls`. Run `grafana <command> --help` for built-in help.
+
+Top-level groups: `dashboard`, `datasource`, `folder`, `alert`, `org`, `team`, `user`, `service-account`, `annotation`, `snapshot`, `playlist`, `library-element`, `correlation`, `admin`, `preferences`, `config`, plus top-level commands `login`, `version`, `update`, `completion`.
+
+### Top-level
+
+```bash
+grafana login                     # interactive login; saves a connection profile
+grafana version                   # print CLI version, commit hash, and build date
+grafana update [--check]          # self-update from GitHub Releases (--check = report only)
+grafana completion <shell>        # emit a shell completion script
+```
+
+- `grafana completion <shell>` — `<shell>` is one of `bash`, `zsh`, `fish`, `powershell`. Example: `grafana completion zsh > "${fpath[1]}/_grafana"`.
+
+### config — Manage CLI configuration
+
+```bash
+grafana config view                       # print the current config file (YAML)
+grafana config set <key> <value>          # set a config value
+grafana config use-profile <name>         # set the active profile
+grafana config list-profiles              # list profiles (* marks the active one)
+```
+
+- `config set` supported keys: `defaults.output` (value must be `table`, `json`, or `yaml`) and `current_profile` (must name an existing profile).
+- `config use-profile <name>` errors if `<name>` is not an existing profile.
+
+```bash
+grafana config set defaults.output json
+grafana config use-profile prod
+grafana config list-profiles
+```
+
+### dashboard (aliases: `dash`, `db`) — Manage dashboards
+
+```bash
+grafana dashboard list [flags]                        # search/list dashboards
+grafana dashboard get <uid>                           # get full dashboard model by UID
+grafana dashboard create [flags]                      # create from a JSON/YAML file
+grafana dashboard update [flags]                      # update from a JSON/YAML file
+grafana dashboard delete <uid> [--confirm] [--if-exists]
+grafana dashboard export <uid> [--output-file <path>] # dump dashboard JSON
+grafana dashboard import [flags]                      # import from a file (like create)
+grafana dashboard versions <uid> [--limit N] [--start N]
+grafana dashboard restore <uid> <version>             # restore to a version number
+grafana dashboard permissions get <uid>
+grafana dashboard permissions update <uid> -f <file>
+```
+
+`dashboard list` flags: `--query` (search by title), `--tag`/`-t` (filter by tag), `--folder` (folder UID), `--page` (default `1`), `--limit` (default `100`).
+
+`dashboard create` flags: `--file`/`-f`, `--folder` (folder UID), `--overwrite` (default `false`), `--message`/`-m` (version-history note), `--if-not-exists`.
+
+`dashboard update` flags: `--file`/`-f`, `--folder`, `--overwrite` (default `true`), `--message`/`-m`.
+
+`dashboard import` flags: `--file`/`-f`, `--folder`, `--overwrite` (default `false`), `--message`/`-m`.
+
+`dashboard versions` flags: `--limit` (default `100`), `--start` (version ID to start from, for pagination).
+
+Examples:
+
+```bash
+grafana dashboard list --query "production" --tag monitoring -o json
+grafana dashboard get abc123 -o json
+grafana dashboard create -f dashboard.json --folder folderUid123 -m "Initial version"
+cat dashboard.json | grafana dashboard create -f -
+grafana dashboard update -f dashboard.json -m "Add panels"
+grafana dashboard export abc123 --output-file backup.json
+grafana dashboard export abc123 | jq '.panels | length'
+grafana dashboard versions abc123 -o json
+grafana dashboard restore abc123 3
+grafana dashboard delete abc123 --confirm
+grafana dashboard permissions get abc123 -o json
+grafana dashboard permissions update abc123 -f perms.json
+```
+
+### datasource (alias: `ds`) — Manage datasources
+
+```bash
+grafana datasource list [--type <type>] [--name <name>]
+grafana datasource get <uid>
+grafana datasource create -f <file> [--if-not-exists]
+grafana datasource update <id> -f <file>              # note: numeric ID, not UID
+grafana datasource delete <uid> [--confirm] [--if-exists]
+grafana datasource query <uid> [flags]                # Loki/Prometheus via proxy
+```
+
+`datasource list` flags: `--type` (e.g. `prometheus`, `loki`, `elasticsearch`, `mysql`), `--name`/`-n` (case-insensitive substring match). No pagination flags.
+
+`datasource query <uid>` queries a Loki or Prometheus datasource through Grafana's datasource proxy API. The datasource type is auto-detected from its UID (only `loki` and `prometheus` are supported). Flags:
+
+| Flag | Short | Default | Description |
+|---|---|---|---|
+| `--expr` | `-e` | | Query expression — LogQL (Loki) or PromQL (Prometheus). Required. |
+| `--last` | | `1h` | Lookback duration (e.g. `1h`, `30m`). Ignored when `--from` is set. |
+| `--from` | | | Start time (RFC3339 or Unix epoch). Overrides `--last`. |
+| `--to` | | | End time (RFC3339 or Unix epoch). Defaults to now. |
+| `--limit` | | `100` | Max log entries (Loki only). |
+| `--direction` | | `backward` | Log ordering: `backward` (newest first) or `forward` (Loki only). |
+| `--step` | | | Resolution step, e.g. `15s` (Prometheus range queries only). |
+| `--query-type` | | `range` | `range` or `instant`. |
+
+Examples:
+
+```bash
+grafana datasource list --type prometheus -o json
+grafana datasource list -o json | jq '.[] | {name, type, uid}'
+grafana datasource get P1234 -o json
+grafana datasource create -f prometheus.json
+grafana datasource update 5 -f updated-ds.json
+grafana datasource delete P1234 --confirm
+
+# Loki
+grafana datasource query <loki-uid> --expr '{job="api"} |= "error"' --last 30m -o json
+# Prometheus instant
+grafana datasource query <prom-uid> --expr 'up' --query-type instant -o json
+# Prometheus range with step
+grafana datasource query <prom-uid> --expr 'rate(http_requests_total[5m])' --last 1h --step 30s -o json
+# Absolute range
+grafana datasource query <loki-uid> --expr '{job="api"}' --from 2026-01-01T00:00:00Z --to 2026-01-01T01:00:00Z -o json
+```
+
+### folder — Manage folders
+
+```bash
+grafana folder list [--page N] [--limit N]
+grafana folder get <uid>
+grafana folder create -f <file> [--if-not-exists]
+grafana folder update <uid> -f <file>
+grafana folder delete <uid> [--confirm] [--if-exists]
+grafana folder permissions get <uid>
+grafana folder permissions update <uid> -f <file>
+```
+
+`folder list` flags: `--page` (default `1`), `--limit` (default `100`).
+
+```bash
+grafana folder list -o json
+echo '{"title":"My Folder"}' | grafana folder create -f -
+grafana folder update folderUid123 -f updated-folder.json
+grafana folder delete folderUid123 --confirm
+grafana folder permissions get folderUid123 -o json
+grafana folder permissions update folderUid123 -f perms.json
+```
+
+### alert — Manage Grafana unified alerting
+
+The `alert` group has six subgroups: `rule`, `contact-point` (alias `cp`), `policy`, `mute-timing` (alias `mt`), `template` (alias `tmpl`), and `silence`.
+
+#### alert rule — Alert rules
+
+```bash
+grafana alert rule list [--folder <uid>] [--group <name>] [--limit N] [--page N]
+grafana alert rule get <uid>
+grafana alert rule create -f <file> [--if-not-exists]
+grafana alert rule update <uid> -f <file>
+grafana alert rule delete <uid> [--confirm] [--if-exists]
+```
+
+`alert rule list` flags: `--folder` (folder UID), `--group` (rule group name), `--limit` (default `0` = all), `--page` (default `1`, used with `--limit`).
+
+```bash
+grafana alert rule list --folder abc123 --group "High CPU" -o json
+grafana alert rule create -f rule.json
+grafana alert rule delete ruleUid123 --confirm
+```
+
+#### alert contact-point (alias: `cp`) — Contact points
+
+```bash
+grafana alert contact-point list
+grafana alert contact-point get <uid>
+grafana alert contact-point create -f <file> [--if-not-exists]
+grafana alert contact-point update <uid> -f <file>
+grafana alert contact-point delete <uid> [--confirm] [--if-exists]
+```
+
+```bash
+grafana alert cp list -o json
+grafana alert contact-point create -f contact-point.json
+grafana alert contact-point delete cpUid123 --confirm
+```
+
+#### alert policy — Notification policy tree
+
+```bash
+grafana alert policy get                      # full notification policy tree
+grafana alert policy update -f <file>
+grafana alert policy reset [--confirm]        # reset to default policy
+```
+
+```bash
+grafana alert policy get -o json
+grafana alert policy update -f policy.json
+grafana alert policy reset --confirm
+```
+
+#### alert mute-timing (alias: `mt`) — Mute timings
+
+```bash
+grafana alert mute-timing list
+grafana alert mute-timing get <name>
+grafana alert mute-timing create -f <file> [--if-not-exists]
+grafana alert mute-timing update <name> -f <file>
+grafana alert mute-timing delete <name> [--confirm] [--if-exists]
+```
+
+```bash
+grafana alert mute-timing get "weekends" -o json
+grafana alert mt create -f mute-timing.json
+grafana alert mute-timing delete "weekends" --confirm
+```
+
+#### alert template (alias: `tmpl`) — Notification templates
+
+```bash
+grafana alert template list
+grafana alert template get <name>
+grafana alert template update <name> -f <file>   # creates or updates
+grafana alert template delete <name> [--confirm] [--if-exists]
+```
+
+Note: there is no separate `template create`; `template update <name>` creates the template if it does not exist.
+
+```bash
+grafana alert template update "my-template" -f template.json
+grafana alert tmpl delete "my-template" --confirm
+```
+
+#### alert silence — Alert silences (maintenance windows)
+
+```bash
+grafana alert silence list
+grafana alert silence get <id>
+grafana alert silence create -f <file> [--if-not-exists]
+grafana alert silence delete <id> [--confirm] [--if-exists]   # expires the silence
+```
+
+```bash
+grafana alert silence list -o json
+grafana alert silence create -f silence.json
+echo '{"matchers":[{"name":"severity","value":"warning","isRegex":false}],"startsAt":"2026-01-15T00:00:00Z","endsAt":"2026-01-15T06:00:00Z","comment":"Suppress warnings"}' | grafana alert silence create -f -
+grafana alert silence delete silenceId123 --confirm
+```
+
+### org — Manage organizations
+
+```bash
+grafana org list [--page N] [--limit N]
+grafana org get <id>
+grafana org create -f <file> [--if-not-exists]
+grafana org update <id> -f <file>
+grafana org delete <id> [--confirm] [--if-exists]
+grafana org current                                   # show the current organization
+grafana org switch <org-id>                           # switch the active organization
+```
+
+`org list` flags: `--page` (default `1`), `--limit` (default `100`).
+
+#### org user — Organization membership
+
+```bash
+grafana org user list <org-id> [--role <role>] [--query <q>]
+grafana org user add <org-id> -f <file> [--if-not-exists]
+grafana org user update <org-id> <user-id> -f <file>
+grafana org user remove <org-id> <user-id> [--confirm] [--if-exists]
+```
+
+`org user list` flags: `--role` (`Viewer`, `Editor`, or `Admin`), `--query` (search by login, email, or name).
+
+```bash
+grafana org list -o json
+grafana org current -o json
+grafana org switch 2
+echo '{"name":"My Org"}' | grafana org create -f -
+grafana org user list 1 --role Admin -o json
+echo '{"loginOrEmail":"user@example.com","role":"Editor"}' | grafana org user add 1 -f -
+echo '{"role":"Admin"}' | grafana org user update 1 5 -f -
+grafana org user remove 1 5 --confirm
+```
+
+### team — Manage teams
+
+```bash
+grafana team list [--query <q>] [--page N] [--limit N]
+grafana team get <id>
+grafana team create -f <file> [--if-not-exists]
+grafana team update <id> -f <file>
+grafana team delete <id> [--confirm] [--if-exists]
+```
+
+`team list` flags: `--query` (search), `--page` (default `1`), `--limit` (default `100`).
+
+#### team member — Team membership
+
+```bash
+grafana team member list <team-id>
+grafana team member add <team-id> <user-id> [--if-not-exists]
+grafana team member remove <team-id> <user-id> [--confirm] [--if-exists]
+```
+
+#### team preferences — Team preferences
+
+```bash
+grafana team preferences get <team-id>
+grafana team preferences update <team-id> -f <file>
+```
+
+```bash
+grafana team list --query "backend" -o json
+echo '{"name":"Backend Team","email":"backend@example.com"}' | grafana team create -f -
+grafana team member add 5 10
+grafana team member remove 5 10 --confirm
+grafana team preferences update 5 -f prefs.json
+```
+
+### user — Manage users
+
+Most operations require server admin permissions.
+
+```bash
+grafana user list [--query <q>] [--page N] [--limit N]
+grafana user get <id>
+grafana user lookup <login-or-email>
+grafana user update <id> -f <file>
+grafana user orgs <user-id>                           # orgs the user belongs to
+grafana user teams <user-id>                           # teams the user belongs to
+grafana user current                                  # current authenticated user (alias: whoami)
+grafana user star add <dashboard-id>                  # star a dashboard
+grafana user star remove <dashboard-id>               # unstar a dashboard
+```
+
+`user list` flags: `--query` (search), `--page` (default `1`), `--limit` (default `100`).
+
+```bash
+grafana user current -o json          # or: grafana user whoami -o json
+grafana user list --query "john" -o json
+grafana user lookup admin@example.com -o json
+grafana user orgs 5 -o json
+grafana user update 5 -f user.json
+grafana user star add 42
+```
+
+### service-account (alias: `sa`) — Manage service accounts and tokens
+
+```bash
+grafana service-account list [--query <q>] [--page N] [--limit N]
+grafana service-account get <id>
+grafana service-account create -f <file> [--if-not-exists]
+grafana service-account update <id> -f <file>
+grafana service-account delete <id> [--confirm] [--if-exists]
+```
+
+`service-account list` flags: `--query` (search), `--page` (default `1`), `--limit` (default `100`).
+
+#### service-account token — Tokens
+
+```bash
+grafana service-account token list <service-account-id>
+grafana service-account token create <service-account-id> -f <file> [--if-not-exists]
+grafana service-account token delete <service-account-id> <token-id> [--confirm] [--if-exists]
+```
+
+The token key (the `glsa_...` secret) is returned only once on creation — capture it immediately.
+
+```bash
+echo '{"name":"ci-bot","role":"Editor"}' | grafana sa create -f - -o json
+# Capture the new SA id, then mint a token:
+SA_ID=$(echo '{"name":"ci-bot","role":"Editor"}' | grafana sa create -f - -o json | jq -r '.id')
+echo '{"name":"deploy-token","secondsToLive":86400}' | grafana sa token create "$SA_ID" -f - -o json | jq -r '.key'
+grafana sa token list 10 -o json
+grafana sa token delete 10 3 --confirm
+grafana sa delete 10 --confirm
+```
+
+### annotation — Manage annotations
+
+```bash
+grafana annotation list [flags]
+grafana annotation get <id>
+grafana annotation create -f <file> [--if-not-exists]
+grafana annotation update <id> -f <file>
+grafana annotation delete <id> [--confirm] [--if-exists]
+grafana annotation tags [--tag <prefix>] [--limit N]   # list annotation tags
+```
+
+`annotation list` flags:
+
+| Flag | Default | Description |
+|---|---|---|
+| `--dashboard-id` | `0` | Filter by dashboard ID |
+| `--panel-id` | `0` | Filter by panel ID |
+| `--from` | | Start time — accepts RFC3339, Unix seconds, epoch ms, or epoch ns |
+| `--to` | | End time — accepts RFC3339, Unix seconds, epoch ms, or epoch ns |
+| `--tags` | | Filter by tags (comma-separated, e.g. `deploy,release`) |
+| `--type` | | Filter by type: `annotation` or `alert` |
+| `--limit` | `100` | Maximum number of results |
+
+`annotation tags` flags: `--tag` (filter tags by prefix), `--limit` (default `0` = all).
+
+```bash
+grafana annotation list --tags deploy,release -o json
+grafana annotation list --dashboard-id 42 --from 2026-01-15T00:00:00Z --to 2026-01-15T06:00:00Z -o json
+grafana annotation list --type alert --limit 500 -o json
+echo '{"text":"Deployed v2.1.0","tags":["deploy","production"]}' | grafana annotation create -f -
+grafana annotation tags -o json
+grafana annotation delete 42 --confirm
+```
+
+### snapshot — Manage dashboard snapshots
+
+```bash
+grafana snapshot list [--limit N]
+grafana snapshot get <key>
+grafana snapshot create -f <file> [--if-not-exists]
+grafana snapshot delete <key> [--confirm] [--if-exists]
+```
+
+`snapshot list` flags: `--limit` (default `0` = all). No `--page`.
+
+```bash
+grafana snapshot list --limit 10 -o json
+grafana snapshot get abc123key -o json
+grafana snapshot create -f snapshot.json
+grafana snapshot delete abc123key --confirm
+```
+
+### playlist — Manage playlists
+
+```bash
+grafana playlist list [--query <q>] [--limit N]
+grafana playlist get <uid>
+grafana playlist create -f <file> [--if-not-exists]
+grafana playlist update <uid> -f <file>
+grafana playlist delete <uid> [--confirm] [--if-exists]
+```
+
+`playlist list` flags: `--query` (search), `--limit` (default `0` = all). No `--page`.
+
+```bash
+grafana playlist list --query "production" -o json
+grafana playlist create -f playlist.json
+grafana playlist update playlistUid -f playlist.json
+grafana playlist delete playlistUid --confirm
+```
+
+### library-element (alias: `le`) — Manage library panels and variables
+
+```bash
+grafana library-element list [--search <q>] [--kind N] [--folder <name>] [--page N] [--limit N]
+grafana library-element get <uid>
+grafana library-element create -f <file> [--if-not-exists]
+grafana library-element update <uid> -f <file>
+grafana library-element delete <uid> [--confirm] [--if-exists]
+grafana library-element connections <uid>             # dashboards using this element
+```
+
+`library-element list` flags: `--search` (element name; no `-q` alias), `--kind` (`1`=panel, `2`=variable; default `0` = no kind filter / all), `--folder` (folder name), `--page` (default `1`), `--limit` (default `100`).
+
+```bash
+grafana library-element list --kind 1 --search "CPU" -o json
+grafana le get leUid123 -o json
+grafana library-element connections leUid123 -o json
+grafana library-element delete leUid123 --confirm
+```
+
+### correlation — Manage datasource correlations
+
+```bash
+grafana correlation list
+grafana correlation get <source-uid> <correlation-uid>
+grafana correlation create <source-uid> -f <file> [--if-not-exists]
+grafana correlation update <source-uid> <correlation-uid> -f <file>
+grafana correlation delete <source-uid> <correlation-uid> [--confirm] [--if-exists]
+```
+
+```bash
+grafana correlation list -o json
+grafana correlation create sourceUid -f correlation.json
+grafana correlation get sourceUid corrUid -o json
+grafana correlation delete sourceUid corrUid --confirm
+```
+
+### preferences (alias: `prefs`) — Manage user preferences
+
+```bash
+grafana preferences get
+grafana preferences update -f <file>
+```
+
+```bash
+grafana preferences get -o json
+echo '{"theme":"dark","timezone":"utc","weekStart":"monday"}' | grafana preferences update -f -
+```
+
+### admin — Server administration
+
+Requires server admin permissions.
+
+```bash
+grafana admin settings                 # show all Grafana server settings
+grafana admin stats                    # show server usage statistics
+grafana admin reload <resource>        # reload provisioned resources
+```
+
+`admin reload <resource>` accepts exactly one of: `dashboards`, `datasources`, `plugins`, `access-control`, `alerting`.
+
+```bash
+grafana admin settings -o json
+grafana admin stats -o json
+grafana admin reload dashboards
+grafana admin reload alerting
+```
+
+## Output formats
+
+Set with the global `--output`/`-o` flag (or `defaults.output` in the config). Three formats are supported:
+
+- `table` (default) — human-readable, columnar text.
+- `json` — machine-readable JSON. Best for scripting and AI agents; pipe to `jq`.
+- `yaml` — YAML.
+
+Any other value is rejected with `unsupported output format: <x> (use table, json, or yaml)`.
+
+```bash
+grafana dashboard list                 # table (default)
+grafana dashboard list -o json         # JSON
+grafana dashboard list -o yaml         # YAML
+
+# JSON is ideal for agents/scripts:
+grafana dashboard list -o json | jq -r '.[].uid'
+grafana datasource list -o json | jq '.[] | {name, type, uid}'
+```
+
+When `-o json` is active and a command fails with an API error, the error is also written to stderr as structured JSON (including the HTTP status code). The process exits non-zero on any error.
+
+## Configuration & profiles
+
+### Location and format
+
+Config lives at `~/.config/grafana-cli/config.yaml` (or `$XDG_CONFIG_HOME/grafana-cli/config.yaml`), written with mode `0600`. If the file does not exist, the CLI behaves as if it were empty with `defaults.output: table`.
+
+### Schema
+
+```yaml
+# Name of the active profile.
+current_profile: production
+
+# Default settings applied when not overridden by flags/env.
+defaults:
+  output: table            # table | json | yaml
+
+# Named connection profiles (the key is the profile name).
+profiles:
+  production:
+    url: https://grafana.prod.example.com
+    token: glsa_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    org_id: 1
+
+  staging:
+    url: https://grafana.staging.example.com
+    username: admin
+    password: staging-password
+    org_id: 2
+
+  local:
+    url: http://localhost:3000
+    token: glsa_yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+
+  prod-readonly:
+    url: https://grafana.prod.example.com
+    token: glsa_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+    read_only: true          # block all mutating commands for this profile
+```
+
+Profile fields: `url`, `token`, `username`, `password`, `org_id` (integer), `read_only` (boolean). All are optional/omitempty. A profile uses token auth when `token` is set; otherwise basic auth when `username` is set.
+
+### How profiles work
+
+- `grafana login` creates or overwrites a profile and sets it as `current_profile`.
+- The active profile is whichever `--profile <name>` you pass, else `current_profile` in the config.
+- `grafana config use-profile <name>` changes the persistent active profile; `--profile <name>` selects one for a single command without changing the default.
+- `grafana config list-profiles` prints each profile as `<marker> <name> (<url>, <token|basic>)`, where `*` marks the active profile.
+- Profiles only supply defaults — environment variables and flags still override per the precedence rules above (e.g. `grafana dashboard list --org-id 3` targets org 3 regardless of the profile's `org_id`).
+
+```bash
+grafana login                              # create "default"
+grafana config use-profile staging         # switch active profile
+grafana dashboard list --profile local     # one-off use of another profile
+grafana config list-profiles
+```
+
+## Examples / recipes
+
+End-to-end patterns combining the above. Use `-o json` plus `jq` for anything programmatic.
+
+### Bulk-export every dashboard
+
+```bash
+export GRAFANA_URL=https://grafana.prod.example.com
+export GRAFANA_TOKEN=glsa_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+mkdir -p backups
+for uid in $(grafana dashboard list -o json | jq -r '.[].uid'); do
+  grafana dashboard export "$uid" --output-file "backups/${uid}.json"
+done
+```
+
+### Copy dashboards from production to staging
+
+```bash
+for uid in $(grafana dashboard list --profile production -o json | jq -r '.[].uid'); do
+  grafana dashboard export "$uid" --profile production --output-file "/tmp/${uid}.json"
+  grafana dashboard import -f "/tmp/${uid}.json" --profile staging --overwrite
+done
+```
+
+### Deploy a dashboard from CI (GitHub Actions)
+
+```yaml
+jobs:
+  deploy-dashboards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Grafana CLI
+        run: curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | sh
+      - name: Deploy dashboard
+        env:
+          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+          GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+        run: |
+          grafana --no-input dashboard create \
+            -f dashboards/production.json --overwrite -m "Deploy from CI"
+```
+
+### Mint a CI service account token
+
+```bash
+SA_ID=$(echo '{"name":"ci-bot","role":"Editor"}' \
+  | grafana service-account create -f - -o json | jq -r '.id')
+TOKEN=$(echo '{"name":"deploy-token","secondsToLive":86400}' \
+  | grafana service-account token create "$SA_ID" -f - -o json | jq -r '.key')
+echo "Save this token now (shown only once): $TOKEN"
+```
+
+### Mark a deployment with an annotation
+
+```bash
+echo '{"text":"Deployed v2.1.0","tags":["deploy","production"]}' \
+  | grafana annotation create -f -
+```
+
+### Query logs and metrics through the datasource proxy
+
+```bash
+# Recent errors from a Loki datasource
+grafana datasource query <loki-uid> --expr '{app="api"} |= "error"' --last 30m -o json \
+  | jq '.data.result'
+
+# Current value of a Prometheus metric
+grafana datasource query <prom-uid> --expr 'up' --query-type instant -o json
+```
+
+### Safe, idempotent agent runs
+
+```bash
+# Read-only exploration — any mutating command is refused:
+grafana --read-only dashboard list -o json
+
+# Idempotent create/delete (no error if it already exists / is already gone):
+grafana folder create -f folder.json --if-not-exists
+grafana dashboard delete abc123 --if-exists --confirm
+
+# Fully non-interactive (never prompts; fails fast instead of waiting on a TTY):
+grafana --no-input dashboard delete abc123 --confirm
+```
+
+---
+
+Generated as the canonical `llms.txt` for the Grafana CLI. For the human-oriented docs see the project README and the `grafana/references/commands.md` reference in the source repository.
