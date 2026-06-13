@@ -19,8 +19,8 @@ func newCmdUserList(f *cmdutil.Factory) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:     "list",
-		Short:   "List users",
+		Use:   "list",
+		Short: "List users",
 		Long: `List all users (requires server admin permissions).
 
 The output includes ID, Login, Email, Name, Admin status, and Disabled status.

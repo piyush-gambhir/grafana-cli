@@ -7,20 +7,20 @@ import (
 
 // Correlation represents a Grafana correlation.
 type Correlation struct {
-	UID           string            `json:"uid"`
-	SourceUID     string            `json:"sourceUID"`
-	TargetUID     string            `json:"targetUID"`
-	Label         string            `json:"label"`
-	Description   string            `json:"description"`
-	Config        CorrelationConfig `json:"config"`
-	Provisioned   bool              `json:"provisioned,omitempty"`
+	UID         string            `json:"uid"`
+	SourceUID   string            `json:"sourceUID"`
+	TargetUID   string            `json:"targetUID"`
+	Label       string            `json:"label"`
+	Description string            `json:"description"`
+	Config      CorrelationConfig `json:"config"`
+	Provisioned bool              `json:"provisioned,omitempty"`
 }
 
 // CorrelationConfig holds the configuration for a correlation.
 type CorrelationConfig struct {
-	Type        string            `json:"type"`
-	Field       string            `json:"field"`
-	Target      map[string]interface{} `json:"target,omitempty"`
+	Type            string                      `json:"type"`
+	Field           string                      `json:"field"`
+	Target          map[string]interface{}      `json:"target,omitempty"`
 	Transformations []CorrelationTransformation `json:"transformations,omitempty"`
 }
 
@@ -42,8 +42,8 @@ type CorrelationCreateRequest struct {
 
 // CorrelationUpdateRequest is the body for updating a correlation.
 type CorrelationUpdateRequest struct {
-	Label       string            `json:"label,omitempty"`
-	Description string            `json:"description,omitempty"`
+	Label       string             `json:"label,omitempty"`
+	Description string             `json:"description,omitempty"`
 	Config      *CorrelationConfig `json:"config,omitempty"`
 }
 

@@ -14,8 +14,8 @@ import (
 
 func newCmdMemberList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
-		Use:     "list <team-id>",
-		Short:   "List team members",
+		Use:   "list <team-id>",
+		Short: "List team members",
 		Long: `List all members of a team.
 
 Examples:

@@ -23,7 +23,7 @@ func newCmdTeamUpdate(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # Update team 5
   grafana team update 5 -f team.json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

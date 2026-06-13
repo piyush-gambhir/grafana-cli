@@ -183,8 +183,8 @@ func lokiJSONEnvelope(r *client.LokiQueryResponse) (interface{}, error) {
 		return struct {
 			Status string `json:"status"`
 			Data   struct {
-				ResultType string                     `json:"resultType"`
-				Result     []client.PrometheusResult  `json:"result"`
+				ResultType string                    `json:"resultType"`
+				Result     []client.PrometheusResult `json:"result"`
 			} `json:"data"`
 		}{
 			Status: r.Status,
@@ -364,15 +364,21 @@ func parseTime(s string) (time.Time, error) {
 	if t, err := time.Parse(time.RFC3339, s); err == nil {
 		return t, nil
 	}
-	// Try Unix epoch (seconds as float or integer).
+	// Integer epochs: nanoseconds when the magnitude is too large to be
+	// seconds, otherwise seconds. This check must run before the float
+	// branch — ParseFloat accepts every integer string, so a nanosecond
+	// epoch would otherwise be misread as seconds.
+	if n, err := strconv.ParseInt(s, 10, 64); err == nil {
+		if n > 1e15 {
+			return time.Unix(0, n), nil
+		}
+		return time.Unix(n, 0), nil
+	}
+	// Fractional Unix epoch seconds.
 	if f, err := strconv.ParseFloat(s, 64); err == nil {
 		sec := int64(f)
 		nsec := int64((f - float64(sec)) * 1e9)
 		return time.Unix(sec, nsec), nil
-	}
-	// Try nanosecond epoch.
-	if ns, err := strconv.ParseInt(s, 10, 64); err == nil && ns > 1e15 {
-		return time.Unix(0, ns), nil
 	}
 	return time.Time{}, fmt.Errorf("cannot parse %q as RFC3339 or Unix epoch", s)
 }

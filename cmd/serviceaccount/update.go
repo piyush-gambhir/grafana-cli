@@ -24,7 +24,7 @@ func newCmdServiceAccountUpdate(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # Update service account 10
   grafana service-account update 10 -f sa.json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

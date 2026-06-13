@@ -13,8 +13,8 @@ import (
 
 func newCmdCorrelationList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
-		Use:     "list",
-		Short:   "List correlations",
+		Use:   "list",
+		Short: "List correlations",
 		Long: `List all correlations.
 
 The output includes UID, Source UID, Target UID, Label, and Description.

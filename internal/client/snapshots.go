@@ -8,17 +8,17 @@ import (
 
 // Snapshot represents a dashboard snapshot.
 type Snapshot struct {
-	ID        int64  `json:"id"`
-	Name      string `json:"name"`
-	Key       string `json:"key"`
-	OrgID     int64  `json:"orgId"`
-	UserID    int64  `json:"userId"`
-	External  bool   `json:"external"`
+	ID          int64  `json:"id"`
+	Name        string `json:"name"`
+	Key         string `json:"key"`
+	OrgID       int64  `json:"orgId"`
+	UserID      int64  `json:"userId"`
+	External    bool   `json:"external"`
 	ExternalURL string `json:"externalUrl,omitempty"`
-	Expires   string `json:"expires"`
-	Created   string `json:"created"`
-	Updated   string `json:"updated"`
-	URL       string `json:"url,omitempty"`
+	Expires     string `json:"expires"`
+	Created     string `json:"created"`
+	Updated     string `json:"updated"`
+	URL         string `json:"url,omitempty"`
 }
 
 // SnapshotDetail represents a snapshot with its full dashboard data.

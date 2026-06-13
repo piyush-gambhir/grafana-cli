@@ -8,21 +8,21 @@ import (
 
 // Annotation represents a Grafana annotation.
 type Annotation struct {
-	ID          int64    `json:"id"`
-	AlertID     int64    `json:"alertId,omitempty"`
-	DashboardID int64   `json:"dashboardId,omitempty"`
-	DashboardUID string  `json:"dashboardUID,omitempty"`
-	PanelID     int64    `json:"panelId,omitempty"`
-	UserID      int64    `json:"userId,omitempty"`
-	UserLogin   string   `json:"login,omitempty"`
-	UserEmail   string   `json:"email,omitempty"`
-	Time        int64    `json:"time"`
-	TimeEnd     int64    `json:"timeEnd,omitempty"`
-	Tags        []string `json:"tags,omitempty"`
-	Text        string   `json:"text"`
-	Type        string   `json:"type,omitempty"`
-	Created     int64    `json:"created,omitempty"`
-	Updated     int64    `json:"updated,omitempty"`
+	ID           int64    `json:"id"`
+	AlertID      int64    `json:"alertId,omitempty"`
+	DashboardID  int64    `json:"dashboardId,omitempty"`
+	DashboardUID string   `json:"dashboardUID,omitempty"`
+	PanelID      int64    `json:"panelId,omitempty"`
+	UserID       int64    `json:"userId,omitempty"`
+	UserLogin    string   `json:"login,omitempty"`
+	UserEmail    string   `json:"email,omitempty"`
+	Time         int64    `json:"time"`
+	TimeEnd      int64    `json:"timeEnd,omitempty"`
+	Tags         []string `json:"tags,omitempty"`
+	Text         string   `json:"text"`
+	Type         string   `json:"type,omitempty"`
+	Created      int64    `json:"created,omitempty"`
+	Updated      int64    `json:"updated,omitempty"`
 }
 
 // AnnotationCreateRequest is the body for creating an annotation.

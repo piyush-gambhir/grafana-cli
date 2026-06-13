@@ -18,8 +18,8 @@ func newCmdFolderList(f *cmdutil.Factory) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:     "list",
-		Short:   "List all folders",
+		Use:   "list",
+		Short: "List all folders",
 		Long: `List all folders in the current organization.
 
 The output includes ID, UID, and Title. Folders are used to organize

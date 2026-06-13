@@ -14,8 +14,8 @@ import (
 
 func newCmdTokenList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
-		Use:     "list <service-account-id>",
-		Short:   "List tokens for a service account",
+		Use:   "list <service-account-id>",
+		Short: "List tokens for a service account",
 		Long: `List all API tokens for a service account.
 
 The output includes ID, Name, Created date, Expiration date, and whether

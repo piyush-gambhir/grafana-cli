@@ -11,7 +11,7 @@ func NewCmdMember(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "member",
 		Short: "Manage team members",
-		Long: `List, add, and remove members from a team.`,
+		Long:  `List, add, and remove members from a team.`,
 	}
 
 	cmd.AddCommand(newCmdMemberList(f))

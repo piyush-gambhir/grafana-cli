@@ -24,7 +24,7 @@ Examples:
   grafana preferences update -f prefs.json
 
   # Example JSON: {"theme":"dark","timezone":"utc","weekStart":"monday"}`,
-		Args:  cobra.NoArgs,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

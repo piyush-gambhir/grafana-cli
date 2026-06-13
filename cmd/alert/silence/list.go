@@ -14,8 +14,8 @@ import (
 
 func newCmdSilenceList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
-		Use:     "list",
-		Short:   "List silences",
+		Use:   "list",
+		Short: "List silences",
 		Long: `List all alert silences.
 
 The output includes ID, State, Matchers, Starts At, Ends At, Comment,

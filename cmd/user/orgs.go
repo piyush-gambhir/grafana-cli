@@ -21,7 +21,7 @@ func newCmdUserOrgs(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # List orgs for user 5
   grafana user orgs 5`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			userID, err := strconv.ParseInt(args[0], 10, 64)
 			if err != nil {

@@ -18,8 +18,8 @@ func newCmdOrgList(f *cmdutil.Factory) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:     "list",
-		Short:   "List organizations",
+		Use:   "list",
+		Short: "List organizations",
 		Long: `List all organizations (requires server admin permissions).
 
 The output includes ID and Name for each organization.

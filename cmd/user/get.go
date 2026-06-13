@@ -23,7 +23,7 @@ Examples:
 
   # Get as JSON
   grafana user get 5 -o json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)
 			if err != nil {

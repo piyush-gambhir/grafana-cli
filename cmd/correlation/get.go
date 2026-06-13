@@ -22,7 +22,7 @@ Examples:
 
   # Get as JSON
   grafana correlation get sourceUid corrUid -o json`,
-		Args:  cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {

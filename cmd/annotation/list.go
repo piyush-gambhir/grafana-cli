@@ -43,7 +43,18 @@ func parseAnnotationTime(s string) (int64, error) {
 		}
 	}
 	if f, err := strconv.ParseFloat(s, 64); err == nil {
-		return int64(f * 1000), nil
+		// Apply the same magnitude thresholds as integer input so a
+		// float-formatted ms/ns epoch is not misread as seconds.
+		switch {
+		case f >= 1e15: // nanoseconds
+			return int64(f / 1e6), nil
+		case f >= 1e12: // milliseconds
+			return int64(f), nil
+		case f > 0: // seconds
+			return int64(f * 1000), nil
+		default:
+			return 0, nil
+		}
 	}
 	return 0, fmt.Errorf("cannot parse %q as RFC3339 or a numeric epoch", s)
 }

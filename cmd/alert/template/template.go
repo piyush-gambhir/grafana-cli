@@ -9,8 +9,8 @@ import (
 // NewCmdTemplate returns the notification template parent command.
 func NewCmdTemplate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "template",
-		Short:   "Manage notification templates",
+		Use:   "template",
+		Short: "Manage notification templates",
 		Long: `List, get, update, and delete notification templates.
 
 Templates customize the content of alert notifications using Go templating

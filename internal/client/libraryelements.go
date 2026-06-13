@@ -24,11 +24,11 @@ type LibraryElement struct {
 
 // LibraryElementMeta holds library element metadata.
 type LibraryElementMeta struct {
-	FolderName          string `json:"folderName"`
-	FolderUID           string `json:"folderUid"`
-	ConnectedDashboards int    `json:"connectedDashboards"`
-	Created             string `json:"created"`
-	Updated             string `json:"updated"`
+	FolderName          string             `json:"folderName"`
+	FolderUID           string             `json:"folderUid"`
+	ConnectedDashboards int                `json:"connectedDashboards"`
+	Created             string             `json:"created"`
+	Updated             string             `json:"updated"`
 	CreatedBy           LibraryElementUser `json:"createdBy"`
 	UpdatedBy           LibraryElementUser `json:"updatedBy"`
 }
@@ -60,32 +60,32 @@ type LibraryElementResult struct {
 
 // LibraryElementCreateRequest is the body for creating a library element.
 type LibraryElementCreateRequest struct {
-	FolderID int64                  `json:"folderId,omitempty"`
-	FolderUID string                `json:"folderUid,omitempty"`
-	Name     string                 `json:"name"`
-	Kind     int                    `json:"kind"`
-	Model    map[string]interface{} `json:"model"`
+	FolderID  int64                  `json:"folderId,omitempty"`
+	FolderUID string                 `json:"folderUid,omitempty"`
+	Name      string                 `json:"name"`
+	Kind      int                    `json:"kind"`
+	Model     map[string]interface{} `json:"model"`
 }
 
 // LibraryElementUpdateRequest is the body for updating a library element.
 type LibraryElementUpdateRequest struct {
-	FolderID int64                  `json:"folderId,omitempty"`
-	FolderUID string                `json:"folderUid,omitempty"`
-	Name     string                 `json:"name"`
-	Kind     int                    `json:"kind"`
-	Model    map[string]interface{} `json:"model"`
-	Version  int64                  `json:"version"`
+	FolderID  int64                  `json:"folderId,omitempty"`
+	FolderUID string                 `json:"folderUid,omitempty"`
+	Name      string                 `json:"name"`
+	Kind      int                    `json:"kind"`
+	Model     map[string]interface{} `json:"model"`
+	Version   int64                  `json:"version"`
 }
 
 // LibraryElementConnection represents a connection to a dashboard.
 type LibraryElementConnection struct {
-	ID                int64  `json:"id"`
-	Kind              int    `json:"kind"`
-	ElementID         int64  `json:"elementId"`
-	ConnectionID      int64  `json:"connectionId"`
-	ConnectionUID     string `json:"connectionUid,omitempty"`
-	Created           string `json:"created"`
-	CreatedBy         LibraryElementUser `json:"createdBy"`
+	ID            int64              `json:"id"`
+	Kind          int                `json:"kind"`
+	ElementID     int64              `json:"elementId"`
+	ConnectionID  int64              `json:"connectionId"`
+	ConnectionUID string             `json:"connectionUid,omitempty"`
+	Created       string             `json:"created"`
+	CreatedBy     LibraryElementUser `json:"createdBy"`
 }
 
 // LibraryElementConnectionsResult wraps connection results.

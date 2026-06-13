@@ -34,7 +34,7 @@ func newCmdTeamPreferencesGet(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # Get preferences for team 5
   grafana team preferences get 5`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)
 			if err != nil {
@@ -75,7 +75,7 @@ func newCmdTeamPreferencesUpdate(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # Update preferences for team 5
   grafana team preferences update 5 -f prefs.json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

@@ -13,8 +13,8 @@ import (
 
 func newCmdContactPointList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
-		Use:     "list",
-		Short:   "List contact points",
+		Use:   "list",
+		Short: "List contact points",
 		Long: `List all configured contact points.
 
 The output includes UID, Name, Type (email, slack, etc.), and Provenance.

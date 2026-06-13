@@ -27,7 +27,7 @@ Examples:
   grafana org user update 1 5 -f role.json
 
   # Example JSON: {"role":"Admin"}`,
-		Args:  cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

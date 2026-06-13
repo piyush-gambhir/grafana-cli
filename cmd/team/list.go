@@ -19,8 +19,8 @@ func newCmdTeamList(f *cmdutil.Factory) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:     "list",
-		Short:   "List teams",
+		Use:   "list",
+		Short: "List teams",
 		Long: `Search and list teams in the current organization.
 
 The output includes ID, Name, Email, and Member count.

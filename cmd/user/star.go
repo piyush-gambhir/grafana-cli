@@ -14,7 +14,7 @@ func newCmdUserStar(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "star",
 		Short: "Star or unstar a dashboard",
-		Long: `Star or unstar a dashboard for the current user.`,
+		Long:  `Star or unstar a dashboard for the current user.`,
 	}
 
 	cmd.AddCommand(newCmdUserStarAdd(f))
@@ -33,7 +33,7 @@ func newCmdUserStarAdd(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # Star dashboard 42
   grafana user star add 42`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)
 			if err != nil {
@@ -67,7 +67,7 @@ func newCmdUserStarRemove(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # Unstar dashboard 42
   grafana user star remove 42`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			id, err := strconv.ParseInt(args[0], 10, 64)
 			if err != nil {

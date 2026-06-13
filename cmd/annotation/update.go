@@ -23,7 +23,7 @@ func newCmdAnnotationUpdate(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # Update annotation 42
   grafana annotation update 42 -f annotation.json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

@@ -23,7 +23,7 @@ func newCmdRuleUpdate(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # Update an alert rule
   grafana alert rule update ruleUid123 -f updated-rule.json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

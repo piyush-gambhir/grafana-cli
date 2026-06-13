@@ -7,21 +7,21 @@ import (
 
 // AlertRule represents a Grafana alerting rule.
 type AlertRule struct {
-	ID           int64                  `json:"id"`
-	UID          string                 `json:"uid"`
-	OrgID        int64                  `json:"orgID"`
-	FolderUID    string                 `json:"folderUID"`
-	RuleGroup    string                 `json:"ruleGroup"`
-	Title        string                 `json:"title"`
-	Condition    string                 `json:"condition"`
-	Data         []AlertQuery           `json:"data"`
-	NoDataState  string                 `json:"noDataState"`
-	ExecErrState string                 `json:"execErrState"`
-	For          string                 `json:"for"`
-	Annotations  map[string]string      `json:"annotations,omitempty"`
-	Labels       map[string]string      `json:"labels,omitempty"`
-	Updated      string                 `json:"updated,omitempty"`
-	Provenance   string                 `json:"provenance,omitempty"`
+	ID           int64             `json:"id"`
+	UID          string            `json:"uid"`
+	OrgID        int64             `json:"orgID"`
+	FolderUID    string            `json:"folderUID"`
+	RuleGroup    string            `json:"ruleGroup"`
+	Title        string            `json:"title"`
+	Condition    string            `json:"condition"`
+	Data         []AlertQuery      `json:"data"`
+	NoDataState  string            `json:"noDataState"`
+	ExecErrState string            `json:"execErrState"`
+	For          string            `json:"for"`
+	Annotations  map[string]string `json:"annotations,omitempty"`
+	Labels       map[string]string `json:"labels,omitempty"`
+	Updated      string            `json:"updated,omitempty"`
+	Provenance   string            `json:"provenance,omitempty"`
 }
 
 // AlertQuery is a query within an alert rule.
@@ -59,15 +59,15 @@ type ContactPoint struct {
 
 // NotificationPolicy represents the notification policy tree.
 type NotificationPolicy struct {
-	Receiver       string                `json:"receiver"`
-	GroupBy        []string              `json:"group_by,omitempty"`
-	GroupWait      string                `json:"group_wait,omitempty"`
-	GroupInterval  string                `json:"group_interval,omitempty"`
-	RepeatInterval string                `json:"repeat_interval,omitempty"`
-	ObjectMatchers [][]string            `json:"object_matchers,omitempty"`
-	Routes         []NotificationPolicy  `json:"routes,omitempty"`
-	Continue       bool                  `json:"continue,omitempty"`
-	MuteTimeIntervals []string           `json:"mute_time_intervals,omitempty"`
+	Receiver          string               `json:"receiver"`
+	GroupBy           []string             `json:"group_by,omitempty"`
+	GroupWait         string               `json:"group_wait,omitempty"`
+	GroupInterval     string               `json:"group_interval,omitempty"`
+	RepeatInterval    string               `json:"repeat_interval,omitempty"`
+	ObjectMatchers    [][]string           `json:"object_matchers,omitempty"`
+	Routes            []NotificationPolicy `json:"routes,omitempty"`
+	Continue          bool                 `json:"continue,omitempty"`
+	MuteTimeIntervals []string             `json:"mute_time_intervals,omitempty"`
 }
 
 // MuteTiming represents a mute timing.
@@ -106,13 +106,13 @@ type AlertTemplatesResponse []AlertTemplate
 
 // Silence represents an alerting silence.
 type Silence struct {
-	ID        string    `json:"id"`
+	ID        string        `json:"id"`
 	Status    SilenceStatus `json:"status"`
-	Comment   string    `json:"comment"`
-	CreatedBy string    `json:"createdBy"`
-	StartsAt  string    `json:"startsAt"`
-	EndsAt    string    `json:"endsAt"`
-	Matchers  []Matcher `json:"matchers"`
+	Comment   string        `json:"comment"`
+	CreatedBy string        `json:"createdBy"`
+	StartsAt  string        `json:"startsAt"`
+	EndsAt    string        `json:"endsAt"`
+	Matchers  []Matcher     `json:"matchers"`
 }
 
 // SilenceStatus represents the status of a silence.

@@ -23,7 +23,7 @@ func newCmdCorrelationUpdate(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # Update a correlation
   grafana correlation update sourceUid corrUid -f correlation.json`,
-		Args:  cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

@@ -33,7 +33,7 @@ Examples:
   grafana datasource get P1234 -o json > ds.json
   # edit ds.json
   grafana datasource update 5 -f ds.json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

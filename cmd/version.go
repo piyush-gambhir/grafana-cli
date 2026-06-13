@@ -16,7 +16,7 @@ func newVersionCmd() *cobra.Command {
 
 Examples:
   grafana version`,
-		Args:  cobra.NoArgs,
+		Args: cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Fprintf(cmd.OutOrStdout(), "grafana-cli version %s\n", build.Version)
 			fmt.Fprintf(cmd.OutOrStdout(), "  commit: %s\n", build.Commit)

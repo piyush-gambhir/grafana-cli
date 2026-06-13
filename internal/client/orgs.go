@@ -13,8 +13,8 @@ type Org struct {
 
 // OrgDetail represents the detail of an organization.
 type OrgDetail struct {
-	ID      int64  `json:"id"`
-	Name    string `json:"name"`
+	ID      int64   `json:"id"`
+	Name    string  `json:"name"`
 	Address Address `json:"address"`
 }
 
@@ -46,13 +46,13 @@ type OrgUpdateRequest struct {
 
 // OrgUser represents a user in an organization.
 type OrgUser struct {
-	OrgID     int64  `json:"orgId"`
-	UserID    int64  `json:"userId"`
-	Login     string `json:"login"`
-	Email     string `json:"email"`
-	Name      string `json:"name"`
-	Role      string `json:"role"`
-	AvatarURL string `json:"avatarUrl,omitempty"`
+	OrgID      int64  `json:"orgId"`
+	UserID     int64  `json:"userId"`
+	Login      string `json:"login"`
+	Email      string `json:"email"`
+	Name       string `json:"name"`
+	Role       string `json:"role"`
+	AvatarURL  string `json:"avatarUrl,omitempty"`
 	LastSeenAt string `json:"lastSeenAt,omitempty"`
 }
 

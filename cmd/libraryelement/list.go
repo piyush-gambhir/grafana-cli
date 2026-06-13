@@ -13,11 +13,11 @@ import (
 
 func newCmdLibraryElementList(f *cmdutil.Factory) *cobra.Command {
 	var (
-		search    string
-		kind      int
+		search       string
+		kind         int
 		folderFilter string
-		page      int
-		limit     int
+		page         int
+		limit        int
 	)
 
 	cmd := &cobra.Command{

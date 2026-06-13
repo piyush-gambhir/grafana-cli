@@ -31,7 +31,7 @@ Examples:
 
   # Get dashboard as YAML
   grafana dashboard get abc123 -o yaml`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {

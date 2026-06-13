@@ -45,15 +45,15 @@ type TeamUpdateRequest struct {
 
 // TeamMember represents a member of a team.
 type TeamMember struct {
-	OrgID     int64  `json:"orgId"`
-	TeamID    int64  `json:"teamId"`
-	UserID    int64  `json:"userId"`
-	Login     string `json:"login"`
-	Email     string `json:"email"`
-	Name      string `json:"name"`
-	AvatarURL string `json:"avatarUrl,omitempty"`
-	Labels    []string `json:"labels,omitempty"`
-	Permission int   `json:"permission"`
+	OrgID      int64    `json:"orgId"`
+	TeamID     int64    `json:"teamId"`
+	UserID     int64    `json:"userId"`
+	Login      string   `json:"login"`
+	Email      string   `json:"email"`
+	Name       string   `json:"name"`
+	AvatarURL  string   `json:"avatarUrl,omitempty"`
+	Labels     []string `json:"labels,omitempty"`
+	Permission int      `json:"permission"`
 }
 
 // TeamMemberAddRequest is the request to add a member to a team.

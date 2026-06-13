@@ -35,9 +35,14 @@ type LokiQueryData struct {
 }
 
 // Streams decodes the result as []LokiStream when ResultType == "streams".
+// An empty ResultType is treated as streams for older Loki responses that
+// omit the field; a missing/empty result payload decodes to no streams.
 func (d *LokiQueryData) Streams() ([]LokiStream, error) {
-	if d.ResultType != "streams" {
+	if d.ResultType != "streams" && d.ResultType != "" {
 		return nil, fmt.Errorf("resultType is %q, expected %q", d.ResultType, "streams")
+	}
+	if len(d.Result) == 0 {
+		return nil, nil
 	}
 	var out []LokiStream
 	if err := json.Unmarshal(d.Result, &out); err != nil {
@@ -52,6 +57,9 @@ func (d *LokiQueryData) Vector() ([]PrometheusResult, error) {
 	if d.ResultType != "vector" {
 		return nil, fmt.Errorf("resultType is %q, expected %q", d.ResultType, "vector")
 	}
+	if len(d.Result) == 0 {
+		return nil, nil
+	}
 	var out []PrometheusResult
 	if err := json.Unmarshal(d.Result, &out); err != nil {
 		return nil, fmt.Errorf("decoding vector: %w", err)
@@ -64,6 +72,9 @@ func (d *LokiQueryData) Vector() ([]PrometheusResult, error) {
 func (d *LokiQueryData) Matrix() ([]PrometheusResult, error) {
 	if d.ResultType != "matrix" {
 		return nil, fmt.Errorf("resultType is %q, expected %q", d.ResultType, "matrix")
+	}
+	if len(d.Result) == 0 {
+		return nil, nil
 	}
 	var out []PrometheusResult
 	if err := json.Unmarshal(d.Result, &out); err != nil {
@@ -90,6 +101,41 @@ type PrometheusQueryResponse struct {
 type PrometheusQueryData struct {
 	ResultType string             `json:"resultType"`
 	Result     []PrometheusResult `json:"result"`
+}
+
+// UnmarshalJSON decodes the result payload based on resultType. Vector and
+// matrix results are arrays of objects, but scalar and string results are a
+// single [timestamp, value] pair — decoding those into []PrometheusResult
+// used to fail with "cannot unmarshal number into Go struct field". They are
+// normalized into a single PrometheusResult with the pair in Value. A
+// missing or null result decodes to an empty slice.
+func (d *PrometheusQueryData) UnmarshalJSON(b []byte) error {
+	var raw struct {
+		ResultType string          `json:"resultType"`
+		Result     json.RawMessage `json:"result"`
+	}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	d.ResultType = raw.ResultType
+	d.Result = nil
+	if len(raw.Result) == 0 || string(raw.Result) == "null" {
+		return nil
+	}
+	switch raw.ResultType {
+	case "scalar", "string":
+		var pair []interface{}
+		if err := json.Unmarshal(raw.Result, &pair); err != nil {
+			return fmt.Errorf("decoding %s result: %w", raw.ResultType, err)
+		}
+		d.Result = []PrometheusResult{{Value: pair}}
+		return nil
+	default: // vector, matrix
+		if err := json.Unmarshal(raw.Result, &d.Result); err != nil {
+			return fmt.Errorf("decoding %s result: %w", raw.ResultType, err)
+		}
+		return nil
+	}
 }
 
 // PrometheusResult represents a single result from a Prometheus query.

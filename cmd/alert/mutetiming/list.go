@@ -13,8 +13,8 @@ import (
 
 func newCmdMuteTimingList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
-		Use:     "list",
-		Short:   "List mute timings",
+		Use:   "list",
+		Short: "List mute timings",
 		Long: `List all configured mute timings.
 
 The output includes Name, number of time Intervals, and Provenance.

@@ -28,7 +28,7 @@ Examples:
   # Check versions first, then restore
   grafana dashboard versions abc123
   grafana dashboard restore abc123 5`,
-		Args:  cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			uid := args[0]
 			version, err := strconv.Atoi(args[1])

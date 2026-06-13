@@ -9,8 +9,8 @@ import (
 // NewCmdMuteTiming returns the mute timing parent command.
 func NewCmdMuteTiming(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "mute-timing",
-		Short:   "Manage mute timings",
+		Use:   "mute-timing",
+		Short: "Manage mute timings",
 		Long: `Create, list, get, update, and delete mute timings.
 
 Mute timings define time periods during which alert notifications are

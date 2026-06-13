@@ -25,7 +25,7 @@ Examples:
 
   # Get full policy tree as JSON
   grafana alert policy get -o json`,
-		Args:  cobra.NoArgs,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {

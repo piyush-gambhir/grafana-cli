@@ -7,24 +7,24 @@ import (
 
 // Datasource represents a Grafana data source.
 type Datasource struct {
-	ID                int64                  `json:"id"`
-	UID               string                 `json:"uid"`
-	OrgID             int64                  `json:"orgId"`
-	Name              string                 `json:"name"`
-	Type              string                 `json:"type"`
-	TypeName          string                 `json:"typeName,omitempty"`
-	TypeLogoURL       string                 `json:"typeLogoUrl,omitempty"`
-	Access            string                 `json:"access"`
-	URL               string                 `json:"url"`
-	User              string                 `json:"user,omitempty"`
-	Database          string                 `json:"database,omitempty"`
-	BasicAuth         bool                   `json:"basicAuth"`
-	BasicAuthUser     string                 `json:"basicAuthUser,omitempty"`
-	WithCredentials   bool                   `json:"withCredentials"`
-	IsDefault         bool                   `json:"isDefault"`
-	ReadOnly          bool                   `json:"readOnly"`
-	JSONData          map[string]interface{} `json:"jsonData,omitempty"`
-	SecureJSONFields  map[string]bool        `json:"secureJsonFields,omitempty"`
+	ID               int64                  `json:"id"`
+	UID              string                 `json:"uid"`
+	OrgID            int64                  `json:"orgId"`
+	Name             string                 `json:"name"`
+	Type             string                 `json:"type"`
+	TypeName         string                 `json:"typeName,omitempty"`
+	TypeLogoURL      string                 `json:"typeLogoUrl,omitempty"`
+	Access           string                 `json:"access"`
+	URL              string                 `json:"url"`
+	User             string                 `json:"user,omitempty"`
+	Database         string                 `json:"database,omitempty"`
+	BasicAuth        bool                   `json:"basicAuth"`
+	BasicAuthUser    string                 `json:"basicAuthUser,omitempty"`
+	WithCredentials  bool                   `json:"withCredentials"`
+	IsDefault        bool                   `json:"isDefault"`
+	ReadOnly         bool                   `json:"readOnly"`
+	JSONData         map[string]interface{} `json:"jsonData,omitempty"`
+	SecureJSONFields map[string]bool        `json:"secureJsonFields,omitempty"`
 }
 
 // DatasourceCreateRequest is the body for creating a data source.

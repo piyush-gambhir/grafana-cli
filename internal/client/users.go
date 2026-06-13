@@ -8,16 +8,16 @@ import (
 
 // User represents a Grafana user.
 type User struct {
-	ID            int64  `json:"id"`
-	Login         string `json:"login"`
-	Email         string `json:"email"`
-	Name          string `json:"name"`
-	IsAdmin       bool   `json:"isGrafanaAdmin"`
-	IsDisabled    bool   `json:"isDisabled"`
-	LastSeenAt    string `json:"lastSeenAt,omitempty"`
-	LastSeenAtAge string `json:"lastSeenAtAge,omitempty"`
+	ID            int64    `json:"id"`
+	Login         string   `json:"login"`
+	Email         string   `json:"email"`
+	Name          string   `json:"name"`
+	IsAdmin       bool     `json:"isGrafanaAdmin"`
+	IsDisabled    bool     `json:"isDisabled"`
+	LastSeenAt    string   `json:"lastSeenAt,omitempty"`
+	LastSeenAtAge string   `json:"lastSeenAtAge,omitempty"`
 	AuthLabels    []string `json:"authLabels,omitempty"`
-	AvatarURL     string `json:"avatarUrl,omitempty"`
+	AvatarURL     string   `json:"avatarUrl,omitempty"`
 }
 
 // UserSearchResult represents the result of a user search.

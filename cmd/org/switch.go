@@ -22,7 +22,7 @@ Use "grafana org list" to see available organization IDs.
 Examples:
   # Switch to org 2
   grafana org switch 2`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			orgID, err := strconv.ParseInt(args[0], 10, 64)
 			if err != nil {

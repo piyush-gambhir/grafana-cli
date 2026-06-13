@@ -19,8 +19,8 @@ func newCmdServiceAccountList(f *cmdutil.Factory) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:     "list",
-		Short:   "List service accounts",
+		Use:   "list",
+		Short: "List service accounts",
 		Long: `List all service accounts in the current organization.
 
 The output includes ID, Name, Login, Role, Token count, and Disabled status.

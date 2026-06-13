@@ -56,7 +56,7 @@ func TestConfirmAction_NoInputNotSet(t *testing.T) {
 func TestLoginCmd_NoInput(t *testing.T) {
 	f := &cmdutil.Factory{
 		IOStreams: cmdutil.DefaultIOStreams(),
-		NoInput:  true,
+		NoInput:   true,
 	}
 	cmd := newLoginCmd(f)
 	err := cmd.RunE(cmd, nil)

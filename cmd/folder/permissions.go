@@ -40,7 +40,7 @@ Examples:
 
   # Output as JSON
   grafana folder permissions get folderUid123 -o json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {
@@ -92,7 +92,7 @@ func newCmdFolderPermissionsUpdate(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # Update folder permissions
   grafana folder permissions update folderUid123 -f perms.json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

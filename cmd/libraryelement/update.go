@@ -23,7 +23,7 @@ func newCmdLibraryElementUpdate(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # Update a library element
   grafana library-element update leUid123 -f updated-panel.json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

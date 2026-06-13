@@ -23,7 +23,7 @@ func newCmdMuteTimingUpdate(f *cmdutil.Factory) *cobra.Command {
 Examples:
   # Update a mute timing
   grafana alert mute-timing update "weekends" -f updated-mt.json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

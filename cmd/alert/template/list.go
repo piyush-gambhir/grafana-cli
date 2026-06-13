@@ -13,8 +13,8 @@ import (
 
 func newCmdTemplateList(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
-		Use:     "list",
-		Short:   "List notification templates",
+		Use:   "list",
+		Short: "List notification templates",
 		Long: `List all notification templates.
 
 The output includes Name and Provenance.

@@ -12,8 +12,8 @@ import (
 
 func newCmdUserCurrent(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
-		Use:     "current",
-		Short:   "Show the current authenticated user",
+		Use:   "current",
+		Short: "Show the current authenticated user",
 		Long: `Display information about the currently authenticated user.
 
 Examples:

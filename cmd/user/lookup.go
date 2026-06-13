@@ -22,7 +22,7 @@ Examples:
 
   # Look up by email
   grafana user lookup admin@example.com`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {

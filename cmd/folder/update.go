@@ -25,7 +25,7 @@ The file must contain the updated folder properties (e.g. title).
 Examples:
   # Update a folder
   grafana folder update folderUid123 -f updated-folder.json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

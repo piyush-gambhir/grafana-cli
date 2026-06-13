@@ -43,7 +43,7 @@ Examples:
 
   # Output as JSON
   grafana dashboard permissions get abc123 -o json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {
@@ -98,7 +98,7 @@ item specifies a user, team, or role and their permission level.
 Examples:
   # Update permissions from file
   grafana dashboard permissions update abc123 -f perms.json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")

@@ -26,7 +26,7 @@ Examples:
 
   # Get full JSON (for creating update payloads)
   grafana alert rule get ruleUid123 -o json`,
-		Args:  cobra.ExactArgs(1),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {

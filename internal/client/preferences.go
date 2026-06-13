@@ -4,13 +4,13 @@ import "context"
 
 // Preferences represents user/org preferences.
 type Preferences struct {
-	Theme           string `json:"theme"`
-	HomeDashboardID int64  `json:"homeDashboardId"`
-	HomeDashboardUID string `json:"homeDashboardUID,omitempty"`
-	Timezone        string `json:"timezone"`
-	WeekStart       string `json:"weekStart"`
-	Language        string `json:"language,omitempty"`
-	QueryHistory    QueryHistoryPreference `json:"queryHistory,omitempty"`
+	Theme            string                 `json:"theme"`
+	HomeDashboardID  int64                  `json:"homeDashboardId"`
+	HomeDashboardUID string                 `json:"homeDashboardUID,omitempty"`
+	Timezone         string                 `json:"timezone"`
+	WeekStart        string                 `json:"weekStart"`
+	Language         string                 `json:"language,omitempty"`
+	QueryHistory     QueryHistoryPreference `json:"queryHistory,omitempty"`
 }
 
 // QueryHistoryPreference holds the query history preference.
