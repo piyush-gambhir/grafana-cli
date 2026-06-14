@@ -122,9 +122,11 @@ func newRootCmd() *cobra.Command {
 	var updateResult chan *update.UpdateInfo
 
 	rootCmd := &cobra.Command{
-		Use:           "grafana",
-		Short:         "Grafana CLI - manage Grafana from the command line",
-		Long:          "A command-line interface for managing Grafana instances, dashboards, datasources, alerts, and more.",
+		Use:   "grafana",
+		Short: "Grafana CLI - manage Grafana from the command line",
+		Long: `A command-line interface for managing Grafana instances, dashboards, datasources, alerts, and more.
+
+Full command reference (for agents/LLMs): https://grafana-cli.pages.dev/llms.txt`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
