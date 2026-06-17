@@ -20,11 +20,23 @@ Designed for both human operators and coding agents (LLMs). All commands support
 
 ## Installation
 
-```bash
-# curl (recommended)
-curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | sh
+Install the latest prebuilt binary (no Go toolchain required):
 
-# Go
+```bash
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | sh
+```
+
+Install a specific version, or to a custom directory:
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | VERSION=0.2.0 sh
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | INSTALL_DIR=~/.local/bin sh
+```
+
+### Alternative (requires Go)
+
+```bash
+# Go install
 go install github.com/piyush-gambhir/grafana-cli@latest
 
 # From source
