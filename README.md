@@ -29,7 +29,7 @@ curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/ins
 Install a specific version, or to a custom directory:
 
 ```bash
-curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | VERSION=0.2.0 sh
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | VERSION=0.2.1 sh
 curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | INSTALL_DIR=~/.local/bin sh
 ```
 
