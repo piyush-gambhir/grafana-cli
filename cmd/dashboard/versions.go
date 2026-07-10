@@ -47,7 +47,7 @@ Examples:
 				return err
 			}
 
-			if len(versions) == 0 {
+			if len(versions) == 0 && f.Resolved.Output == "table" {
 				fmt.Fprintln(f.IOStreams.Out, "No versions found.")
 				return nil
 			}

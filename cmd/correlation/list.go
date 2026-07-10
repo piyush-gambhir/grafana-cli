@@ -37,7 +37,7 @@ Examples:
 				return err
 			}
 
-			if len(results) == 0 {
+			if len(results) == 0 && f.Resolved.Output == "table" {
 				fmt.Fprintln(f.IOStreams.Out, "No correlations found.")
 				return nil
 			}

@@ -46,7 +46,7 @@ Examples:
 				return err
 			}
 
-			if len(result.Result.Tags) == 0 {
+			if len(result.Result.Tags) == 0 && f.Resolved.Output == "table" {
 				fmt.Fprintln(f.IOStreams.Out, "No annotation tags found.")
 				return nil
 			}

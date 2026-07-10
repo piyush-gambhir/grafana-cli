@@ -90,7 +90,7 @@ Examples:
 				}
 			}
 
-			if len(filtered) == 0 {
+			if len(filtered) == 0 && f.Resolved.Output == "table" {
 				fmt.Fprintln(f.IOStreams.Out, "No alert rules found.")
 				return nil
 			}

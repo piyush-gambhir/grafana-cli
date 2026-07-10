@@ -766,6 +766,7 @@ Manage Grafana users (most commands require server admin).
 
 ```bash
 grafana user list
+grafana user list --all
 grafana user list -q "john"
 grafana user list --page 2 --limit 50
 ```
@@ -777,6 +778,7 @@ grafana user list --page 2 --limit 50
 | `--query`, `-q` | | Search query |
 | `--page` | `1` | Page number |
 | `--limit` | `100` | Results per page |
+| `--all` | `false` | Fetch all matching users across every page |
 
 #### `grafana user get <id>`
 

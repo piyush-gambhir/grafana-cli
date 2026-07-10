@@ -49,7 +49,7 @@ Examples:
 				return err
 			}
 
-			if len(result.ServiceAccounts) == 0 {
+			if len(result.ServiceAccounts) == 0 && f.Resolved.Output == "table" {
 				fmt.Fprintln(f.IOStreams.Out, "No service accounts found.")
 				return nil
 			}

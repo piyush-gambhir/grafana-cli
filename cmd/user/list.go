@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -16,12 +15,13 @@ func newCmdUserList(f *cmdutil.Factory) *cobra.Command {
 		query string
 		page  int
 		limit int
+		all   bool
 	)
 
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List users",
-		Long: `List all users (requires server admin permissions).
+		Long: `List users (requires server admin permissions). Use --all to fetch every page.
 
 The output includes ID, Login, Email, Name, Admin status, and Disabled status.
 
@@ -44,17 +44,34 @@ Examples:
 				return err
 			}
 
-			result, err := c.ListUsers(context.Background(), query, client.PageParams{Page: page, PerPage: limit})
-			if err != nil {
-				return err
+			var users []client.User
+			if all {
+				for currentPage := 1; ; currentPage++ {
+					result, err := c.ListUsers(cmd.Context(), query, client.PageParams{Page: currentPage, PerPage: limit})
+					if err != nil {
+						return err
+					}
+					users = append(users, result.Users...)
+					if len(result.Users) == 0 ||
+						(result.TotalCount > 0 && len(users) >= result.TotalCount) ||
+						(limit > 0 && len(result.Users) < limit) {
+						break
+					}
+				}
+			} else {
+				result, err := c.ListUsers(cmd.Context(), query, client.PageParams{Page: page, PerPage: limit})
+				if err != nil {
+					return err
+				}
+				users = result.Users
 			}
 
-			if len(result.Users) == 0 {
+			if len(users) == 0 && f.Resolved.Output == "table" {
 				fmt.Fprintln(f.IOStreams.Out, "No users found.")
 				return nil
 			}
 
-			return output.Print(f.IOStreams.Out, f.Resolved.Output, result.Users, &output.TableDef{
+			return output.Print(f.IOStreams.Out, f.Resolved.Output, users, &output.TableDef{
 				Headers: []string{"ID", "Login", "Email", "Name", "Admin", "Disabled"},
 				RowFunc: func(item interface{}) []string {
 					u := item.(client.User)
@@ -73,6 +90,7 @@ Examples:
 
 	cmd.Flags().StringVar(&query, "query", "", "Search query")
 	cmdutil.AddPaginationFlags(cmd, &page, &limit)
+	cmd.Flags().BoolVar(&all, "all", false, "Fetch all matching users across every page")
 
 	return cmd
 }

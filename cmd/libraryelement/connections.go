@@ -35,7 +35,7 @@ Examples:
 				return err
 			}
 
-			if len(result.Result) == 0 {
+			if len(result.Result) == 0 && f.Resolved.Output == "table" {
 				fmt.Fprintln(f.IOStreams.Out, "No connections found.")
 				return nil
 			}

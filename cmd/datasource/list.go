@@ -71,7 +71,7 @@ Examples:
 				filtered = append(filtered, d)
 			}
 
-			if len(filtered) == 0 {
+			if len(filtered) == 0 && f.Resolved.Output == "table" {
 				fmt.Fprintln(f.IOStreams.Out, "No datasources found.")
 				return nil
 			}

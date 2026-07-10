@@ -52,7 +52,7 @@ Examples:
 				return err
 			}
 
-			if len(perms) == 0 {
+			if len(perms) == 0 && f.Resolved.Output == "table" {
 				fmt.Fprintln(f.IOStreams.Out, "No permissions found.")
 				return nil
 			}
