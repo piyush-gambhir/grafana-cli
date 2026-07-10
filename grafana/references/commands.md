@@ -61,6 +61,7 @@ grafana dashboard list [flags]
 | `--folder` | | | Filter by folder UID |
 | `--page` | | `1` | Page number |
 | `--limit` | | `100` | Results per page |
+| `--all` | | `false` | Fetch all matching users across every page |
 
 ### grafana dashboard get
 

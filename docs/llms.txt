@@ -114,9 +114,9 @@ It then tests the connection (calls `GET /api/org/`, falling back to `GET /api/h
 | `GRAFANA_PASSWORD` | Password for basic auth |
 | `GRAFANA_ORG_ID` | Organization ID (sets the `X-Grafana-Org-Id` context) |
 | `GRAFANA_READ_ONLY` | If `true` or `1`, block all mutating commands |
-| `GRAFANA_NO_INPUT` | If set (any non-empty value), disable interactive prompts |
-| `GRAFANA_QUIET` | If set (any non-empty value), suppress informational output |
-| `GRAFANA_VERBOSE` | If set (any non-empty value), enable verbose HTTP logging to stderr |
+| `GRAFANA_NO_INPUT` | Disable interactive prompts when set to `true` or `1` |
+| `GRAFANA_QUIET` | Suppress informational output when set to `true` or `1` |
+| `GRAFANA_VERBOSE` | Enable verbose HTTP logging to stderr when set to `true` or `1` |
 | `XDG_CONFIG_HOME` | Overrides the base config directory (see Configuration) |
 
 Go-standard certificate variables are also honored: `SSL_CERT_FILE` / `SSL_CERT_DIR` (for custom CA bundles / self-signed certificates). Note: the CLI builds its own HTTP transport without `http.ProxyFromEnvironment`, so the `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` variables are NOT honored, connections always go direct.
@@ -507,7 +507,7 @@ grafana team preferences update 5 -f prefs.json
 Most operations require server admin permissions.
 
 ```bash
-grafana user list [--query <q>] [--page N] [--limit N]
+grafana user list [--query <q>] [--page N] [--limit N] [--all]
 grafana user get <id>
 grafana user lookup <login-or-email>
 grafana user update <id> -f <file>
@@ -518,7 +518,7 @@ grafana user star add <dashboard-id>                  # star a dashboard
 grafana user star remove <dashboard-id>               # unstar a dashboard
 ```
 
-`user list` flags: `--query` (search), `--page` (default `1`), `--limit` (default `100`).
+`user list` flags: `--query` (search), `--page` (default `1`), `--limit` (default `100`), `--all` (fetch every page; ignores `--page`).
 
 ```bash
 grafana user current -o json          # or: grafana user whoami -o json

@@ -49,7 +49,7 @@ Examples:
 				return err
 			}
 
-			if len(result.Teams) == 0 {
+			if len(result.Teams) == 0 && f.Resolved.Output == "table" {
 				fmt.Fprintln(f.IOStreams.Out, "No teams found.")
 				return nil
 			}

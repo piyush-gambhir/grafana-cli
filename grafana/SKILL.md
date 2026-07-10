@@ -392,7 +392,7 @@ grafana annotation tags -o json
 grafana user current -o json
 
 # List all users
-grafana user list -o json
+grafana user list --all -o json
 
 # Search users
 grafana user list -q "john" -o json

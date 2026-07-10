@@ -65,7 +65,7 @@ Examples:
 				return err
 			}
 
-			if len(result.Result.Elements) == 0 {
+			if len(result.Result.Elements) == 0 && f.Resolved.Output == "table" {
 				fmt.Fprintln(f.IOStreams.Out, "No library elements found.")
 				return nil
 			}
