@@ -1,7 +1,6 @@
 package token
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -54,7 +53,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.CreateServiceAccountToken(context.Background(), saID, req)
+			result, err := c.CreateServiceAccountToken(cmd.Context(), saID, req)
 			if err != nil {
 				if ifNotExists && client.IsConflict(err) {
 					if !f.Quiet {

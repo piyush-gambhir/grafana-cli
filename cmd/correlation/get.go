@@ -1,7 +1,6 @@
 package correlation
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -29,7 +28,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetCorrelation(context.Background(), args[0], args[1])
+			result, err := c.GetCorrelation(cmd.Context(), args[0], args[1])
 			if err != nil {
 				return err
 			}

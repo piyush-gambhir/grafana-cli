@@ -1,7 +1,6 @@
 package member
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -44,7 +43,7 @@ Examples:
 			}
 
 			req := client.TeamMemberAddRequest{UserID: userID}
-			if err := c.AddTeamMember(context.Background(), teamID, req); err != nil {
+			if err := c.AddTeamMember(cmd.Context(), teamID, req); err != nil {
 				if ifNotExists && client.IsConflict(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: user %d already in team %d, skipping.\n", userID, teamID)

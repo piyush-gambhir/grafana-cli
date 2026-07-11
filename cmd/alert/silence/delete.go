@@ -1,7 +1,6 @@
 package silence
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -48,7 +47,7 @@ Examples:
 				return err
 			}
 
-			if err := c.DeleteSilence(context.Background(), id); err != nil {
+			if err := c.DeleteSilence(cmd.Context(), id); err != nil {
 				if ifExists && client.IsNotFound(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: silence %q not found, skipping.\n", id)

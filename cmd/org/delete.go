@@ -1,7 +1,6 @@
 package org
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -52,7 +51,7 @@ Examples:
 				return err
 			}
 
-			if err := c.DeleteOrg(context.Background(), id); err != nil {
+			if err := c.DeleteOrg(cmd.Context(), id); err != nil {
 				if ifExists && client.IsNotFound(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: organization %d not found, skipping.\n", id)

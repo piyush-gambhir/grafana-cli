@@ -1,7 +1,6 @@
 package libraryelement
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -29,7 +28,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetLibraryElement(context.Background(), args[0])
+			result, err := c.GetLibraryElement(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}

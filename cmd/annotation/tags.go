@@ -1,7 +1,6 @@
 package annotation
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -41,7 +40,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetAnnotationTags(context.Background(), tag, limit)
+			result, err := c.GetAnnotationTags(cmd.Context(), tag, limit)
 			if err != nil {
 				return err
 			}

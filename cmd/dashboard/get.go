@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -38,7 +37,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetDashboardByUID(context.Background(), args[0])
+			result, err := c.GetDashboardByUID(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}
@@ -59,7 +58,7 @@ Examples:
 			return err
 		}
 
-		result, err := c.GetDashboardByUID(context.Background(), args[0])
+		result, err := c.GetDashboardByUID(cmd.Context(), args[0])
 		if err != nil {
 			return err
 		}

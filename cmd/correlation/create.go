@@ -1,7 +1,6 @@
 package correlation
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -43,7 +42,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.CreateCorrelation(context.Background(), args[0], req)
+			result, err := c.CreateCorrelation(cmd.Context(), args[0], req)
 			if err != nil {
 				if ifNotExists && client.IsConflict(err) {
 					if !f.Quiet {

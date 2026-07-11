@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -61,7 +60,7 @@ Examples:
 				return err
 			}
 
-			results, err := c.SearchDashboards(context.Background(), query, tag, folderUID, client.PageParams{Page: page, PerPage: limit})
+			results, err := c.SearchDashboards(cmd.Context(), query, tag, folderUID, client.PageParams{Page: page, PerPage: limit})
 			if err != nil {
 				return err
 			}

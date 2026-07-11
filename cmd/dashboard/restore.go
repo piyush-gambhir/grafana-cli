@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -41,7 +40,7 @@ Examples:
 				return err
 			}
 
-			if err := c.RestoreDashboardVersion(context.Background(), uid, version); err != nil {
+			if err := c.RestoreDashboardVersion(cmd.Context(), uid, version); err != nil {
 				return err
 			}
 

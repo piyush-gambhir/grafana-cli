@@ -1,7 +1,6 @@
 package snapshot
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -41,7 +40,7 @@ Examples:
 				return err
 			}
 
-			results, err := c.ListSnapshots(context.Background(), limit)
+			results, err := c.ListSnapshots(cmd.Context(), limit)
 			if err != nil {
 				return err
 			}

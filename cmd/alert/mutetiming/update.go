@@ -1,7 +1,6 @@
 package mutetiming
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -39,7 +38,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.UpdateMuteTiming(context.Background(), args[0], req)
+			result, err := c.UpdateMuteTiming(cmd.Context(), args[0], req)
 			if err != nil {
 				return err
 			}

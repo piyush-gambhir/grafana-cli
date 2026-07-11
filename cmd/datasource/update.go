@@ -1,7 +1,6 @@
 package datasource
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -54,7 +53,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.UpdateDatasource(context.Background(), id, req)
+			result, err := c.UpdateDatasource(cmd.Context(), id, req)
 			if err != nil {
 				return err
 			}

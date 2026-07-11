@@ -1,7 +1,6 @@
 package datasource
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -54,7 +53,7 @@ Examples:
 				return err
 			}
 
-			results, err := c.ListDatasources(context.Background())
+			results, err := c.ListDatasources(cmd.Context())
 			if err != nil {
 				return err
 			}

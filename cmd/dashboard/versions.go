@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -42,7 +41,7 @@ Examples:
 				return err
 			}
 
-			versions, err := c.GetDashboardVersions(context.Background(), args[0], limit, start)
+			versions, err := c.GetDashboardVersions(cmd.Context(), args[0], limit, start)
 			if err != nil {
 				return err
 			}

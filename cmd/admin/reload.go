@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -25,7 +24,7 @@ func newCmdAdminReload(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			resource := args[0]
-			ctx := context.Background()
+			ctx := cmd.Context()
 
 			switch resource {
 			case "dashboards":

@@ -1,7 +1,6 @@
 package annotation
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -36,7 +35,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetAnnotation(context.Background(), id)
+			result, err := c.GetAnnotation(cmd.Context(), id)
 			if err != nil {
 				return err
 			}

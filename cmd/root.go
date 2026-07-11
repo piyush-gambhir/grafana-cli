@@ -113,11 +113,11 @@ func createClient(f *cmdutil.Factory, resolved *config.ResolvedConfig) {
 // checkPermissions enforces read-only and no-input checks.
 func checkPermissions(cmd *cobra.Command, resolved *config.ResolvedConfig) error {
 	effectiveReadOnly := resolved.ReadOnly // from env > config
-	if cmd.Flags().Changed("read-only") {
-		effectiveReadOnly = flagReadOnly
+	if flagReadOnly {
+		effectiveReadOnly = true
 	}
 	if effectiveReadOnly && cmd.Annotations != nil && cmd.Annotations["mutates"] == "true" {
-		return fmt.Errorf("command '%s' is blocked in read-only mode.\nTo disable, use --read-only=false or remove read_only from your config profile.", cmd.CommandPath())
+		return fmt.Errorf("command '%s' is blocked in read-only mode; remove read_only from the profile or disable the read-only environment setting to permit writes", cmd.CommandPath())
 	}
 	return nil
 }
@@ -141,8 +141,8 @@ Claude Code skill: https://github.com/piyush-gambhir/grafana-cli/blob/main/SKILL
 		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// Check env vars for --no-input, --quiet, --verbose.
-			if !cmd.Flags().Changed("no-input") {
-				flagNoInput = envFlagEnabled("GRAFANA_NO_INPUT")
+			if envFlagEnabled("GRAFANA_NO_INPUT") {
+				flagNoInput = true
 			}
 			if !cmd.Flags().Changed("quiet") {
 				flagQuiet = envFlagEnabled("GRAFANA_QUIET")

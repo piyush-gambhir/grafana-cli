@@ -1,7 +1,6 @@
 package contactpoint
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -29,7 +28,7 @@ Examples:
 				return err
 			}
 
-			cp, err := c.GetContactPoint(context.Background(), args[0])
+			cp, err := c.GetContactPoint(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}

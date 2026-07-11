@@ -1,7 +1,6 @@
 package template
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -31,7 +30,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetAlertTemplate(context.Background(), args[0])
+			result, err := c.GetAlertTemplate(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}

@@ -1,7 +1,6 @@
 package team
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -35,7 +34,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetTeam(context.Background(), id)
+			result, err := c.GetTeam(cmd.Context(), id)
 			if err != nil {
 				return err
 			}

@@ -1,7 +1,6 @@
 package serviceaccount
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -45,7 +44,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.UpdateServiceAccount(context.Background(), id, req)
+			result, err := c.UpdateServiceAccount(cmd.Context(), id, req)
 			if err != nil {
 				return err
 			}

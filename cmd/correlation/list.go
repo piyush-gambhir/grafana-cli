@@ -1,7 +1,6 @@
 package correlation
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -32,7 +31,7 @@ Examples:
 				return err
 			}
 
-			results, err := c.ListCorrelations(context.Background())
+			results, err := c.ListCorrelations(cmd.Context())
 			if err != nil {
 				return err
 			}

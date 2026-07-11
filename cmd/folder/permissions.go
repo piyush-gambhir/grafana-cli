@@ -1,7 +1,6 @@
 package folder
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -47,7 +46,7 @@ Examples:
 				return err
 			}
 
-			perms, err := c.GetFolderPermissions(context.Background(), args[0])
+			perms, err := c.GetFolderPermissions(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}
@@ -108,7 +107,7 @@ Examples:
 				return err
 			}
 
-			if err := c.UpdateFolderPermissions(context.Background(), args[0], req); err != nil {
+			if err := c.UpdateFolderPermissions(cmd.Context(), args[0], req); err != nil {
 				return err
 			}
 

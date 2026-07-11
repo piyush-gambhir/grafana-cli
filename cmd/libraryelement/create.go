@@ -1,7 +1,6 @@
 package libraryelement
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -44,7 +43,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.CreateLibraryElement(context.Background(), req)
+			result, err := c.CreateLibraryElement(cmd.Context(), req)
 			if err != nil {
 				if ifNotExists && client.IsConflict(err) {
 					if !f.Quiet {

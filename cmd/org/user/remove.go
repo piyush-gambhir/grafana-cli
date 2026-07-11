@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -57,7 +56,7 @@ Examples:
 				return err
 			}
 
-			if err := c.RemoveOrgUser(context.Background(), orgID, userID); err != nil {
+			if err := c.RemoveOrgUser(cmd.Context(), orgID, userID); err != nil {
 				if ifExists && client.IsNotFound(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: user %d not found in organization %d, skipping.\n", userID, orgID)

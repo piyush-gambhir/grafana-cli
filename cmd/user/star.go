@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -45,7 +44,7 @@ Examples:
 				return err
 			}
 
-			if err := c.StarDashboard(context.Background(), id); err != nil {
+			if err := c.StarDashboard(cmd.Context(), id); err != nil {
 				return err
 			}
 
@@ -79,7 +78,7 @@ Examples:
 				return err
 			}
 
-			if err := c.UnstarDashboard(context.Background(), id); err != nil {
+			if err := c.UnstarDashboard(cmd.Context(), id); err != nil {
 				return err
 			}
 

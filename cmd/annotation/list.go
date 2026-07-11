@@ -1,7 +1,6 @@
 package annotation
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -130,7 +129,7 @@ Examples:
 				return err
 			}
 
-			results, err := c.ListAnnotations(context.Background(), dashboardID, panelID, from, to, tags, limit, annType)
+			results, err := c.ListAnnotations(cmd.Context(), dashboardID, panelID, from, to, tags, limit, annType)
 			if err != nil {
 				return err
 			}

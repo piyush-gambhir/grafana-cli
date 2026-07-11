@@ -1,7 +1,6 @@
 package serviceaccount
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -35,7 +34,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetServiceAccount(context.Background(), id)
+			result, err := c.GetServiceAccount(cmd.Context(), id)
 			if err != nil {
 				return err
 			}

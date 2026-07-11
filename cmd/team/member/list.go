@@ -1,7 +1,6 @@
 package member
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -37,7 +36,7 @@ Examples:
 				return err
 			}
 
-			results, err := c.ListTeamMembers(context.Background(), teamID)
+			results, err := c.ListTeamMembers(cmd.Context(), teamID)
 			if err != nil {
 				return err
 			}

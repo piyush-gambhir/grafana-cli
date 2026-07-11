@@ -1,7 +1,6 @@
 package libraryelement
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -48,7 +47,7 @@ Examples:
 				return err
 			}
 
-			if err := c.DeleteLibraryElement(context.Background(), uid); err != nil {
+			if err := c.DeleteLibraryElement(cmd.Context(), uid); err != nil {
 				if ifExists && client.IsNotFound(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: library element %q not found, skipping.\n", uid)

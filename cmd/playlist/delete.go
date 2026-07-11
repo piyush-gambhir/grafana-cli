@@ -1,7 +1,6 @@
 package playlist
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -48,7 +47,7 @@ Examples:
 				return err
 			}
 
-			if err := c.DeletePlaylist(context.Background(), uid); err != nil {
+			if err := c.DeletePlaylist(cmd.Context(), uid); err != nil {
 				if ifExists && client.IsNotFound(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: playlist %q not found, skipping.\n", uid)

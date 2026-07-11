@@ -1,7 +1,6 @@
 package serviceaccount
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -47,7 +46,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.CreateServiceAccount(context.Background(), req)
+			result, err := c.CreateServiceAccount(cmd.Context(), req)
 			if err != nil {
 				if ifNotExists && client.IsConflict(err) {
 					if !f.Quiet {

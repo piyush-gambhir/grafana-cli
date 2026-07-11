@@ -1,7 +1,6 @@
 package serviceaccount
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -44,7 +43,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.ListServiceAccounts(context.Background(), query, client.PageParams{Page: page, PerPage: limit})
+			result, err := c.ListServiceAccounts(cmd.Context(), query, client.PageParams{Page: page, PerPage: limit})
 			if err != nil {
 				return err
 			}

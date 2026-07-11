@@ -1,7 +1,6 @@
 package playlist
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -39,7 +38,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.UpdatePlaylist(context.Background(), args[0], req)
+			result, err := c.UpdatePlaylist(cmd.Context(), args[0], req)
 			if err != nil {
 				return err
 			}

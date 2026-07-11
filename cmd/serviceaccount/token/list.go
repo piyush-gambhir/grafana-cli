@@ -1,7 +1,6 @@
 package token
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -40,7 +39,7 @@ Examples:
 				return err
 			}
 
-			results, err := c.ListServiceAccountTokens(context.Background(), saID)
+			results, err := c.ListServiceAccountTokens(cmd.Context(), saID)
 			if err != nil {
 				return err
 			}

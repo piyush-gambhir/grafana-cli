@@ -1,7 +1,6 @@
 package token
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -57,7 +56,7 @@ Examples:
 				return err
 			}
 
-			if err := c.DeleteServiceAccountToken(context.Background(), saID, tokenID); err != nil {
+			if err := c.DeleteServiceAccountToken(cmd.Context(), saID, tokenID); err != nil {
 				if ifExists && client.IsNotFound(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: token %d not found, skipping.\n", tokenID)

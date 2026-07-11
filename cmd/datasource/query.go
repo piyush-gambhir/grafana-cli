@@ -70,7 +70,7 @@ Examples:
 				return err
 			}
 
-			ctx := context.Background()
+			ctx := cmd.Context()
 			uid := args[0]
 
 			// Auto-detect datasource type.
@@ -249,7 +249,7 @@ func renderLokiSamples(f *cmdutil.Factory, result *client.LokiQueryResponse) err
 	var rows []queryResultRow
 	for _, r := range samples {
 		labels := formatLabels(r.Metric)
-		if r.Value != nil && len(r.Value) >= 2 {
+		if len(r.Value) >= 2 {
 			rows = append(rows, queryResultRow{
 				Timestamp: formatPromTimestamp(r.Value[0]),
 				Labels:    labels,
@@ -300,7 +300,7 @@ func queryPrometheus(ctx context.Context, c *client.Client, f *cmdutil.Factory, 
 	for _, r := range result.Data.Result {
 		labels := formatLabels(r.Metric)
 
-		if r.Value != nil && len(r.Value) >= 2 {
+		if len(r.Value) >= 2 {
 			// Instant query result.
 			ts := formatPromTimestamp(r.Value[0])
 			val := fmt.Sprintf("%v", r.Value[1])
