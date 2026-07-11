@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -33,7 +32,7 @@ Examples:
 				return err
 			}
 
-			results, err := c.GetUserTeams(context.Background(), userID)
+			results, err := c.GetUserTeams(cmd.Context(), userID)
 			if err != nil {
 				return err
 			}

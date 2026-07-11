@@ -1,7 +1,6 @@
 package mutetiming
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -42,7 +41,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.CreateMuteTiming(context.Background(), req)
+			result, err := c.CreateMuteTiming(cmd.Context(), req)
 			if err != nil {
 				if ifNotExists && client.IsConflict(err) {
 					if !f.Quiet {

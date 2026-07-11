@@ -1,7 +1,6 @@
 package preferences
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -29,7 +28,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetPreferences(context.Background())
+			result, err := c.GetPreferences(cmd.Context())
 			if err != nil {
 				return err
 			}

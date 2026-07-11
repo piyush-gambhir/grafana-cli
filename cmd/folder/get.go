@@ -1,7 +1,6 @@
 package folder
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -31,7 +30,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetFolder(context.Background(), args[0])
+			result, err := c.GetFolder(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}

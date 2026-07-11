@@ -1,7 +1,6 @@
 package member
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -57,7 +56,7 @@ Examples:
 				return err
 			}
 
-			if err := c.RemoveTeamMember(context.Background(), teamID, userID); err != nil {
+			if err := c.RemoveTeamMember(cmd.Context(), teamID, userID); err != nil {
 				if ifExists && client.IsNotFound(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: member %d not found in team %d, skipping.\n", userID, teamID)

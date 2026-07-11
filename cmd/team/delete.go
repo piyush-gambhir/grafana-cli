@@ -1,7 +1,6 @@
 package team
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -52,7 +51,7 @@ Examples:
 				return err
 			}
 
-			if err := c.DeleteTeam(context.Background(), id); err != nil {
+			if err := c.DeleteTeam(cmd.Context(), id); err != nil {
 				if ifExists && client.IsNotFound(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: team %d not found, skipping.\n", id)

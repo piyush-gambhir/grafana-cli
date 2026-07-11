@@ -1,7 +1,6 @@
 package rule
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -33,7 +32,7 @@ Examples:
 				return err
 			}
 
-			rule, err := c.GetAlertRule(context.Background(), args[0])
+			rule, err := c.GetAlertRule(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}

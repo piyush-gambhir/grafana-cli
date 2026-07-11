@@ -1,7 +1,6 @@
 package rule
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -58,7 +57,7 @@ Examples:
 				return err
 			}
 
-			rules, err := c.ListAlertRules(context.Background())
+			rules, err := c.ListAlertRules(cmd.Context())
 			if err != nil {
 				return err
 			}

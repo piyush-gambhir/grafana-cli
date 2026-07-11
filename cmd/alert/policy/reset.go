@@ -1,7 +1,6 @@
 package policy
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -44,7 +43,7 @@ Examples:
 				return err
 			}
 
-			if err := c.ResetNotificationPolicy(context.Background()); err != nil {
+			if err := c.ResetNotificationPolicy(cmd.Context()); err != nil {
 				return err
 			}
 

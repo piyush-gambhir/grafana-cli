@@ -1,7 +1,6 @@
 package mutetiming
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -32,7 +31,7 @@ Examples:
 				return err
 			}
 
-			results, err := c.ListMuteTimings(context.Background())
+			results, err := c.ListMuteTimings(cmd.Context())
 			if err != nil {
 				return err
 			}

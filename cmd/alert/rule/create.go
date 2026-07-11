@@ -1,7 +1,6 @@
 package rule
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -48,7 +47,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.CreateAlertRule(context.Background(), req)
+			result, err := c.CreateAlertRule(cmd.Context(), req)
 			if err != nil {
 				if ifNotExists && client.IsConflict(err) {
 					if !f.Quiet {

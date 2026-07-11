@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -53,7 +52,7 @@ Examples:
 				return err
 			}
 
-			if err := c.UpdateOrgUser(context.Background(), orgID, userID, req); err != nil {
+			if err := c.UpdateOrgUser(cmd.Context(), orgID, userID, req); err != nil {
 				return err
 			}
 

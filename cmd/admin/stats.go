@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -31,7 +30,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetAdminStats(context.Background())
+			result, err := c.GetAdminStats(cmd.Context())
 			if err != nil {
 				return err
 			}

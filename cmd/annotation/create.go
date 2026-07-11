@@ -1,7 +1,6 @@
 package annotation
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -47,7 +46,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.CreateAnnotation(context.Background(), req)
+			result, err := c.CreateAnnotation(cmd.Context(), req)
 			if err != nil {
 				if ifNotExists && client.IsConflict(err) {
 					if !f.Quiet {

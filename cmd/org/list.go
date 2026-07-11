@@ -1,7 +1,6 @@
 package org
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -40,7 +39,7 @@ Examples:
 				return err
 			}
 
-			results, err := c.ListOrgs(context.Background(), client.PageParams{Page: page, PerPage: limit})
+			results, err := c.ListOrgs(cmd.Context(), client.PageParams{Page: page, PerPage: limit})
 			if err != nil {
 				return err
 			}

@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -60,7 +59,7 @@ Examples:
 				return err
 			}
 
-			results, err := c.ListOrgUsers(context.Background(), orgID)
+			results, err := c.ListOrgUsers(cmd.Context(), orgID)
 			if err != nil {
 				return err
 			}

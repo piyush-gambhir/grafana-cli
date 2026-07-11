@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -52,7 +51,7 @@ Examples:
 				return err
 			}
 
-			if err := c.AddOrgUser(context.Background(), orgID, req); err != nil {
+			if err := c.AddOrgUser(cmd.Context(), orgID, req); err != nil {
 				if ifNotExists && client.IsConflict(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: user already in organization, skipping.\n")

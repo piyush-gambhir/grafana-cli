@@ -1,8 +1,6 @@
 package admin
 
 import (
-	"context"
-
 	"github.com/spf13/cobra"
 
 	"github.com/piyush-gambhir/grafana-cli/internal/cmdutil"
@@ -31,7 +29,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetAdminSettings(context.Background())
+			result, err := c.GetAdminSettings(cmd.Context())
 			if err != nil {
 				return err
 			}

@@ -1,7 +1,6 @@
 package snapshot
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -48,7 +47,7 @@ Examples:
 				return err
 			}
 
-			if err := c.DeleteSnapshot(context.Background(), key); err != nil {
+			if err := c.DeleteSnapshot(cmd.Context(), key); err != nil {
 				if ifExists && client.IsNotFound(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: snapshot %q not found, skipping.\n", key)

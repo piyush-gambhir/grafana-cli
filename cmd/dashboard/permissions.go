@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -50,7 +49,7 @@ Examples:
 				return err
 			}
 
-			perms, err := c.GetDashboardPermissions(context.Background(), args[0])
+			perms, err := c.GetDashboardPermissions(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}
@@ -114,7 +113,7 @@ Examples:
 				return err
 			}
 
-			if err := c.UpdateDashboardPermissions(context.Background(), args[0], req); err != nil {
+			if err := c.UpdateDashboardPermissions(cmd.Context(), args[0], req); err != nil {
 				return err
 			}
 

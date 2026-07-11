@@ -1,7 +1,6 @@
 package org
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -29,7 +28,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetCurrentOrg(context.Background())
+			result, err := c.GetCurrentOrg(cmd.Context())
 			if err != nil {
 				return err
 			}

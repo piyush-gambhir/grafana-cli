@@ -1,7 +1,6 @@
 package libraryelement
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -60,7 +59,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.ListLibraryElements(context.Background(), search, kind, folderFilter, client.PageParams{Page: page, PerPage: limit})
+			result, err := c.ListLibraryElements(cmd.Context(), search, kind, folderFilter, client.PageParams{Page: page, PerPage: limit})
 			if err != nil {
 				return err
 			}

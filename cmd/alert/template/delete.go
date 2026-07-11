@@ -1,7 +1,6 @@
 package template
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -48,7 +47,7 @@ Examples:
 				return err
 			}
 
-			if err := c.DeleteAlertTemplate(context.Background(), name); err != nil {
+			if err := c.DeleteAlertTemplate(cmd.Context(), name); err != nil {
 				if ifExists && client.IsNotFound(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: template %q not found, skipping.\n", name)

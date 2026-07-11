@@ -1,7 +1,6 @@
 package correlation
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -46,7 +45,7 @@ Examples:
 				return err
 			}
 
-			if err := c.DeleteCorrelation(context.Background(), args[0], args[1]); err != nil {
+			if err := c.DeleteCorrelation(cmd.Context(), args[0], args[1]); err != nil {
 				if ifExists && client.IsNotFound(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: correlation %q not found, skipping.\n", args[1])

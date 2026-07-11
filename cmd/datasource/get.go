@@ -1,7 +1,6 @@
 package datasource
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -33,7 +32,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetDatasourceByUID(context.Background(), args[0])
+			result, err := c.GetDatasourceByUID(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}

@@ -1,7 +1,6 @@
 package snapshot
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -45,7 +44,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.CreateSnapshot(context.Background(), req)
+			result, err := c.CreateSnapshot(cmd.Context(), req)
 			if err != nil {
 				if ifNotExists && client.IsConflict(err) {
 					if !f.Quiet {

@@ -1,7 +1,6 @@
 package preferences
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -40,7 +39,7 @@ Examples:
 				return err
 			}
 
-			if err := c.UpdatePreferences(context.Background(), req); err != nil {
+			if err := c.UpdatePreferences(cmd.Context(), req); err != nil {
 				return err
 			}
 

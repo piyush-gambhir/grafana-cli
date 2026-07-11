@@ -1,7 +1,6 @@
 package silence
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -34,7 +33,7 @@ Examples:
 				return err
 			}
 
-			results, err := c.ListSilences(context.Background())
+			results, err := c.ListSilences(cmd.Context())
 			if err != nil {
 				return err
 			}

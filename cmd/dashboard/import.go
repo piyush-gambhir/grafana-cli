@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -66,7 +65,7 @@ Examples:
 				Message:   message,
 			}
 
-			result, err := c.CreateDashboard(context.Background(), req)
+			result, err := c.CreateDashboard(cmd.Context(), req)
 			if err != nil {
 				return err
 			}

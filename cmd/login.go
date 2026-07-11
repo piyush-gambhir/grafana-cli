@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"bufio"
-	"context"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 
 	"github.com/piyush-gambhir/grafana-cli/internal/client"
 	"github.com/piyush-gambhir/grafana-cli/internal/cmdutil"
@@ -56,9 +57,10 @@ Examples:
 
 			switch authMethod {
 			case "token":
-				fmt.Fprint(out, "API Token: ")
-				token, _ := reader.ReadString('\n')
-				token = strings.TrimSpace(token)
+				token, err := readLoginSecret(reader, out, "API Token: ")
+				if err != nil {
+					return err
+				}
 				if token == "" {
 					return fmt.Errorf("token is required")
 				}
@@ -67,9 +69,10 @@ Examples:
 				fmt.Fprint(out, "Username: ")
 				username, _ := reader.ReadString('\n')
 				username = strings.TrimSpace(username)
-				fmt.Fprint(out, "Password: ")
-				password, _ := reader.ReadString('\n')
-				password = strings.TrimSpace(password)
+				password, err := readLoginSecret(reader, out, "Password: ")
+				if err != nil {
+					return err
+				}
 				if username == "" || password == "" {
 					return fmt.Errorf("username and password are required")
 				}
@@ -92,7 +95,7 @@ Examples:
 				return fmt.Errorf("creating client: %w", err)
 			}
 
-			resp, err := c.Get(context.Background(), "/api/org/")
+			resp, err := c.Get(cmd.Context(), "/api/org/")
 			if err != nil {
 				return fmt.Errorf("testing connection: %w", err)
 			}
@@ -102,12 +105,12 @@ Examples:
 			}
 			if err := resp.JSON(&orgResult); err != nil {
 				// Try health endpoint as fallback.
-				resp2, err2 := c.Get(context.Background(), "/api/health")
+				resp2, err2 := c.Get(cmd.Context(), "/api/health")
 				if err2 != nil {
-					return fmt.Errorf("connection test failed: %w", err)
+					return fmt.Errorf("connection test failed: %w", err2)
 				}
 				if err2 := resp2.Error(); err2 != nil {
-					return fmt.Errorf("connection test failed: %w", err)
+					return fmt.Errorf("connection test failed: %w", err2)
 				}
 				fmt.Fprintln(out, "Connection successful (health check passed)")
 			} else {
@@ -122,17 +125,11 @@ Examples:
 				profileName = "default"
 			}
 
-			// Save to config.
-			cfg, err := config.Load()
-			if err != nil {
-				return fmt.Errorf("loading config: %w", err)
-			}
-
-			// Overwrite if exists.
-			cfg.Profiles[profileName] = profile
-			cfg.CurrentProfile = profileName
-
-			if err := cfg.Save(); err != nil {
+			if err := config.Update(func(cfg *config.Config) error {
+				cfg.Profiles[profileName] = profile
+				cfg.CurrentProfile = profileName
+				return nil
+			}); err != nil {
 				return fmt.Errorf("saving config: %w", err)
 			}
 
@@ -140,4 +137,15 @@ Examples:
 			return nil
 		},
 	}
+}
+
+func readLoginSecret(reader *bufio.Reader, out io.Writer, label string) (string, error) {
+	fmt.Fprint(out, label)
+	if term.IsTerminal(int(os.Stdin.Fd())) {
+		secret, err := term.ReadPassword(int(os.Stdin.Fd()))
+		fmt.Fprintln(out)
+		return strings.TrimSpace(string(secret)), err
+	}
+	secret, err := reader.ReadString('\n')
+	return strings.TrimSpace(secret), err
 }

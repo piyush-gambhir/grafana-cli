@@ -1,8 +1,6 @@
 package snapshot
 
 import (
-	"context"
-
 	"github.com/spf13/cobra"
 
 	"github.com/piyush-gambhir/grafana-cli/internal/cmdutil"
@@ -28,7 +26,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetSnapshot(context.Background(), args[0])
+			result, err := c.GetSnapshot(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}

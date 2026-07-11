@@ -1,7 +1,6 @@
 package org
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -44,7 +43,7 @@ Examples:
 				return err
 			}
 
-			if err := c.UpdateOrg(context.Background(), id, req); err != nil {
+			if err := c.UpdateOrg(cmd.Context(), id, req); err != nil {
 				return err
 			}
 

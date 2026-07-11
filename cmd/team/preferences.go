@@ -1,7 +1,6 @@
 package team
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -46,7 +45,7 @@ Examples:
 				return err
 			}
 
-			prefs, err := c.GetTeamPreferences(context.Background(), id)
+			prefs, err := c.GetTeamPreferences(cmd.Context(), id)
 			if err != nil {
 				return err
 			}
@@ -96,7 +95,7 @@ Examples:
 				return err
 			}
 
-			if err := c.UpdateTeamPreferences(context.Background(), id, prefs); err != nil {
+			if err := c.UpdateTeamPreferences(cmd.Context(), id, prefs); err != nil {
 				return err
 			}
 

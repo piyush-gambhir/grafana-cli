@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -39,7 +38,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.GetDashboardByUID(context.Background(), args[0])
+			result, err := c.GetDashboardByUID(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}

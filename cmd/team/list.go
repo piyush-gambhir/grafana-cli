@@ -1,7 +1,6 @@
 package team
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -44,7 +43,7 @@ Examples:
 				return err
 			}
 
-			result, err := c.ListTeams(context.Background(), query, client.PageParams{Page: page, PerPage: limit})
+			result, err := c.ListTeams(cmd.Context(), query, client.PageParams{Page: page, PerPage: limit})
 			if err != nil {
 				return err
 			}

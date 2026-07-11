@@ -1,7 +1,6 @@
 package mutetiming
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -48,7 +47,7 @@ Examples:
 				return err
 			}
 
-			if err := c.DeleteMuteTiming(context.Background(), name); err != nil {
+			if err := c.DeleteMuteTiming(cmd.Context(), name); err != nil {
 				if ifExists && client.IsNotFound(err) {
 					if !f.Quiet {
 						fmt.Fprintf(f.IOStreams.ErrOut, "Warning: mute timing %q not found, skipping.\n", name)
