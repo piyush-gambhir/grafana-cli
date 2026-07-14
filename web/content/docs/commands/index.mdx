@@ -1,0 +1,28 @@
+---
+title: Overview
+description: The Grafana CLI command surface, grouped by resource area.
+---
+
+Every command supports `-h`/`--help`. The global `-o/--output` flag accepts
+`table`, `json`, or `yaml`.
+
+## Connection check
+
+```bash
+grafana user current -o json
+grafana org current -o json
+```
+
+## Groups
+
+<Cards>
+  <Card title="Dashboards & data" href="/docs/commands/dashboards-data" description="Dashboards, folders, datasources, queries, library elements, and correlations." />
+  <Card title="Alerting & events" href="/docs/commands/alerting" description="Rules, contact points, policies, silences, mute timings, templates, and annotations." />
+  <Card title="Access & automation" href="/docs/commands/access" description="Organizations, users, teams, service accounts, and tokens." />
+  <Card title="Administration & utilities" href="/docs/commands/administration" description="Server admin, snapshots, playlists, preferences, config, and updates." />
+</Cards>
+
+<Callout type="info">
+  This is a curated tour. The exhaustive, always-current reference is the CLI's own
+  help output and [llms.txt](https://grafana-cli.pages.dev/llms.txt).
+</Callout>

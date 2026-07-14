@@ -37,11 +37,11 @@ curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/ins
 
 ```bash
 # Go install
-go install github.com/piyush-gambhir/grafana-cli@latest
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | sh
 
 # From source
 git clone https://github.com/piyush-gambhir/grafana-cli.git
-cd grafana-cli && make install
+cd grafana-cli/cli-go && make install
 ```
 
 ## Quick Start

@@ -1,0 +1,52 @@
+---
+title: Agents
+description: Structured output, safety flags, and non-interactive Grafana workflows for coding agents.
+---
+
+Grafana CLI exposes global controls intended for scripts and coding agents.
+
+## The output contract
+
+- Use `-o json` when the result will be parsed.
+- Use `--quiet` to suppress informational output where a command supports it.
+- Prefer stable UIDs for dashboards, folders, datasources, and alerting resources.
+- Inspect first, then mutate with an explicit resource ID or UID.
+
+## Safety flags
+
+| Flag | Effect |
+|---|---|
+| `--read-only` | Blocks commands annotated as mutating, including create, update, delete, restore, switch, and reload operations |
+| `--no-input` | Disables interactive prompts; commands fail instead of waiting for input |
+| `--quiet` | Suppresses informational output |
+| `--verbose` | Enables verbose HTTP logging for diagnostics |
+
+```bash
+# Safe, non-interactive reads for an agent
+grafana dashboard list --read-only --no-input --quiet -o json
+grafana alert rule list --read-only --no-input --quiet -o json
+```
+
+`GRAFANA_NO_INPUT=1`, `GRAFANA_QUIET=1`, and `GRAFANA_VERBOSE=1` provide the
+same non-interactive, quiet, and verbose controls through the environment.
+
+<Callout type="warn">
+  `--no-input` does not approve destructive actions. A delete or reset command
+  still needs its real `--confirm` flag; `--read-only` blocks the operation even
+  when confirmation is present.
+</Callout>
+
+## Connection via environment
+
+Agents do not need to run the interactive login flow:
+
+```bash
+export GRAFANA_URL=https://grafana.example.com
+export GRAFANA_TOKEN=glsa_xxxxxxxxxxxxxxxxxxxx
+grafana user current --read-only --no-input -o json
+```
+
+## Agent references
+
+- [Full command reference](https://grafana-cli.pages.dev/llms.txt)
+- [Claude Code skill](https://github.com/piyush-gambhir/grafana-cli/blob/main/SKILL.md)

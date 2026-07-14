@@ -1,0 +1,59 @@
+---
+title: Dashboards & data
+description: Dashboards, folders, datasources, queries, library elements, and correlations.
+---
+
+## Dashboards
+
+```bash
+# Search and inspect
+grafana dashboard list --query "production" --tag monitoring -o json
+grafana dashboard get <dashboard-uid> -o json
+
+# Back up and restore dashboard definitions
+grafana dashboard export <dashboard-uid> --output-file dashboard.json
+grafana dashboard import -f dashboard.json --folder <folder-uid> --overwrite
+
+# Inspect and restore version history
+grafana dashboard versions <dashboard-uid> --limit 10
+grafana dashboard restore <dashboard-uid> 3
+```
+
+Dashboard `create`, `update`, and `import` read JSON or YAML with `-f/--file`.
+Use `dashboard permissions get|update` for dashboard access control.
+
+## Folders and reusable elements
+
+```bash
+grafana folder list --page 1 --limit 50 -o json
+grafana folder permissions get <folder-uid> -o json
+grafana library-element list --kind 1 --search "CPU" -o json
+grafana library-element connections <element-uid> -o json
+```
+
+Library element kind `1` selects panels and kind `2` selects variables.
+
+## Datasources and proxy queries
+
+```bash
+grafana datasource list --type prometheus --name "prod" -o json
+grafana datasource get <datasource-uid> -o json
+
+# Prometheus instant query
+grafana datasource query <prometheus-uid> --expr 'up' --query-type instant -o json
+
+# Loki range query over the last 30 minutes
+grafana datasource query <loki-uid> --expr '{app="api"} |= "error"' --last 30m --limit 100 -o json
+```
+
+`datasource query` supports Loki and Prometheus. Use `--from` and `--to` for
+RFC3339 or Unix-epoch bounds, `--step` for Prometheus range resolution, and
+`--direction` for Loki ordering.
+
+## Correlations
+
+```bash
+grafana correlation list -o json
+grafana correlation get <source-uid> <correlation-uid> -o json
+grafana correlation create <source-uid> -f correlation.json
+```

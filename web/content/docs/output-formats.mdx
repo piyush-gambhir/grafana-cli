@@ -1,0 +1,44 @@
+---
+title: Output formats
+description: Select table, JSON, or YAML output for human use and automation.
+---
+
+The global `-o/--output` flag accepts three formats:
+
+- `-o table` — default, human-readable
+- `-o json` — structured JSON for programs and agents
+- `-o yaml` — structured YAML
+
+<Callout type="info">
+  **Agents: prefer `-o json`.** Add `--quiet` when a command may also emit
+  informational messages that are not needed by the caller.
+</Callout>
+
+```bash
+grafana user current -o json | jq -r .login
+grafana dashboard list -o json | jq -r '.[].uid'
+grafana datasource list -o yaml
+```
+
+## Set a default
+
+Save a preferred output format in the CLI config:
+
+```bash
+grafana config set defaults.output json
+```
+
+A per-command `-o` flag overrides that default.
+
+## File input and exports
+
+Create and update commands commonly use `-f/--file` with JSON, YAML, or `-` for
+stdin. This is independent of the selected output format:
+
+```bash
+grafana folder create -f folder.yaml -o json
+echo '{"title":"Operations"}' | grafana folder create -f - -o json
+```
+
+`grafana dashboard export <uid>` is a dedicated JSON export command. Use
+`--output-file <path>` to write the dashboard model directly to a file.

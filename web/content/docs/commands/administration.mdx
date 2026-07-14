@@ -1,0 +1,52 @@
+---
+title: Administration & utilities
+description: Server administration, snapshots, playlists, preferences, configuration, and updates.
+---
+
+## Server administration
+
+```bash
+grafana admin settings -o json
+grafana admin stats -o json
+grafana admin reload dashboards
+grafana admin reload alerting
+```
+
+`admin reload` accepts `dashboards`, `datasources`, `plugins`, `access-control`,
+or `alerting` and requires the matching Grafana administrative permissions.
+
+## Snapshots and playlists
+
+```bash
+grafana snapshot list --limit 10 -o json
+grafana snapshot get <snapshot-key> -o json
+grafana snapshot create -f snapshot.json
+
+grafana playlist list --query "operations" --limit 10 -o json
+grafana playlist get <playlist-uid> -o json
+grafana playlist create -f playlist.json
+```
+
+## Preferences and configuration
+
+```bash
+grafana preferences get -o json
+grafana preferences update -f preferences.yaml
+
+grafana config view
+grafana config list-profiles
+grafana config use-profile staging
+grafana config set defaults.output json
+```
+
+## CLI maintenance
+
+```bash
+grafana version
+grafana update --check
+grafana completion zsh
+```
+
+Running `grafana update` without `--check` prompts before replacing the current
+binary. With `--no-input`, use `grafana update --check` to inspect availability
+without starting an interactive update.

@@ -1,0 +1,73 @@
+---
+title: Authentication
+description: Service account tokens, basic auth, environment variables, and named connection profiles.
+---
+
+Grafana CLI supports bearer tokens and basic authentication. Configuration is
+resolved in this order: **CLI flags > environment variables > config profile >
+defaults**.
+
+## Methods
+
+| Method | Credentials | Best for |
+|---|---|---|
+| Token | Grafana service account token or compatible API token | Grafana Cloud, self-hosted instances, CI, and automation |
+| Basic auth | Grafana username and password | Local or self-hosted instances with built-in basic auth enabled |
+
+<Callout type="info">
+  Service account tokens are the recommended option. They are not tied to a
+  person's login and can be assigned the Grafana role needed by the workflow.
+</Callout>
+
+## Logging in
+
+`grafana login` prompts for the Grafana URL, `token` or `basic`, the matching
+credential, and a profile name. It tests the connection before saving the
+profile.
+
+```bash
+grafana login
+```
+
+The config file is `~/.config/grafana-cli/config.yaml`, or
+`$XDG_CONFIG_HOME/grafana-cli/config.yaml` when `XDG_CONFIG_HOME` is set.
+
+## Environment variables
+
+For non-interactive use, no login step is required:
+
+```bash
+export GRAFANA_URL=https://grafana.example.com
+export GRAFANA_TOKEN=glsa_xxxxxxxxxxxxxxxxxxxx
+grafana user current -o json
+```
+
+Basic auth uses `GRAFANA_USERNAME` and `GRAFANA_PASSWORD` instead of
+`GRAFANA_TOKEN`. Set `GRAFANA_ORG_ID` to send requests in a specific organization.
+
+## One-off flags
+
+Every command accepts connection overrides:
+
+```bash
+grafana dashboard list \
+  --url https://grafana.example.com \
+  --token "$GRAFANA_TOKEN" \
+  --org-id 2
+
+grafana dashboard list \
+  --url http://localhost:3000 \
+  --username admin \
+  --password admin
+```
+
+## Named profiles
+
+```bash
+grafana login
+grafana config list-profiles
+grafana config use-profile production
+grafana dashboard list --profile staging
+```
+
+Use `--profile <name>` for one command without changing the active profile.

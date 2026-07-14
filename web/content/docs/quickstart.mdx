@@ -1,0 +1,56 @@
+---
+title: Quick start
+description: Connect to a Grafana instance and inspect dashboards, datasources, and alerting resources.
+---
+
+## 1. Authenticate
+
+A service account token is the recommended setup:
+
+```bash
+grafana login
+```
+
+Or non-interactively for CI/agents:
+
+```bash
+export GRAFANA_URL=https://grafana.example.com
+export GRAFANA_TOKEN=glsa_xxxxxxxxxxxxxxxxxxxx
+```
+
+## 2. Confirm connectivity
+
+```bash
+grafana user current -o json
+grafana org current
+```
+
+## 3. Inspect resources
+
+```bash
+# Find dashboards by title
+grafana dashboard list --query "production" -o json
+
+# Inspect a dashboard and its version history
+grafana dashboard get <dashboard-uid> -o json
+grafana dashboard versions <dashboard-uid>
+
+# List datasources and alert rules
+grafana datasource list --type prometheus -o json
+grafana alert rule list --folder <folder-uid> -o json
+```
+
+## Discovering commands
+
+Every command has `-h`/`--help`:
+
+```bash
+grafana --help
+grafana dashboard --help
+grafana datasource query --help
+```
+
+<Cards>
+  <Card title="Output formats" href="/docs/output-formats" description="table, JSON, YAML, and default output selection." />
+  <Card title="Commands" href="/docs/commands" description="A curated command tour grouped by Grafana resource area." />
+</Cards>

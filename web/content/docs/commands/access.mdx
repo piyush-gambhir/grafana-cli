@@ -1,0 +1,45 @@
+---
+title: Access & automation
+description: Organizations, users, teams, service accounts, and service account tokens.
+---
+
+## Users and organizations
+
+```bash
+grafana user current -o json
+grafana user lookup admin@example.com -o json
+grafana user list --all -o json
+
+grafana org current -o json
+grafana org list --page 1 --limit 50 -o json
+grafana org user list 1 --role Admin --query "ops" -o json
+```
+
+Most server-wide user and organization operations require Grafana server-admin
+permissions. `grafana org switch <org-id>` changes the authenticated user's active
+organization.
+
+## Teams
+
+```bash
+grafana team list --query "platform" -o json
+grafana team get <team-id> -o json
+grafana team member list <team-id> -o json
+grafana team member add <team-id> <user-id>
+grafana team preferences get <team-id> -o json
+```
+
+## Service accounts and tokens
+
+```bash
+grafana service-account list --query "ci" -o json
+grafana service-account create -f service-account.json -o json
+grafana service-account token list <service-account-id> -o json
+grafana service-account token create <service-account-id> -f token.json -o json
+grafana service-account token delete <service-account-id> <token-id> --confirm
+```
+
+<Callout type="warn">
+  A newly created service account token key is shown only once. Capture the
+  structured creation result immediately and store the key in a secret manager.
+</Callout>

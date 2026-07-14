@@ -1,0 +1,41 @@
+---
+title: Introduction
+description: Manage Grafana instances, dashboards, datasources, alerting, access, and more from your terminal.
+---
+
+**Grafana CLI** is a command-line interface for managing Grafana instances over
+the HTTP API. Search and move dashboards, query datasources, configure unified
+alerting, and administer organizations, users, teams, and service accounts.
+
+It is designed for human operators, scripts, and coding agents. The global
+`-o/--output` flag supports `table`, `json`, and `yaml`, while `--read-only` and
+`--no-input` make automated exploration safer.
+
+<Callout type="info">
+  The exhaustive command reference for agents and LLMs is available at
+  [grafana-cli.pages.dev/llms.txt](https://grafana-cli.pages.dev/llms.txt).
+</Callout>
+
+## Features
+
+- **Dashboards** — list, inspect, create, update, delete, import, export, restore,
+  and manage dashboard or folder permissions.
+- **Datasources** — manage datasource definitions and query Loki or Prometheus
+  through Grafana's datasource proxy.
+- **Unified alerting** — rules, contact points, notification policies, mute
+  timings, notification templates, and silences.
+- **Access management** — organizations, users, teams, service accounts, and
+  service account tokens.
+- **More Grafana resources** — annotations, snapshots, playlists, library
+  elements, correlations, preferences, and server administration.
+- **Automation controls** — named profiles, environment configuration,
+  `-o json|yaml`, `--read-only`, `--no-input`, and `--quiet`.
+
+## Next steps
+
+<Cards>
+  <Card title="Installation" href="/docs/installation" description="Install the prebuilt binary or build from source." />
+  <Card title="Authentication" href="/docs/authentication" description="Connect with a token or basic auth and manage named profiles." />
+  <Card title="Quick start" href="/docs/quickstart" description="Connect and inspect your first Grafana resources." />
+  <Card title="Agents" href="/docs/agents" description="Structured output, safety flags, and non-interactive operation." />
+</Cards>

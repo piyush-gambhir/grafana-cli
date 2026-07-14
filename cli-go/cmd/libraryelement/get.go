@@ -1,0 +1,52 @@
+package libraryelement
+
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+
+	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
+	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/output"
+)
+
+func newCmdLibraryElementGet(f *cmdutil.Factory) *cobra.Command {
+	return &cobra.Command{
+		Use:   "get <uid>",
+		Short: "Get a library element by UID",
+		Long: `Retrieve a library element by its UID.
+
+Examples:
+  # Get library element
+  grafana library-element get leUid123
+
+  # Get as JSON
+  grafana library-element get leUid123 -o json`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			c, err := f.Client()
+			if err != nil {
+				return err
+			}
+
+			result, err := c.GetLibraryElement(cmd.Context(), args[0])
+			if err != nil {
+				return err
+			}
+
+			le := result.Result
+			if f.Resolved.Output == "table" {
+				fmt.Fprintf(f.IOStreams.Out, "UID:         %s\n", le.UID)
+				fmt.Fprintf(f.IOStreams.Out, "Name:        %s\n", le.Name)
+				fmt.Fprintf(f.IOStreams.Out, "Type:        %s\n", le.Type)
+				fmt.Fprintf(f.IOStreams.Out, "Kind:        %d\n", le.Kind)
+				fmt.Fprintf(f.IOStreams.Out, "Description: %s\n", le.Description)
+				fmt.Fprintf(f.IOStreams.Out, "Version:     %d\n", le.Version)
+				fmt.Fprintf(f.IOStreams.Out, "Folder:      %s\n", le.Meta.FolderName)
+				fmt.Fprintf(f.IOStreams.Out, "Connections: %d\n", le.Meta.ConnectedDashboards)
+				return nil
+			}
+
+			return output.Print(f.IOStreams.Out, f.Resolved.Output, result, nil)
+		},
+	}
+}

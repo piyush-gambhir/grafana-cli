@@ -1,0 +1,56 @@
+---
+title: Alerting & events
+description: Unified alerting resources, silences, notification routing, and annotations.
+---
+
+## Alert rules
+
+```bash
+grafana alert rule list --folder <folder-uid> --group "High CPU" -o json
+grafana alert rule get <rule-uid> -o json
+grafana alert rule create -f rule.json
+grafana alert rule update <rule-uid> -f updated-rule.yaml
+grafana alert rule delete <rule-uid> --confirm
+```
+
+## Notification routing
+
+```bash
+grafana alert contact-point list -o json
+grafana alert contact-point create -f contact-point.json
+
+grafana alert policy get -o json
+grafana alert policy update -f policy.json
+grafana alert policy reset --confirm
+```
+
+<Callout type="warn">
+  `alert policy update` replaces the entire policy tree. Read the current tree
+  with `grafana alert policy get -o json` before updating it.
+</Callout>
+
+## Silences, mute timings, and templates
+
+```bash
+grafana alert silence list -o json
+grafana alert silence create -f silence.json
+grafana alert silence delete <silence-id> --confirm
+
+grafana alert mute-timing list -o json
+grafana alert mute-timing get "weekends" -o json
+
+grafana alert template list -o json
+grafana alert template update "on-call" -f template.json
+```
+
+## Annotations
+
+```bash
+grafana annotation list --tags deploy,production --limit 100 -o json
+grafana annotation list --from 2026-07-01T00:00:00Z --to 2026-07-02T00:00:00Z -o json
+grafana annotation create -f annotation.json
+grafana annotation tags --tag deploy -o json
+```
+
+Annotation time filters accept RFC3339, Unix seconds, epoch milliseconds, or
+epoch nanoseconds.

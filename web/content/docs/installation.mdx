@@ -1,0 +1,56 @@
+---
+title: Installation
+description: Install the prebuilt binary or build Grafana CLI from source.
+---
+
+## Install script (recommended)
+
+Installs the latest prebuilt binary for your OS/arch — no Go toolchain required:
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | sh
+```
+
+Pin a version or change the install directory:
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | VERSION=0.2.4 sh
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | INSTALL_DIR=~/.local/bin sh
+```
+
+The script installs to `/usr/local/bin` by default and asks for elevated
+permissions when that directory is not writable.
+
+## Download a release manually
+
+Prebuilt archives are attached to each
+[GitHub Release](https://github.com/piyush-gambhir/grafana-cli/releases). Download
+the archive for your OS and architecture, extract it, and put `grafana` on your
+`PATH`:
+
+```bash
+# example (macOS arm64) — adjust the version/asset name
+curl -sSfL https://github.com/piyush-gambhir/grafana-cli/releases/latest/download/grafana-cli_darwin_arm64.tar.gz | tar xz
+sudo mv grafana /usr/local/bin/
+```
+
+The install script expects assets named `grafana-cli_<os>_<arch>.tar.gz`, where
+`<os>` is `darwin` or `linux` and `<arch>` is `amd64` or `arm64`.
+
+## Build from source
+
+Building locally requires Go:
+
+```bash
+git clone https://github.com/piyush-gambhir/grafana-cli.git
+cd grafana-cli/cli-go
+make install
+```
+
+The binary is `grafana`.
+
+## Verify
+
+```bash
+grafana version
+```
