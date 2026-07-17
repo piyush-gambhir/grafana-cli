@@ -37,6 +37,16 @@ export interface SiteConfig {
   example: string;
   /** Optional: tech / query languages this CLI speaks (logo strip) */
   compatible?: string[];
+  /** Optional: features section heading (default: "Everything, from one binary") */
+  featuresTitle?: string;
+  /** Optional: features section subheading */
+  featuresSubtitle?: string;
+  /** Optional: CTA band body (default mentions installing the binary) */
+  ctaBody?: string;
+  /** Optional: per-site accent expressed as an OKLCH color */
+  accent?: string;
+  /** Optional: human-readable accent name */
+  accentName?: string;
 }
 
 export const site: SiteConfig = {
@@ -45,8 +55,10 @@ export const site: SiteConfig = {
   repo: 'piyush-gambhir/grafana-cli',
   tagline: 'Grafana from your terminal',
   description:
-    'A command-line interface for managing Grafana instances, dashboards, datasources, alerts, and more — with structured output and safety controls for both operators and coding agents.',
+    'An independent, unofficial open-source CLI for managing Grafana instances, dashboards, data sources, alerts, and access with scriptable, agent-safe workflows.',
   badge: 'Open-source · Cloud & self-hosted',
+  accent: 'oklch(0.75 0.15 60)',
+  accentName: 'amber',
   installCommand:
     'curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | sh',
   features: [
@@ -89,7 +101,8 @@ grafana user current -o json
 # Find production dashboards
 grafana dashboard list --query "production" -o json
 # Query Prometheus through Grafana
-grafana datasource query <prometheus-uid> --expr 'up' --query-type instant -o json`,
+grafana datasource query <prometheus-uid> --expr 'up' \\
+  --query-type instant -o json`,
   compatible: [
     "HTTP API",
     "Dashboards",

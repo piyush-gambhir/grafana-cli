@@ -3,6 +3,8 @@ title: Agents
 description: Structured output, safety flags, and non-interactive Grafana workflows for coding agents.
 ---
 
+import { siteUrl } from '@/lib/shared';
+
 Grafana CLI exposes global controls intended for scripts and coding agents.
 
 ## The output contract
@@ -48,5 +50,5 @@ grafana user current --read-only --no-input -o json
 
 ## Agent references
 
-- [Full command reference](https://grafana-cli.pages.dev/llms.txt)
+- <a href={`${siteUrl}/llms.txt`}>Full command reference</a>
 - [Claude Code skill](https://github.com/piyush-gambhir/grafana-cli/blob/main/SKILL.md)

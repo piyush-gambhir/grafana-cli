@@ -3,6 +3,8 @@ title: Overview
 description: The Grafana CLI command surface, grouped by resource area.
 ---
 
+import { siteUrl } from '@/lib/shared';
+
 Every command supports `-h`/`--help`. The global `-o/--output` flag accepts
 `table`, `json`, or `yaml`.
 
@@ -24,5 +26,5 @@ grafana org current -o json
 
 <Callout type="info">
   This is a curated tour. The exhaustive, always-current reference is the CLI's own
-  help output and [llms.txt](https://grafana-cli.pages.dev/llms.txt).
+  help output and <a href={`${siteUrl}/llms.txt`}>llms.txt</a>.
 </Callout>
