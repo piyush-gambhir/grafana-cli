@@ -6,14 +6,14 @@ import { site } from '@/lib/site';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-const fontBuffer = async (name: string) => {
-  const data = await readFile(join(process.cwd(), 'fonts', name));
+const fontBuffer = async (...fontPath: string[]) => {
+  const data = await readFile(join(process.cwd(), 'node_modules', ...fontPath));
   return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
 };
 
 export const revalidate = false;
 
-const hafferXH = fontBuffer('haffer-xh-regular-2.ttf');
+const inter = fontBuffer('@fontsource', 'inter', 'files', 'inter-latin-400-normal.woff');
 
 export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...slug]'>) {
   const { slug } = await params;
@@ -31,7 +31,7 @@ export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...
         padding: '70px 76px',
         color: '#f3f4f1',
         background: '#131412',
-        fontFamily: 'Haffer XH',
+        fontFamily: 'Inter',
       }}
     >
       <div style={{ display: 'flex', color: '#f2943c', fontSize: 30 }}>
@@ -78,8 +78,8 @@ export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...
       height: 630,
       fonts: [
         {
-          name: 'Haffer XH',
-          data: await hafferXH,
+          name: 'Inter',
+          data: await inter,
           style: 'normal',
           weight: 400,
         },
