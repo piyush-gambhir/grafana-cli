@@ -5,7 +5,7 @@ import { InstallCommand } from '@/components/install-command';
 import { Reveal } from '@/components/reveal';
 import { SiteFooter } from '@/components/site-footer';
 import { OsmoButton } from '@/components/ui/osmo-button';
-import { repoUrl, serializeJsonLd } from '@/lib/seo';
+import { repoUrl, serializeJsonLd } from '@/lib/metadata';
 import { siteUrl } from '@/lib/shared';
 import { site } from '@/lib/site';
 import { getOtherSuiteProjects } from '@/lib/suite';

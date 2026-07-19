@@ -4,7 +4,7 @@ import '@fontsource-variable/jetbrains-mono';
 import '@fontsource/instrument-serif';
 import type { CSSProperties } from 'react';
 import { Provider } from '@/components/provider';
-import { homeSocialImage, siteMetadataDescription } from '@/lib/seo';
+import { homeSocialImage, siteMetadataDescription } from '@/lib/metadata';
 import { siteUrl } from '@/lib/shared';
 import { site } from '@/lib/site';
 import './global.css';

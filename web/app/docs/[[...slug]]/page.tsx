@@ -11,7 +11,7 @@ import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
-import { serializeJsonLd, siteMetadataDescription } from '@/lib/seo';
+import { createPageMetadata, serializeJsonLd, siteMetadataDescription } from '@/lib/metadata';
 import { gitConfig, siteUrl } from '@/lib/shared';
 import { site } from '@/lib/site';
 
@@ -125,34 +125,12 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) notFound();
-  const description = getMetadataDescription(page.data.description);
-  const canonicalUrl = `${siteUrl}${page.url}`;
-  const socialImageUrl = `${siteUrl}${getPageImage(page).url}`;
 
-  return {
+  return createPageMetadata({
     title: page.data.title,
-    description,
-    alternates: { canonical: canonicalUrl },
-    openGraph: {
-      type: 'article',
-      url: canonicalUrl,
-      siteName: site.name,
-      title: page.data.title,
-      description,
-      images: [
-        {
-          url: socialImageUrl,
-          width: 1200,
-          height: 630,
-          alt: `${page.data.title} | ${site.name}`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: page.data.title,
-      description,
-      images: [socialImageUrl],
-    },
-  };
+    description: getMetadataDescription(page.data.description),
+    path: page.url,
+    type: 'article',
+    image: getPageImage(page).url,
+  });
 }
