@@ -2,6 +2,15 @@ import type { Metadata } from 'next';
 import { siteUrl } from './shared';
 import { site } from './site';
 
+/** Social card for the site root. Rendered by app/og/home/image.png/route.tsx. */
+export const homeSocialImage = {
+  url: `${siteUrl}/og/home/image.png`,
+  width: 1200,
+  height: 630,
+  alt: `${site.name}: ${site.tagline}`,
+};
+
+
 export const repoUrl = `https://github.com/${site.repo}`;
 export const socialImage = `${siteUrl}/og/docs/image.png`;
 export const siteMetadataDescription =

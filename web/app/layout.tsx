@@ -4,7 +4,7 @@ import '@fontsource-variable/jetbrains-mono';
 import '@fontsource/instrument-serif';
 import type { CSSProperties } from 'react';
 import { Provider } from '@/components/provider';
-import { siteMetadataDescription, socialImage } from '@/lib/seo';
+import { homeSocialImage, siteMetadataDescription } from '@/lib/seo';
 import { siteUrl } from '@/lib/shared';
 import { site } from '@/lib/site';
 import './global.css';
@@ -12,35 +12,36 @@ import './global.css';
 const homeUrl = `${siteUrl}`;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  applicationName: site.name,
   title: {
     default: `${site.name}: ${site.tagline}`,
     template: `%s · ${site.name}`,
   },
   description: siteMetadataDescription,
-  alternates: { canonical: homeUrl },
+  authors: [{ name: 'Piyush Gambhir', url: 'https://github.com/piyush-gambhir' }],
+  creator: 'Piyush Gambhir',
+  publisher: 'Piyush Gambhir',
+  alternates: {
+    canonical: siteUrl,
+  },
   icons: {
     icon: [{ url: '/grafana-cli/favicon.svg', type: 'image/svg+xml' }],
   },
   openGraph: {
     type: 'website',
-    url: homeUrl,
+    locale: 'en_US',
+    url: siteUrl,
     siteName: site.name,
     title: `${site.name}: ${site.tagline}`,
     description: siteMetadataDescription,
-    images: [
-      {
-        url: socialImage,
-        width: 1200,
-        height: 630,
-        alt: `${site.name} documentation`,
-      },
-    ],
+    images: [homeSocialImage],
   },
   twitter: {
     card: 'summary_large_image',
     title: `${site.name}: ${site.tagline}`,
     description: siteMetadataDescription,
-    images: [socialImage],
+    images: [homeSocialImage],
   },
 };
 

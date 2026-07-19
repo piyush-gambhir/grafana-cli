@@ -47,6 +47,8 @@ export interface SiteConfig {
   accent?: string;
   /** Optional: human-readable accent name */
   accentName?: string;
+  /** Optional: hex twin of the accent, for surfaces without oklch() support (OG images) */
+  accentHex?: string;
 }
 
 export const site: SiteConfig = {
@@ -59,6 +61,7 @@ export const site: SiteConfig = {
   badge: 'Open-source · Cloud & self-hosted',
   accent: 'oklch(0.75 0.15 60)',
   accentName: 'amber',
+  accentHex: '#f2943c',
   installCommand:
     'curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | sh',
   features: [
