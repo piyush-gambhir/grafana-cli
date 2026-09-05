@@ -33,16 +33,19 @@ curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/ins
 curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | INSTALL_DIR=~/.local/bin sh
 ```
 
-### Alternative (requires Go)
+### Build from source
+
+Requires Go 1.26 or later; Go 1.27.1 is recommended.
 
 ```bash
-# Go install
-curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | sh
-
-# From source
 git clone https://github.com/piyush-gambhir/grafana-cli.git
-cd grafana-cli/cli-go && make install
+cd grafana-cli/cli-go
+make install
 ```
+
+`make install` writes the correctly named executable to `go env GOBIN`, or to
+`$(go env GOPATH)/bin` when GOBIN is unset. Use `make install INSTALL_DIR=...`
+to select a different directory.
 
 ## Quick Start
 
@@ -1298,3 +1301,7 @@ Once installed, coding agents automatically know how to use this CLI effectively
 ## License
 
 MIT
+
+## Compatibility and maintenance
+
+See [build requirements and upstream API compatibility](docs/COMPATIBILITY.md) for the checked API baseline and dependency update workflow.

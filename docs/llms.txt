@@ -11,7 +11,7 @@ The Grafana CLI talks to the standard Grafana HTTP API. It wraps the API surface
 - **Independent / unofficial.** This is a third-party project (`github.com/piyush-gambhir/grafana-cli`). It is NOT affiliated with, endorsed by, or maintained by Grafana Labs. "Grafana" is a trademark of Grafana Labs. Note that Grafana Labs also ships a built-in administrative binary historically called `grafana-cli` (and the `grafana cli` subcommand) for plugin/admin tasks on a Grafana server, this project is a different, separate tool that talks to the HTTP API of a running Grafana instance.
 - **Binary name:** `grafana`.
 - **Supported platforms:** macOS, Linux, and Windows, on `amd64` and `arm64` (Windows `arm64` is not built). Single static Go binary, no runtime dependencies.
-- **Written in Go** (module `github.com/piyush-gambhir/grafana-cli`, Go 1.22, using `spf13/cobra`).
+- **Written in Go** (module `github.com/piyush-gambhir/grafana-cli`, Go 1.26+, using `spf13/cobra`).
 - **Designed for agents:** comprehensive `--help` on every command, structured `-o json` output, idempotency flags (`--if-not-exists`, `--if-exists`), a non-interactive mode (`--no-input`), and a safety mode (`--read-only`).
 
 ## Links
@@ -52,10 +52,12 @@ curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/ins
 
 The installer requires `curl` and `tar`. It detects OS (`linux`/`darwin`) and arch (`amd64`/`arm64`), downloads `grafana-cli_<os>_<arch>.tar.gz` from GitHub Releases, and places the `grafana` binary in `INSTALL_DIR` (using `sudo` if that directory is not writable).
 
-### go install
+### Build from source
 
 ```bash
-go install github.com/piyush-gambhir/grafana-cli@latest
+git clone https://github.com/piyush-gambhir/grafana-cli.git
+cd grafana-cli/cli-go
+make install
 ```
 
 ### From source
