@@ -14,7 +14,7 @@ curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/ins
 Pin a version or change the install directory:
 
 ```bash
-curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | VERSION=0.2.4 sh
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | VERSION=0.2.7 sh
 curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | INSTALL_DIR=~/.local/bin sh
 ```
 
@@ -29,13 +29,17 @@ the archive for your OS and architecture, extract it, and put `grafana` on your
 `PATH`:
 
 ```bash
-# example (macOS arm64) — adjust the version/asset name
+# example (macOS arm64): adjust the asset name for your platform
 curl -sSfL https://github.com/piyush-gambhir/grafana-cli/releases/latest/download/grafana-cli_darwin_arm64.tar.gz | tar xz
 sudo mv grafana /usr/local/bin/
 ```
 
 The install script expects assets named `grafana-cli_<os>_<arch>.tar.gz`, where
 `<os>` is `darwin` or `linux` and `<arch>` is `amd64` or `arm64`.
+
+Windows builds ship as `grafana-cli_windows_amd64.zip` containing `grafana.exe`.
+The install script and `grafana update` do not support Windows: to upgrade,
+download the new `.zip` and replace `grafana.exe`.
 
 ## Build from source
 

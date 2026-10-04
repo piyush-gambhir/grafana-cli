@@ -1,6 +1,6 @@
 import { docs } from 'collections/server';
 import { loader } from 'fumadocs-core/source';
-import { docsContentRoute, docsImageRoute, docsRoute, siteUrl } from './shared';
+import { absoluteLinks, docsContentRoute, docsImageRoute, docsRoute, siteUrl } from './shared';
 
 // See https://fumadocs.dev/docs/headless/source-api for more info
 export const source = loader({
@@ -32,5 +32,5 @@ export async function getLLMText(page: (typeof source)['$inferPage']) {
 
   return `# ${page.data.title} (${siteUrl}${page.url})
 
-${processed}`;
+${absoluteLinks(processed)}`;
 }

@@ -260,7 +260,7 @@ grafana config use-profile staging
 |---------|-------------|
 | `grafana login` | Interactively log in and save a connection profile |
 | `grafana version` | Print CLI version |
-| `grafana update` | Check for and install CLI updates |
+| `grafana update` | Check for and install CLI updates (Windows: `--check` only) |
 | `grafana completion` | Generate shell completion scripts |
 
 ### `grafana config` -- Manage CLI configuration
