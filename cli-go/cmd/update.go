@@ -218,8 +218,10 @@ func extractBinary(archivePath, destDir string) (string, error) {
 			continue
 		}
 
-		outPath := filepath.Join(destDir, name)
-		out, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY, 0o755)
+		// Write to a fixed name so no part of the archive entry reaches the
+		// file system path (CodeQL go/zipslip).
+		outPath := filepath.Join(destDir, "grafana")
+		out, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o755)
 		if err != nil {
 			return "", err
 		}
