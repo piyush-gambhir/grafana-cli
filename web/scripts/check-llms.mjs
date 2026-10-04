@@ -10,12 +10,15 @@ const pages = (await readdir(new URL('llms.mdx/', out), { recursive: true }))
   .filter((f) => f.endsWith('.md'))
   .map((f) => `llms.mdx/${f}`);
 assert.ok(pages.length > 0, 'no per-page Markdown under out/llms.mdx');
-const link = /\]\(([^)\s]*)|href="([^"]*)"/g;
+// Code examples are not links; skip fenced blocks and inline code.
+const code = /```[\s\S]*?```|`[^`\n]*`/g;
+// Inline links, <a>/<Card> hrefs, and reference definitions ([x]: /path).
+const link = /\]\(([^)\s]*)|href="([^"]*)"|^\s*\[(?!\^)[^\]\n]+\]:\s*(\S*)/gm;
 for (const file of ['llms.txt', 'llms-full.txt', ...pages]) {
-  const text = await readFile(new URL(file, out), 'utf8');
-  for (const [match, md, href] of text.matchAll(link)) {
-    const target = md ?? href;
-    assert.ok(/^(https?:\/\/|mailto:|#)/.test(target), `${file} has a non-absolute link: ${match}`);
+  const text = (await readFile(new URL(file, out), 'utf8')).replace(code, '');
+  for (const [match, md, href, ref] of text.matchAll(link)) {
+    const target = md ?? href ?? ref;
+    assert.ok(/^(https?:\/\/|mailto:|#)/.test(target), `${file} has a non-absolute link: ${match.trim()}`);
   }
 }
 const full = await readFile(new URL('llms-full.txt', out), 'utf8');
