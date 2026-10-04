@@ -10,12 +10,14 @@ const pages = (await readdir(new URL('llms.mdx/', out), { recursive: true }))
   .filter((f) => f.endsWith('.md'))
   .map((f) => `llms.mdx/${f}`);
 assert.ok(pages.length > 0, 'no per-page Markdown under out/llms.mdx');
-// Code examples are not links; skip fenced blocks and inline code.
-const code = /```[\s\S]*?```|`[^`\n]*`/g;
-// Inline links, <a>/<Card> hrefs, and reference definitions ([x]: /path).
-const link = /\]\(([^)\s]*)|href="([^"]*)"|^\s*\[(?!\^)[^\]\n]+\]:\s*(\S*)/gm;
+// Code examples are not links: blank out code spans and fences (a run of N
+// unescaped backticks up to the next run of exactly N), keeping line breaks.
+const code = /(?<![\\`])(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/g;
+// Inline links, <a>/<Card> hrefs, and reference definitions ([x]: /path),
+// with optional <...> around the destination.
+const link = /\]\(<?([^)\s>]*)|href="([^"]*)"|^[ \t]*\[(?!\^)[^\]\n]+\]:[ \t]*<?([^\s>]*)/gm;
 for (const file of ['llms.txt', 'llms-full.txt', ...pages]) {
-  const text = (await readFile(new URL(file, out), 'utf8')).replace(code, '');
+  const text = (await readFile(new URL(file, out), 'utf8')).replace(code, (m) => m.replace(/[^\n]/g, ' '));
   for (const [match, md, href, ref] of text.matchAll(link)) {
     const target = md ?? href ?? ref;
     assert.ok(/^(https?:\/\/|mailto:|#)/.test(target), `${file} has a non-absolute link: ${match.trim()}`);
