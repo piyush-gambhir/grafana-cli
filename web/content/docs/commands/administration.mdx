@@ -47,7 +47,11 @@ grafana update --check
 grafana completion zsh
 ```
 
-Running `grafana update` without `--check` prompts before replacing the current
-binary. With `--no-input`, use `grafana update --check` to inspect availability
-without starting an interactive update. On Windows, only `--check` is supported:
-download the new `.zip` from the release page and replace `grafana.exe`.
+Running `grafana update` without `--check` asks `Update now? [Y/n]` before
+replacing the current binary on macOS, Linux, or Windows. Pass `--yes` to skip
+the prompt; with `--no-input` or without a terminal, `--yes` is required.
+`grafana update --check -o json` reports `current_version`, `latest_version`,
+`update_available`, `release_url`, and `install_method`. `--read-only` blocks
+installing but not `--check`. See
+[Updating](https://projects.piyushgambhir.com/grafana-cli/docs/installation#updating)
+for the update notice and how to turn it off.

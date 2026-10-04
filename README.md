@@ -14,7 +14,7 @@ Designed for both human operators and coding agents (LLMs). All commands support
 - Full API coverage: every Grafana API endpoint accessible from the command line
 - Multiple output formats: table, JSON, YAML (`-o json`)
 - Profile management: multiple instances with `--profile`
-- Auto-update: checks for new versions; `grafana update` self-updates on macOS and Linux
+- Auto-update: a once-a-day notice in interactive terminals; `grafana update` self-updates on macOS, Linux, and Windows
 - Agent-friendly: comprehensive help text, structured output for LLM coding agents
 - Cross-platform: macOS and Linux (amd64 and arm64), Windows (amd64)
 
@@ -46,6 +46,40 @@ make install
 `make install` writes the correctly named executable to `go env GOBIN`, or to
 `$(go env GOPATH)/bin` when GOBIN is unset. Use `make install INSTALL_DIR=...`
 to select a different directory.
+
+### Updating
+
+```bash
+grafana update                   # show v<current> -> v<latest>, ask "Update now? [Y/n]", install
+grafana update --yes             # install without the prompt (required with --no-input or without a terminal)
+grafana update --check           # report current and latest versions; always queries GitHub
+grafana update --check -o json   # current_version, latest_version, update_available, release_url, install_method
+```
+
+`grafana update` downloads the release archive for your OS and architecture,
+verifies its SHA-256 against the release's `checksums.txt`, and replaces the
+running binary. It works on macOS, Linux, and Windows (on Windows the old
+`grafana.exe` is renamed to `grafana.exe.old` and deleted on a later start). If
+the binary's directory is not writable, re-run with `sudo` or reinstall with the
+install script into a writable directory; the old binary is left untouched. A
+binary built from source into a Go bin directory (`$GOBIN`, `$GOPATH/bin`, or
+`~/go/bin`) is not replaced: update it with `git pull && make install` in your
+checkout. `--read-only` blocks installing, while `--check` is always allowed.
+
+When a newer release exists, grafana prints a notice on stderr after the
+command's output, at most once a day per version:
+
+```
+A new version of grafana is available: v0.2.9 -> v0.2.10
+Update with: grafana update
+Release notes: https://github.com/piyush-gambhir/grafana-cli/releases/tag/v0.2.10
+```
+
+The release check runs at most once a day (cached in
+`~/.config/grafana-cli/update-check.json`) and only when stderr is a terminal,
+so scripts, CI, and coding agents never see it. Turn it off with
+`GRAFANA_NO_UPDATE_NOTIFIER=1` or `NO_UPDATE_NOTIFIER=1`; it is also skipped when
+`CI` is set, with `--quiet` (or `GRAFANA_QUIET=1`), and for development builds.
 
 ## Quick Start
 
@@ -1271,15 +1305,15 @@ grafana completion zsh
 
 #### `grafana update`
 
-Check for and install CLI updates.
+Check for and install CLI updates on macOS, Linux, and Windows. See
+[Updating](#updating) for the install steps, the update notice, and how to turn
+it off.
 
 ```bash
 grafana update
-grafana update --check
+grafana update --yes
+grafana update --check -o json
 ```
-
-On Windows, only `--check` is supported: download `grafana-cli_windows_amd64.zip`
-from the release page and replace `grafana.exe` with the one inside.
 
 ## File Input Format
 
