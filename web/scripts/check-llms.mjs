@@ -23,6 +23,11 @@ for (const file of ['llms.txt', 'llms-full.txt', ...pages]) {
     assert.ok(/^(https?:\/\/|mailto:|#)/.test(target), `${file} has a non-absolute link: ${match.trim()}`);
   }
 }
+// A sidebar separator followed by a folder of the same name lists the section
+// twice in the llms.txt index ("- **Commands**" then "- Commands").
+const index = await readFile(new URL('llms.txt', out), 'utf8');
+const labels = [...index.matchAll(/^[ \t]*- (?:\*\*)?([^[*\n]+?)(?:\*\*)?$/gm)].map((m) => m[1]);
+assert.equal(new Set(labels).size, labels.length, `llms.txt lists a section twice: ${labels.join(', ')}`);
 const full = await readFile(new URL('llms-full.txt', out), 'utf8');
 assert.ok(full.includes('https://projects.piyushgambhir.com/grafana-cli/docs/'), 'llms-full.txt has no absolute docs links');
 console.log(`Agent Markdown links are absolute in ${pages.length + 2} files`);
