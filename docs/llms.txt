@@ -97,7 +97,7 @@ Update with: grafana update
 Release notes: https://github.com/piyush-gambhir/grafana-cli/releases/tag/v0.2.10
 ```
 
-(For a `go` install the second line is `Update with: git pull && make install (in your grafana-cli/cli-go checkout)`.) The check calls GitHub's `releases/latest` API in the background with a 3-second timeout, never delays command output, and caches the answer (including a failed check) for 24 hours in `~/.config/grafana-cli/update-check.json`. It is skipped entirely, with no network request, when any of these hold: stderr is not a terminal; `CI` is set to any value; `GRAFANA_NO_UPDATE_NOTIFIER` or `NO_UPDATE_NOTIFIER` is set to any value; `--quiet`/`-q` or `GRAFANA_QUIET` is on; the build is a development build; or the command is `update`, `version`, `completion`, or `help`. Scripts, CI, and coding agents therefore never see it.
+(For a `go` install the second line is `Update with: git pull && make install (in your grafana-cli/cli-go checkout)`.) The check reads the redirect of `https://github.com/piyush-gambhir/grafana-cli/releases/latest` (not the rate-limited api.github.com) in the background with a 3-second timeout, never delays command output, and caches the answer (including a failed check) for 24 hours in `~/.config/grafana-cli/update-check.json`. It is skipped entirely, with no network request, when any of these hold: stderr is not a terminal; `CI` is set to any value; `GRAFANA_NO_UPDATE_NOTIFIER` or `NO_UPDATE_NOTIFIER` is set to any value; `--quiet`/`-q` or `GRAFANA_QUIET` is on; the build is a development build; or the command is `update`, `version`, `completion`, or `help`. Scripts, CI, and coding agents therefore never see it.
 
 ## Authentication
 
