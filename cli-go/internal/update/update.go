@@ -106,9 +106,10 @@ func NotifierDisabled(getenv func(string) string, version string, quiet, stderrI
 
 // Start begins the background check and returns a channel that receives the
 // answer. A cache entry less than 24 hours old answers synchronously (no
-// network), so the notice never depends on goroutine timing. Otherwise GitHub
-// is asked in a goroutine (3-second timeout) and the outcome is cached; a
-// failed check is cached too, so it is not retried for 24 hours.
+// network), so the notice never depends on goroutine timing. Otherwise the
+// attempt is recorded first, then GitHub is asked in a goroutine (3-second
+// timeout) and the outcome is cached. A failed check, or one the process
+// exits before, is not retried for 24 hours.
 func Start(currentVersion, configDir string) <-chan *UpdateInfo {
 	ch := make(chan *UpdateInfo, 1)
 	path := filepath.Join(configDir, cacheFileName)
@@ -117,6 +118,8 @@ func Start(currentVersion, configDir string) <-chan *UpdateInfo {
 		ch <- infoFrom(currentVersion, entry)
 		return ch
 	}
+	entry.LastChecked = now().UTC().Format(time.RFC3339)
+	writeEntry(path, entry)
 	go func() {
 		info, _ := fetchAndCache(currentVersion, path, backgroundTimeout)
 		ch <- info
@@ -124,7 +127,8 @@ func Start(currentVersion, configDir string) <-chan *UpdateInfo {
 	return ch
 }
 
-// CheckForUpdateFresh always asks GitHub, bypassing (and refreshing) the cache.
+// CheckForUpdateFresh always asks GitHub, bypassing the cache, and stores the
+// answer in it so the notice agrees with `grafana update`.
 func CheckForUpdateFresh(currentVersion, configDir string) (*UpdateInfo, error) {
 	return fetchAndCache(currentVersion, filepath.Join(configDir, cacheFileName), explicitTimeout)
 }
@@ -137,15 +141,6 @@ func Cached(currentVersion, configDir string) *UpdateInfo {
 		return nil
 	}
 	return infoFrom(currentVersion, entry)
-}
-
-// ClearCache removes the cached check, for example after a successful update.
-func ClearCache(configDir string) error {
-	err := os.Remove(filepath.Join(configDir, cacheFileName))
-	if os.IsNotExist(err) {
-		return nil
-	}
-	return err
 }
 
 // Notify prints the notice unless it was already shown for this latest
@@ -306,7 +301,7 @@ func fetchLatest(timeout time.Duration) (string, error) {
 	}
 	tag, ok := strings.CutPrefix(loc.Path, "/"+Repo+"/releases/tag/")
 	if loc.Scheme != req.URL.Scheme || loc.Host != req.URL.Host || !ok {
-		return "", fmt.Errorf("%s redirected to %s, not a %s release tag", latestURL, loc.Redacted(), Repo)
+		return "", fmt.Errorf("%s redirected to %q, not a %s release tag", latestURL, loc.Redacted(), Repo)
 	}
 	if !releaseTagRE.MatchString(tag) {
 		return "", fmt.Errorf("unexpected release tag %q", tag)

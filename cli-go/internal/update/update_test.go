@@ -252,6 +252,7 @@ func TestFetchLatestReadsRedirect(t *testing.T) {
 		{"pre-release tag", http.StatusFound, tagURL(srv.URL, "v0.2.10-rc.1"), ""},
 		{"tag without v", http.StatusFound, tagURL(srv.URL, "0.2.10"), ""},
 		{"terminal escape in tag", http.StatusFound, tagURL(srv.URL, "v1.0.0\x1b[31m"), ""},
+		{"C1 control in foreign query", http.StatusFound, "https://evil.example/x?\x9b2J", ""},
 		{"not a redirect", http.StatusOK, "", ""},
 		{"rate limited", http.StatusForbidden, "", ""},
 	} {
@@ -261,6 +262,13 @@ func TestFetchLatestReadsRedirect(t *testing.T) {
 			if tc.want == "" {
 				if err == nil {
 					t.Fatalf("fetchLatest = %q, want an error", got)
+				}
+				// The error reaches the terminal via `grafana update`.
+				for _, b := range []byte(err.Error()) {
+					if b < 0x20 || b >= 0x7f {
+						t.Errorf("error contains raw byte %#x: %q", b, err)
+						break
+					}
 				}
 				return
 			}
@@ -294,6 +302,39 @@ func TestCheckForUpdateFreshBypassesCache(t *testing.T) {
 	}
 	if !info.Available || info.LatestVersion != "0.2.10" || hits.Load() != 1 {
 		t.Errorf("info = %+v, hits = %d", info, hits.Load())
+	}
+	// `update --check` stores its answer, so the notifier agrees with it.
+	if cached := receive(t, Start("0.2.9", dir)); cached == nil || cached.LatestVersion != "0.2.10" || hits.Load() != 1 {
+		t.Errorf("notifier after a fresh check = %+v, hits = %d", cached, hits.Load())
+	}
+}
+
+// The attempt is recorded before the request, so a process that exits before
+// the answer arrives does not make every later command ask GitHub again.
+func TestStartRecordsAttemptBeforeRequest(t *testing.T) {
+	release := make(chan struct{})
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		<-release
+		w.WriteHeader(http.StatusBadGateway)
+	}))
+	t.Cleanup(srv.Close)
+	setReleaseBase(t, srv.URL)
+	dir := t.TempDir()
+	setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
+
+	// Nobody reads this answer during the test, like a command that exited.
+	pending := Start("0.2.9", dir)
+	t.Cleanup(func() { // runs before the seams are restored
+		close(release)
+		<-pending
+	})
+	if entry := readEntry(filepath.Join(dir, cacheFileName)); entry.LastChecked != "2026-10-04T12:00:00Z" {
+		t.Fatalf("attempt not recorded before the request: %+v", entry)
+	}
+	select {
+	case <-Start("0.2.9", dir):
+	default:
+		t.Fatal("second check did not answer from the cache")
 	}
 }
 
