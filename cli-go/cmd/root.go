@@ -135,7 +135,7 @@ func newRootCmd() *cobra.Command {
 		Short: "Grafana CLI - manage Grafana from the command line",
 		Long: `A command-line interface for managing Grafana instances, dashboards, datasources, alerts, and more.
 
-Full command reference (for agents/LLMs): https://projects.piyushgambhir.com/grafana-cli/llms.txt
+Full command reference (for agents/LLMs): https://github.com/piyush-gambhir/grafana-cli/blob/main/docs/llms.txt
 Claude Code skill: https://github.com/piyush-gambhir/grafana-cli/blob/main/grafana/SKILL.md`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
