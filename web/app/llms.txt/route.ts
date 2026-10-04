@@ -6,12 +6,11 @@ import { getOtherSuiteProjects } from '@/lib/suite';
 
 export const revalidate = false;
 
-export function GET() {
+export async function GET() {
   const intro =
     'Grafana CLI is an independent, unofficial command-line interface built for coding agents and any shell-capable agent harness, including Claude Code, OpenAI Codex, and Cursor. It provides structured JSON/YAML output, read-only safety, and no-input automation for dashboards, datasources, and alerting.';
-  const docsIndex = llms(source)
-    .index()
-    .replaceAll('](/', `](${siteUrl}/`);
+  // index() returns a Promise since fumadocs-core 16.15.17.
+  const docsIndex = (await llms(source).index()).replaceAll('](/', `](${siteUrl}/`);
   const relatedProjects = getOtherSuiteProjects(site.repo)
     .map(({ name, website }) => `- [${name}](${website})`)
     .join('\n');
