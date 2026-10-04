@@ -36,6 +36,11 @@ export const suite: readonly SuiteProject[] = [
     repository: 'https://github.com/piyush-gambhir/nginxpm-cli',
   },
   {
+    name: 'bing-webmaster-cli',
+    website: 'https://projects.piyushgambhir.com/bing-webmaster-cli',
+    repository: 'https://github.com/piyush-gambhir/bing-webmaster-cli',
+  },
+  {
     name: 'reckon',
     website: 'https://projects.piyushgambhir.com/reckon',
     repository: 'https://github.com/piyush-gambhir/reckon',
