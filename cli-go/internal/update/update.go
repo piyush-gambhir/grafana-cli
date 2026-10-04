@@ -118,7 +118,7 @@ func Start(currentVersion, configDir string) <-chan *UpdateInfo {
 		return ch
 	}
 	go func() {
-		info, _ := fetchAndCache(currentVersion, path, entry, backgroundTimeout)
+		info, _ := fetchAndCache(currentVersion, path, backgroundTimeout)
 		ch <- info
 	}()
 	return ch
@@ -126,8 +126,7 @@ func Start(currentVersion, configDir string) <-chan *UpdateInfo {
 
 // CheckForUpdateFresh always asks GitHub, bypassing (and refreshing) the cache.
 func CheckForUpdateFresh(currentVersion, configDir string) (*UpdateInfo, error) {
-	path := filepath.Join(configDir, cacheFileName)
-	return fetchAndCache(currentVersion, path, readEntry(path), explicitTimeout)
+	return fetchAndCache(currentVersion, filepath.Join(configDir, cacheFileName), explicitTimeout)
 }
 
 // Cached returns the cached answer without touching the network, or nil when
@@ -260,8 +259,11 @@ func infoFrom(currentVersion string, entry cacheEntry) *UpdateInfo {
 // fetchAndCache asks GitHub for the latest release and records the outcome.
 // On failure it keeps the last known latest version but still stamps
 // last_checked, so a broken network does not cause a request per command.
-func fetchAndCache(currentVersion, path string, entry cacheEntry, timeout time.Duration) (*UpdateInfo, error) {
+// The entry is re-read after the request so a notice another process recorded
+// meanwhile is kept.
+func fetchAndCache(currentVersion, path string, timeout time.Duration) (*UpdateInfo, error) {
 	latest, publishedAt, err := fetchLatest(timeout)
+	entry := readEntry(path)
 	entry.LastChecked = now().UTC().Format(time.RFC3339)
 	if err == nil {
 		entry.LatestVersion = latest

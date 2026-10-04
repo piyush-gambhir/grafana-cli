@@ -140,6 +140,34 @@ func TestStartFetchesWhenStaleAndCaches(t *testing.T) {
 	}
 }
 
+// A notice recorded by another process while the GitHub request is in flight
+// must survive the cache refresh, or the next command repeats the notice.
+func TestRefreshKeepsNoticeRecordedDuringFetch(t *testing.T) {
+	release := make(chan struct{})
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		<-release
+		_, _ = w.Write([]byte(`{"tag_name":"v0.2.10"}`))
+	}))
+	t.Cleanup(srv.Close)
+	old := apiBaseURL
+	apiBaseURL = srv.URL
+	t.Cleanup(func() { apiBaseURL = old })
+	dir := t.TempDir()
+	setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
+
+	ch := Start("0.2.9", dir) // empty cache: fetch in the background
+	info := &UpdateInfo{Available: true, CurrentVersion: "0.2.9", LatestVersion: "0.2.10", ReleaseURL: ReleaseURL("0.2.10")}
+	if !Notify(&bytes.Buffer{}, info, dir, MethodSelf) {
+		t.Fatal("notice not shown")
+	}
+	close(release)
+	receive(t, ch)
+
+	if entry := readEntry(filepath.Join(dir, cacheFileName)); entry.NotifiedVersion != "0.2.10" || entry.LatestVersion != "0.2.10" {
+		t.Errorf("refresh lost the recorded notice: %+v", entry)
+	}
+}
+
 func TestFailedCheckIsCached(t *testing.T) {
 	hits := fakeGitHub(t, http.StatusInternalServerError, "")
 	dir := t.TempDir()
