@@ -22,10 +22,17 @@ Available on every command:
 
 ```
 grafana login                  Interactive login; saves connection profile to ~/.config/grafana-cli/config.yaml
-grafana version                Print CLI version, commit hash, and build date
-grafana update                 Check for and install CLI updates (Windows: --check only)
+grafana version                Print CLI version, commit hash, build date, and the cached latest release (no network)
+grafana update                 Install the latest release (macOS, Linux, Windows); --yes skips the prompt
+grafana update --check         Report current/latest versions (always queries GitHub); -o json for
+                               current_version, latest_version, update_available, release_url, install_method
 grafana completion <shell>     Generate shell completion (bash, zsh, fish, powershell)
 ```
+
+Update notice: in an interactive terminal, grafana checks GitHub at most once a day and prints a
+three-line "A new version of grafana is available" notice on stderr after the command's output. It
+never appears when stderr is not a terminal or `CI` is set. Turn it off with
+`GRAFANA_NO_UPDATE_NOTIFIER=1`, `NO_UPDATE_NOTIFIER=1`, or `--quiet`.
 
 ---
 

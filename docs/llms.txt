@@ -60,25 +60,44 @@ cd grafana-cli/cli-go
 make install
 ```
 
-### From source
-
-```bash
-git clone https://github.com/piyush-gambhir/grafana-cli.git
-cd grafana-cli && make install
-```
+`make install` writes `grafana` to `go env GOBIN` (or `$(go env GOPATH)/bin`). Use `make install`, not `go install`: the main package is named `cli-go`, so `go install` would name the binary `cli-go`.
 
 ### Self-update
 
-Once installed from a release, the binary can update itself in place (downloads the matching release tarball, verifies its SHA256 against `checksums.txt`, and atomically replaces the running binary):
-
 ```bash
-grafana update            # check, prompt, and install the latest release
-grafana update --check    # only report whether an update is available
+grafana update                   # show v<current> -> v<latest>, ask "Update now? [Y/n]" (default yes), install
+grafana update --yes             # install without the prompt (-y); required with --no-input or when stdin is not a terminal
+grafana update --check           # report current version, latest version, whether an update is available, and the release URL
+grafana update --check -o json   # the same as JSON
 ```
 
-On Windows, `grafana update` refuses to install (releases ship Windows as a `.zip`, and a running `.exe` cannot be replaced in place); `grafana update --check` still works. Download `grafana-cli_windows_amd64.zip` from the release page and replace `grafana.exe` with the one inside.
+`grafana update --check` always queries GitHub (bypassing the cache) and exits 0 whether or not an update exists. `-o json` prints:
 
-Self-update is disabled for `dev` builds (built from source without release version info). Prebuilt releases also print a one-line update notice to stderr when a newer version exists (this background check is skipped for `update`, `version`, `completion`, and `help`).
+```json
+{
+  "current_version": "0.2.9",
+  "latest_version": "0.2.10",
+  "update_available": true,
+  "release_url": "https://github.com/piyush-gambhir/grafana-cli/releases/tag/v0.2.10",
+  "install_method": "self"
+}
+```
+
+`install_method` is `self` (a release binary that `grafana update` replaces) or `go` (a binary in a Go bin directory: `$GOBIN`, `$GOPATH/bin`, or `~/go/bin`).
+
+Installing downloads `grafana-cli_<os>_<arch>.tar.gz` (`.zip` on Windows) from the release, verifies its SHA-256 against the release's `checksums.txt` (a mismatch or missing entry is refused), extracts only the `grafana` (`grafana.exe`) binary, and replaces the running executable: on macOS and Linux through a temp file in the same directory renamed over it; on Windows by renaming the running `grafana.exe` to `grafana.exe.old`, moving the new one into place, and deleting `grafana.exe.old` on a later start. If the executable's directory is not writable, the update fails with advice to re-run with `sudo` or reinstall with the install script into a writable directory, and the old binary keeps working. A `go` install is never replaced: `grafana update` prints `git pull && make install` instead. `--read-only` blocks installing; `--check` is always allowed. Development builds (version `dev`, empty, or not semver) do not self-update. On success it prints `Updated grafana v<current> -> v<latest>` and the release notes URL.
+
+### Update notice
+
+When a newer release exists, grafana prints this on stderr after the command's output, at most once a day per version:
+
+```
+A new version of grafana is available: v0.2.9 -> v0.2.10
+Update with: grafana update
+Release notes: https://github.com/piyush-gambhir/grafana-cli/releases/tag/v0.2.10
+```
+
+(For a `go` install the second line is `Update with: git pull && make install (in your grafana-cli/cli-go checkout)`.) The check calls GitHub's `releases/latest` API in the background with a 3-second timeout, never delays command output, and caches the answer (including a failed check) for 24 hours in `~/.config/grafana-cli/update-check.json`. It is skipped entirely, with no network request, when any of these hold: stderr is not a terminal; `CI` is set to any value; `GRAFANA_NO_UPDATE_NOTIFIER` or `NO_UPDATE_NOTIFIER` is set to any value; `--quiet`/`-q` or `GRAFANA_QUIET` is on; the build is a development build; or the command is `update`, `version`, `completion`, or `help`. Scripts, CI, and coding agents therefore never see it.
 
 ## Authentication
 
@@ -121,6 +140,9 @@ It then tests the connection (calls `GET /api/org/`, falling back to `GET /api/h
 | `GRAFANA_NO_INPUT` | Disable interactive prompts when set to `true` or `1` |
 | `GRAFANA_QUIET` | Suppress informational output when set to `true` or `1` |
 | `GRAFANA_VERBOSE` | Enable verbose HTTP logging to stderr when set to `true` or `1` |
+| `GRAFANA_NO_UPDATE_NOTIFIER` | Set to any value to turn off the update notice and its GitHub check |
+| `NO_UPDATE_NOTIFIER` | Same as `GRAFANA_NO_UPDATE_NOTIFIER` (shared across CLIs) |
+| `CI` | When set to any value, the update notice and its GitHub check are skipped |
 | `XDG_CONFIG_HOME` | Overrides the base config directory (see Configuration) |
 
 Go-standard certificate variables are also honored: `SSL_CERT_FILE` / `SSL_CERT_DIR` (for custom CA bundles / self-signed certificates). Note: the CLI builds its own HTTP transport without `http.ProxyFromEnvironment`, so the `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` variables are NOT honored, connections always go direct.
@@ -198,8 +220,9 @@ Top-level groups: `dashboard`, `datasource`, `folder`, `alert`, `org`, `team`, `
 
 ```bash
 grafana login                     # interactive login; saves a connection profile
-grafana version                   # print CLI version, commit hash, and build date
-grafana update [--check]          # self-update from GitHub Releases (--check = report only; Windows supports --check only)
+grafana version                   # print CLI version, commit hash, build date, and the cached latest release (never calls GitHub)
+grafana update [--yes]            # install the latest release from GitHub Releases (macOS, Linux, Windows)
+grafana update --check [-o json]  # report current/latest versions and whether an update is available
 grafana completion <shell>        # emit a shell completion script
 ```
 

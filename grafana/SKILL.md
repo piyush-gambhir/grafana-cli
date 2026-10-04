@@ -52,6 +52,7 @@ grafana config list-profiles              # list all profiles
 - **Pagination** is available on list commands via `--page` and `--limit`.
 - **Annotation times** (`--from`, `--to`) are in epoch **milliseconds**, not seconds.
 - **Always verify connection** before running operations: `grafana config view`.
+- **Updating the CLI:** `grafana update --check -o json` reports `current_version`, `latest_version`, and `update_available`; `grafana update --yes` installs the latest release (macOS, Linux, Windows). The "new version" notice is printed only when stderr is a terminal, so it never appears in agent output; `GRAFANA_NO_UPDATE_NOTIFIER=1` turns it off everywhere.
 - **Command aliases:** `dashboard` = `dash` / `db`, `datasource` = `ds`, `service-account` = `sa`, `library-element` = `le`, `contact-point` = `cp`, `mute-timing` = `mt`, `alert template` = `alert tmpl`, `preferences` = `prefs`.
 
 ## Common Workflows

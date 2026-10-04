@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 
 	"github.com/piyush-gambhir/grafana-cli/cli-go/cmd/admin"
 	"github.com/piyush-gambhir/grafana-cli/cli-go/cmd/alert"
@@ -48,9 +48,46 @@ var (
 // OutputFormat is set during PersistentPreRunE and exported for use by main.go.
 var OutputFormat string
 
+// Test seams for the background update check.
+var (
+	stderrIsTerminal    = func() bool { return term.IsTerminal(int(os.Stderr.Fd())) }
+	startUpdateCheck    = update.Start
+	detectInstallMethod = func() string {
+		exe, err := currentExecutable()
+		if err != nil {
+			return update.MethodSelf
+		}
+		return update.DetectInstallMethod(exe)
+	}
+)
+
 // Execute is the main entry point for the CLI.
 func Execute() error {
+	if goos == "windows" {
+		if exe, err := currentExecutable(); err == nil {
+			cleanupOldExecutable(goos, exe)
+		}
+	}
 	return newRootCmd().Execute()
+}
+
+// isTopLevel reports whether cmd is a direct child of the root named one of
+// names, so `grafana update` matches but `grafana dashboard update` does not.
+func isTopLevel(cmd *cobra.Command, names ...string) bool {
+	if !cmd.HasParent() || cmd.Parent().HasParent() {
+		return false
+	}
+	for _, name := range names {
+		if cmd.Name() == name {
+			return true
+		}
+	}
+	return false
+}
+
+// skipsUpdateCheck lists the commands that never run the background check.
+func skipsUpdateCheck(cmd *cobra.Command) bool {
+	return strings.HasPrefix(cmd.Name(), "__complete") || isTopLevel(cmd, "update", "version", "completion", "help")
 }
 
 // loadAndResolveConfig loads the config file and resolves auth from flags/env/config.
@@ -127,8 +164,8 @@ func newRootCmd() *cobra.Command {
 		IOStreams: cmdutil.DefaultIOStreams(),
 	}
 
-	// Channel-based update check result passing from PersistentPreRun to PersistentPostRun.
-	var updateResult chan *update.UpdateInfo
+	// The background update check's answer, passed from PersistentPreRunE to PersistentPostRun.
+	var updateResult <-chan *update.UpdateInfo
 
 	rootCmd := &cobra.Command{
 		Use:   "grafana",
@@ -154,19 +191,14 @@ Claude Code skill: https://github.com/piyush-gambhir/grafana-cli/blob/main/grafa
 			f.Quiet = flagQuiet
 			f.Verbose = flagVerbose
 
-			// Start background update check for most commands.
-			cmdName := cmd.Name()
-			skipUpdateCheck := cmdName == "update" || cmdName == "version" || cmdName == "completion" || cmdName == "help"
-			if !skipUpdateCheck && build.Version != "dev" && build.Version != "" {
-				updateResult = make(chan *update.UpdateInfo, 1)
-				go func() {
-					info, _ := update.CheckForUpdate(build.Version, updateRepo, config.ConfigDir())
-					updateResult <- info
-				}()
+			// Start the background update check unless the command, the
+			// environment, or the build rules it out (no network then).
+			if !skipsUpdateCheck(cmd) && !update.NotifierDisabled(os.Getenv, build.Version, flagQuiet, stderrIsTerminal()) {
+				updateResult = startUpdateCheck(build.Version, config.ConfigDir())
 			}
 
-			// Skip auth setup for commands that don't need it.
-			if cmdName == "version" || cmdName == "completion" || cmdName == "help" || cmdName == "update" {
+			// Skip auth setup for top-level commands that don't need it.
+			if isTopLevel(cmd, "version", "completion", "help", "update") {
 				return nil
 			}
 			// Also skip for config subcommands.
@@ -196,13 +228,13 @@ Claude Code skill: https://github.com/piyush-gambhir/grafana-cli/blob/main/grafa
 			if updateResult == nil {
 				return
 			}
+			// Print only an answer that is already in; never wait for GitHub.
 			select {
 			case info := <-updateResult:
 				if info != nil && info.Available {
-					update.PrintUpdateNotice(os.Stderr, info)
+					update.Notify(cmd.ErrOrStderr(), info, config.ConfigDir(), detectInstallMethod())
 				}
-			case <-time.After(2 * time.Second):
-				// Don't block command output waiting for update check.
+			default:
 			}
 		},
 	}

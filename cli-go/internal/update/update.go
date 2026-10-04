@@ -1,3 +1,6 @@
+// Package update checks GitHub Releases for a newer grafana CLI and prints the
+// update notice. The background check (Start) runs at most once a day and only
+// in an interactive terminal; see NotifierDisabled for the opt-outs.
 package update
 
 import (
@@ -7,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -14,15 +18,45 @@ import (
 )
 
 const (
-	cacheDuration = 24 * time.Hour
-	cacheFileName = "update-check.json"
+	// Repo is the GitHub repository that publishes releases.
+	Repo = "piyush-gambhir/grafana-cli"
+	// BinaryName is the executable name used in notices.
+	BinaryName = "grafana"
+	// EnvPrefix is the CLI's environment variable prefix.
+	EnvPrefix = "GRAFANA"
+
+	// MethodSelf means `grafana update` replaces the binary in place.
+	MethodSelf = "self"
+	// MethodGo means the binary lives in a Go bin directory, where `make
+	// install` from a source checkout put it; it is never self-replaced.
+	MethodGo = "go"
+
+	// SelfUpdateCommand updates a release binary.
+	SelfUpdateCommand = BinaryName + " update"
+	// SourceUpdateCommand updates a binary built from source. The main package
+	// is named cli-go, so `go install .../cli-go@latest` would install a binary
+	// named cli-go; the repo documents `make install` instead.
+	SourceUpdateCommand = "git pull && make install (in your grafana-cli/cli-go checkout)"
+
+	cacheDuration     = 24 * time.Hour
+	cacheFileName     = "update-check.json"
+	backgroundTimeout = 3 * time.Second
+	explicitTimeout   = 15 * time.Second
+	maxAPIResponse    = 1 << 20
 )
 
-// goos is runtime.GOOS; tests override it. `grafana update` cannot install on
-// Windows, so the notice only links the release there.
-var goos = runtime.GOOS
+// Test seams.
+var (
+	apiBaseURL = "https://api.github.com"
+	now        = time.Now
+)
 
-// UpdateInfo holds information about an available update.
+// semverRE matches MAJOR.MINOR.PATCH with an optional pre-release or build
+// suffix (git describe output such as v0.2.9-3-gabc1234-dirty qualifies).
+var semverRE = regexp.MustCompile(`^v?(\d+)\.(\d+)\.(\d+)([-+][0-9A-Za-z.+-]+)?$`)
+
+// UpdateInfo describes the latest release relative to the running version.
+// Versions are stored without the leading "v".
 type UpdateInfo struct {
 	Available      bool
 	CurrentVersion string
@@ -31,143 +65,267 @@ type UpdateInfo struct {
 	PublishedAt    string
 }
 
-// cacheEntry is the on-disk representation of a cached update check.
+// cacheEntry is the on-disk update-check.json.
 type cacheEntry struct {
-	LastChecked   string `json:"last_checked"`
-	LatestVersion string `json:"latest_version"`
-	ReleaseURL    string `json:"release_url"`
-	PublishedAt   string `json:"published_at,omitempty"`
+	LastChecked     string `json:"last_checked,omitempty"`
+	LatestVersion   string `json:"latest_version,omitempty"`
+	PublishedAt     string `json:"published_at,omitempty"`
+	NotifiedVersion string `json:"notified_version,omitempty"`
+	NotifiedAt      string `json:"notified_at,omitempty"`
 }
 
-// githubRelease represents the relevant fields from the GitHub releases API.
 type githubRelease struct {
 	TagName     string `json:"tag_name"`
-	HTMLURL     string `json:"html_url"`
 	PublishedAt string `json:"published_at"`
 }
 
-// CheckForUpdate checks GitHub for a newer release. It uses a 24-hour file
-// cache to avoid hitting the API on every invocation.
-func CheckForUpdate(currentVersion, repo, configDir string) (*UpdateInfo, error) {
-	if currentVersion == "" || currentVersion == "dev" {
-		return &UpdateInfo{CurrentVersion: currentVersion}, nil
-	}
-
-	// Try reading from cache first.
-	cachePath := filepath.Join(configDir, cacheFileName)
-	if info, err := readCache(cachePath, currentVersion); err == nil && info != nil {
-		return info, nil
-	}
-
-	// Cache miss or stale — fetch from GitHub.
-	return fetchAndCache(currentVersion, repo, cachePath)
+// IsReleaseVersion reports whether v is a semver release version. "dev",
+// empty, and commit-hash versions are development builds.
+func IsReleaseVersion(v string) bool {
+	return semverRE.MatchString(v)
 }
 
-// CheckForUpdateFresh always checks GitHub, bypassing the cache.
-func CheckForUpdateFresh(currentVersion, repo, configDir string) (*UpdateInfo, error) {
-	if currentVersion == "" || currentVersion == "dev" {
-		return &UpdateInfo{CurrentVersion: currentVersion}, nil
-	}
-
-	cachePath := filepath.Join(configDir, cacheFileName)
-	return fetchAndCache(currentVersion, repo, cachePath)
+// ReleaseURL returns the release notes page for version.
+func ReleaseURL(version string) string {
+	return fmt.Sprintf("https://github.com/%s/releases/tag/v%s", Repo, strings.TrimPrefix(version, "v"))
 }
 
-// PrintUpdateNotice writes a colored update notice to the given writer.
-func PrintUpdateNotice(w io.Writer, info *UpdateInfo) {
+// NotifierDisabled reports whether the background check must be skipped: a
+// non-terminal stderr, CI, an opt-out variable, quiet mode, or a dev build.
+func NotifierDisabled(getenv func(string) string, version string, quiet, stderrIsTerminal bool) bool {
+	if !stderrIsTerminal || quiet || !IsReleaseVersion(version) {
+		return true
+	}
+	for _, name := range []string{"CI", EnvPrefix + "_NO_UPDATE_NOTIFIER", "NO_UPDATE_NOTIFIER"} {
+		if getenv(name) != "" {
+			return true
+		}
+	}
+	return false
+}
+
+// Start begins the background check and returns a channel that receives the
+// answer. A cache entry less than 24 hours old answers synchronously (no
+// network), so the notice never depends on goroutine timing. Otherwise GitHub
+// is asked in a goroutine (3-second timeout) and the outcome is cached; a
+// failed check is cached too, so it is not retried for 24 hours.
+func Start(currentVersion, configDir string) <-chan *UpdateInfo {
+	ch := make(chan *UpdateInfo, 1)
+	path := filepath.Join(configDir, cacheFileName)
+	entry := readEntry(path)
+	if fresh(entry) {
+		ch <- infoFrom(currentVersion, entry)
+		return ch
+	}
+	go func() {
+		info, _ := fetchAndCache(currentVersion, path, backgroundTimeout)
+		ch <- info
+	}()
+	return ch
+}
+
+// CheckForUpdateFresh always asks GitHub, bypassing (and refreshing) the cache.
+func CheckForUpdateFresh(currentVersion, configDir string) (*UpdateInfo, error) {
+	return fetchAndCache(currentVersion, filepath.Join(configDir, cacheFileName), explicitTimeout)
+}
+
+// Cached returns the cached answer without touching the network, or nil when
+// there is no successful check from the last 24 hours.
+func Cached(currentVersion, configDir string) *UpdateInfo {
+	entry := readEntry(filepath.Join(configDir, cacheFileName))
+	if !fresh(entry) || entry.LatestVersion == "" {
+		return nil
+	}
+	return infoFrom(currentVersion, entry)
+}
+
+// ClearCache removes the cached check, for example after a successful update.
+func ClearCache(configDir string) error {
+	err := os.Remove(filepath.Join(configDir, cacheFileName))
+	if os.IsNotExist(err) {
+		return nil
+	}
+	return err
+}
+
+// Notify prints the notice unless it was already shown for this latest
+// version in the last 24 hours, then records that it was shown. It reports
+// whether the notice was printed.
+func Notify(w io.Writer, info *UpdateInfo, configDir, method string) bool {
 	if info == nil || !info.Available {
-		return
+		return false
 	}
-	fmt.Fprintf(w, "\n")
-	fmt.Fprintf(w, "A new version of grafana is available: %s → %s\n",
-		formatVersion(info.CurrentVersion), formatVersion(info.LatestVersion))
-	if goos == "windows" {
-		fmt.Fprintf(w, "Download it from:\n")
-	} else {
-		fmt.Fprintf(w, "Run `grafana update` to update, or download from:\n")
+	path := filepath.Join(configDir, cacheFileName)
+	entry := readEntry(path)
+	if entry.NotifiedVersion == info.LatestVersion {
+		if at, err := time.Parse(time.RFC3339, entry.NotifiedAt); err == nil {
+			if age := now().Sub(at); age >= 0 && age < cacheDuration {
+				return false
+			}
+		}
 	}
-	fmt.Fprintf(w, "%s\n", info.ReleaseURL)
+	PrintNotice(w, info, method)
+	entry.NotifiedVersion = info.LatestVersion
+	entry.NotifiedAt = now().UTC().Format(time.RFC3339)
+	writeEntry(path, entry)
+	return true
 }
 
-func readCache(cachePath, currentVersion string) (*UpdateInfo, error) {
-	data, err := os.ReadFile(cachePath)
-	if err != nil {
-		return nil, err
-	}
-
-	var entry cacheEntry
-	if err := json.Unmarshal(data, &entry); err != nil {
-		return nil, err
-	}
-
-	lastChecked, err := time.Parse(time.RFC3339, entry.LastChecked)
-	if err != nil {
-		return nil, err
-	}
-
-	if time.Since(lastChecked) > cacheDuration {
-		return nil, fmt.Errorf("cache expired")
-	}
-
-	available, _ := isNewer(entry.LatestVersion, currentVersion)
-	return &UpdateInfo{
-		Available:      available,
-		CurrentVersion: currentVersion,
-		LatestVersion:  entry.LatestVersion,
-		ReleaseURL:     entry.ReleaseURL,
-		PublishedAt:    entry.PublishedAt,
-	}, nil
+// PrintNotice writes the update notice, preceded by a blank line.
+func PrintNotice(w io.Writer, info *UpdateInfo, method string) {
+	fmt.Fprintf(w, "\nA new version of %s is available: v%s -> v%s\n", BinaryName, info.CurrentVersion, info.LatestVersion)
+	fmt.Fprintf(w, "Update with: %s\n", UpdateCommand(method))
+	fmt.Fprintf(w, "Release notes: %s\n", info.ReleaseURL)
 }
 
-func fetchAndCache(currentVersion, repo, cachePath string) (*UpdateInfo, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/%s/releases/latest", repo)
-
-	client := &http.Client{Timeout: 5 * time.Second}
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("creating request: %w", err)
+// UpdateCommand returns the command that updates a binary installed by method.
+func UpdateCommand(method string) string {
+	if method == MethodGo {
+		return SourceUpdateCommand
 	}
-	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	return SelfUpdateCommand
+}
+
+// DetectInstallMethod reports MethodGo when exePath lives in a Go bin
+// directory ($GOBIN, $GOPATH/bin, or ~/go/bin), else MethodSelf.
+func DetectInstallMethod(exePath string) string {
+	home, _ := os.UserHomeDir()
+	return InstallMethodFor(exePath, os.Getenv, home)
+}
+
+// InstallMethodFor is DetectInstallMethod with the environment and home
+// directory supplied by the caller.
+func InstallMethodFor(exePath string, getenv func(string) string, home string) string {
+	var dirs []string
+	if gobin := getenv("GOBIN"); gobin != "" {
+		dirs = append(dirs, gobin)
+	}
+	for _, gopath := range filepath.SplitList(getenv("GOPATH")) {
+		if gopath != "" {
+			dirs = append(dirs, filepath.Join(gopath, "bin"))
+		}
+	}
+	if home != "" {
+		dirs = append(dirs, filepath.Join(home, "go", "bin"))
+	}
+	exeDir := canonicalPath(filepath.Dir(exePath))
+	for _, dir := range dirs {
+		if samePath(exeDir, canonicalPath(dir)) {
+			return MethodGo
+		}
+	}
+	return MethodSelf
+}
+
+func canonicalPath(p string) string {
+	if resolved, err := filepath.EvalSymlinks(p); err == nil {
+		p = resolved
+	}
+	if abs, err := filepath.Abs(p); err == nil {
+		p = abs
+	}
+	return filepath.Clean(p)
+}
+
+func samePath(a, b string) bool {
+	if runtime.GOOS == "windows" {
+		return strings.EqualFold(a, b)
+	}
+	return a == b
+}
+
+func fresh(entry cacheEntry) bool {
+	checked, err := time.Parse(time.RFC3339, entry.LastChecked)
+	if err != nil {
+		return false
+	}
+	age := now().Sub(checked)
+	return age >= 0 && age < cacheDuration
+}
+
+func infoFrom(currentVersion string, entry cacheEntry) *UpdateInfo {
+	current := strings.TrimPrefix(currentVersion, "v")
+	info := &UpdateInfo{CurrentVersion: current}
+	if entry.LatestVersion == "" {
+		return info
+	}
+	info.LatestVersion = entry.LatestVersion
+	info.ReleaseURL = ReleaseURL(entry.LatestVersion)
+	info.PublishedAt = entry.PublishedAt
+	info.Available, _ = isNewer(entry.LatestVersion, current)
+	return info
+}
+
+// fetchAndCache asks GitHub for the latest release and records the outcome.
+// On failure it keeps the last known latest version but still stamps
+// last_checked, so a broken network does not cause a request per command.
+// The entry is re-read after the request so a notice another process recorded
+// meanwhile is kept.
+func fetchAndCache(currentVersion, path string, timeout time.Duration) (*UpdateInfo, error) {
+	latest, publishedAt, err := fetchLatest(timeout)
+	entry := readEntry(path)
+	entry.LastChecked = now().UTC().Format(time.RFC3339)
+	if err == nil {
+		entry.LatestVersion = latest
+		entry.PublishedAt = publishedAt
+	}
+	writeEntry(path, entry)
+	if err != nil {
+		return nil, err
+	}
+	return infoFrom(currentVersion, entry), nil
+}
+
+func fetchLatest(timeout time.Duration) (version, publishedAt string, err error) {
+	client := &http.Client{Timeout: timeout}
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/repos/%s/releases/latest", apiBaseURL, Repo), nil)
+	if err != nil {
+		return "", "", fmt.Errorf("creating request: %w", err)
+	}
+	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("User-Agent", "grafana-cli")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("checking for updates: %w", err)
+		return "", "", fmt.Errorf("checking for updates: %w", err)
 	}
 	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("GitHub API returned status %d", resp.StatusCode)
+		return "", "", fmt.Errorf("GitHub API returned status %d", resp.StatusCode)
 	}
 
 	var release githubRelease
-	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
-		return nil, fmt.Errorf("decoding release: %w", err)
+	if err := json.NewDecoder(io.LimitReader(resp.Body, maxAPIResponse)).Decode(&release); err != nil {
+		return "", "", fmt.Errorf("decoding release: %w", err)
 	}
-
-	latestVersion := strings.TrimPrefix(release.TagName, "v")
-
-	// Write cache.
-	entry := cacheEntry{
-		LastChecked:   time.Now().UTC().Format(time.RFC3339),
-		LatestVersion: latestVersion,
-		ReleaseURL:    release.HTMLURL,
-		PublishedAt:   release.PublishedAt,
+	// The version ends up in URLs and terminal output, so accept only a
+	// plain MAJOR.MINOR.PATCH tag.
+	version = strings.TrimPrefix(release.TagName, "v")
+	if !IsReleaseVersion(version) || strings.ContainsAny(version, "-+") {
+		return "", "", fmt.Errorf("unexpected release tag %q", release.TagName)
 	}
-	writeCache(cachePath, &entry)
-
-	available, _ := isNewer(latestVersion, currentVersion)
-	return &UpdateInfo{
-		Available:      available,
-		CurrentVersion: currentVersion,
-		LatestVersion:  latestVersion,
-		ReleaseURL:     release.HTMLURL,
-		PublishedAt:    release.PublishedAt,
-	}, nil
+	return version, release.PublishedAt, nil
 }
 
-func writeCache(cachePath string, entry *cacheEntry) {
-	dir := filepath.Dir(cachePath)
+func readEntry(path string) cacheEntry {
+	var entry cacheEntry
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return entry
+	}
+	if json.Unmarshal(data, &entry) != nil {
+		return cacheEntry{}
+	}
+	if entry.LatestVersion != "" && (!IsReleaseVersion(entry.LatestVersion) || strings.ContainsAny(entry.LatestVersion, "-+")) {
+		entry.LatestVersion = ""
+	}
+	return entry
+}
+
+// writeEntry saves the cache best-effort via a temp file and rename, so a
+// concurrent reader never sees a partial file.
+func writeEntry(path string, entry cacheEntry) {
+	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return
 	}
@@ -175,61 +333,47 @@ func writeCache(cachePath string, entry *cacheEntry) {
 	if err != nil {
 		return
 	}
-	_ = os.WriteFile(cachePath, data, 0o600)
+	tmp, err := os.CreateTemp(dir, ".update-check-*")
+	if err != nil {
+		return
+	}
+	_, werr := tmp.Write(data)
+	cerr := tmp.Close()
+	if werr != nil || cerr != nil || os.Rename(tmp.Name(), path) != nil {
+		_ = os.Remove(tmp.Name())
+	}
 }
 
-// isNewer returns true if latest is a higher semver than current.
+// isNewer reports whether latest is a higher MAJOR.MINOR.PATCH than current.
 func isNewer(latest, current string) (bool, error) {
-	latest = strings.TrimPrefix(latest, "v")
-	current = strings.TrimPrefix(current, "v")
-
-	lMajor, lMinor, lPatch, err := parseSemver(latest)
+	l, err := parseSemver(latest)
 	if err != nil {
 		return false, err
 	}
-	cMajor, cMinor, cPatch, err := parseSemver(current)
+	c, err := parseSemver(current)
 	if err != nil {
 		return false, err
 	}
-
-	if lMajor != cMajor {
-		return lMajor > cMajor, nil
+	for i := range l {
+		if l[i] != c[i] {
+			return l[i] > c[i], nil
+		}
 	}
-	if lMinor != cMinor {
-		return lMinor > cMinor, nil
-	}
-	return lPatch > cPatch, nil
+	return false, nil
 }
 
-func parseSemver(v string) (major, minor, patch int, err error) {
-	// Strip any pre-release or metadata suffix (e.g. "1.2.3-rc1+build").
-	if idx := strings.IndexAny(v, "-+"); idx != -1 {
-		v = v[:idx]
+func parseSemver(v string) ([3]int, error) {
+	var out [3]int
+	m := semverRE.FindStringSubmatch(v)
+	if m == nil {
+		return out, fmt.Errorf("invalid semver: %s", v)
 	}
-
-	parts := strings.Split(v, ".")
-	if len(parts) != 3 {
-		return 0, 0, 0, fmt.Errorf("invalid semver: %s", v)
+	for i := range out {
+		n, err := strconv.Atoi(m[i+1])
+		if err != nil {
+			return out, fmt.Errorf("invalid semver: %s", v)
+		}
+		out[i] = n
 	}
-
-	major, err = strconv.Atoi(parts[0])
-	if err != nil {
-		return 0, 0, 0, fmt.Errorf("invalid major version: %s", parts[0])
-	}
-	minor, err = strconv.Atoi(parts[1])
-	if err != nil {
-		return 0, 0, 0, fmt.Errorf("invalid minor version: %s", parts[1])
-	}
-	patch, err = strconv.Atoi(parts[2])
-	if err != nil {
-		return 0, 0, 0, fmt.Errorf("invalid patch version: %s", parts[2])
-	}
-	return major, minor, patch, nil
-}
-
-func formatVersion(v string) string {
-	if strings.HasPrefix(v, "v") {
-		return v
-	}
-	return "v" + v
+	return out, nil
 }

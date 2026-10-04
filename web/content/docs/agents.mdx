@@ -30,6 +30,11 @@ grafana alert rule list --read-only --no-input --quiet -o json
 `GRAFANA_NO_INPUT=1`, `GRAFANA_QUIET=1`, and `GRAFANA_VERBOSE=1` provide the
 same non-interactive, quiet, and verbose controls through the environment.
 
+The once-a-day "new version" notice is printed on stderr only when stderr is a
+terminal, so it never appears in agent or CI output. `GRAFANA_NO_UPDATE_NOTIFIER=1`
+(or `NO_UPDATE_NOTIFIER=1`) turns it off everywhere. To update the CLI itself
+without a prompt, run `grafana update --yes`.
+
 <Callout type="warn">
   `--no-input` does not approve destructive actions. A delete or reset command
   still needs its real `--confirm` flag; `--read-only` blocks the operation even

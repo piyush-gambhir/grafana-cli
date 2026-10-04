@@ -5,6 +5,7 @@
 - **Binary:** `grafana`
 - **Config file:** `~/.config/grafana-cli/config.yaml`
 - **Env vars:** `GRAFANA_URL`, `GRAFANA_TOKEN`, `GRAFANA_USERNAME`, `GRAFANA_PASSWORD`, `GRAFANA_ORG_ID`
+- **Update notice:** a once-a-day "new version" notice on stderr, only when stderr is a terminal (never in scripts, CI, or agent runs); off with `GRAFANA_NO_UPDATE_NOTIFIER=1`, `NO_UPDATE_NOTIFIER=1`, `CI`, or `--quiet`
 - **Auth methods:** API token (service account token) or basic auth (username/password)
 - **Config priority:** CLI flags > environment variables > profile config > defaults
 
@@ -259,8 +260,8 @@ grafana config use-profile staging
 | Command | Description |
 |---------|-------------|
 | `grafana login` | Interactively log in and save a connection profile |
-| `grafana version` | Print CLI version |
-| `grafana update` | Check for and install CLI updates (Windows: `--check` only) |
+| `grafana version` | Print CLI version (plus the cached latest release, if known) |
+| `grafana update` | Install the latest release on macOS, Linux, or Windows (`--yes` skips the prompt; `--check [-o json]` only reports) |
 | `grafana completion` | Generate shell completion scripts |
 
 ### `grafana config` -- Manage CLI configuration

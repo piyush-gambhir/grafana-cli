@@ -38,8 +38,8 @@ The install script expects assets named `grafana-cli_<os>_<arch>.tar.gz`, where
 `<os>` is `darwin` or `linux` and `<arch>` is `amd64` or `arm64`.
 
 Windows builds ship as `grafana-cli_windows_amd64.zip` containing `grafana.exe`.
-The install script and `grafana update` do not support Windows: to upgrade,
-download the new `.zip` and replace `grafana.exe`.
+The install script does not support Windows: extract `grafana.exe` from the
+`.zip` and put it on your `PATH`. After that, `grafana update` keeps it current.
 
 ## Build from source
 
@@ -51,7 +51,44 @@ cd grafana-cli/cli-go
 make install
 ```
 
-The binary is `grafana`.
+The binary is `grafana`. `make install` writes it to `go env GOBIN`, or to
+`$(go env GOPATH)/bin` when GOBIN is unset.
+
+## Updating
+
+```bash
+grafana update                   # show v<current> -> v<latest>, ask "Update now? [Y/n]", install
+grafana update --yes             # install without the prompt
+grafana update --check           # report current and latest versions
+grafana update --check -o json   # the same, as JSON
+```
+
+`grafana update` works on macOS, Linux, and Windows. It downloads the release
+archive for your platform, verifies its SHA-256 against the release's
+`checksums.txt`, and replaces the running binary. On Windows the old
+`grafana.exe` is renamed to `grafana.exe.old` and deleted on a later start. If
+the binary's directory is not writable, re-run with `sudo` or reinstall with the
+install script into a writable directory; the old binary keeps working.
+
+A `grafana` built from source into a Go bin directory (`$GOBIN`, `$GOPATH/bin`,
+or `~/go/bin`) is not replaced. Update it with `git pull && make install` in
+your `grafana-cli/cli-go` checkout.
+
+### Update notice
+
+When a newer release exists, `grafana` prints a notice on stderr after the
+command's output, at most once a day per version:
+
+```text
+A new version of grafana is available: v0.2.9 -> v0.2.10
+Update with: grafana update
+Release notes: https://github.com/piyush-gambhir/grafana-cli/releases/tag/v0.2.10
+```
+
+The release check runs at most once a day and only when stderr is a terminal,
+so scripts, CI, and coding agents never see it. To turn it off, set
+`GRAFANA_NO_UPDATE_NOTIFIER=1` or `NO_UPDATE_NOTIFIER=1`. It is also skipped
+when `CI` is set and with `--quiet` (or `GRAFANA_QUIET=1`).
 
 ## Verify
 

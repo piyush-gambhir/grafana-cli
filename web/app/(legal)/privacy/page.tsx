@@ -55,7 +55,10 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>GitHub&apos;s public API</strong>, to check whether a newer release
-            of the CLI is available. This request contains no personal data.
+            of the CLI is available. This happens at most once a day and only in an
+            interactive terminal, and when you run <code>grafana update</code>. Set{' '}
+            <code>GRAFANA_NO_UPDATE_NOTIFIER=1</code> to turn off the background check.
+            This request contains no personal data.
           </li>
         </ul>
         <p>The maintainer is not a party to, and cannot observe, these connections.</p>
