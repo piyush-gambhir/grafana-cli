@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,28 +13,47 @@ import (
 	"time"
 )
 
-// fakeGitHub serves releases/latest with tag (or status when non-200) and
-// counts requests.
+// fakeGitHub serves /<repo>/releases/latest like github.com: a 302 to the tag
+// page when status is 302 and tag is set (no Location when tag is empty), or
+// a bare status otherwise. It counts requests and fails the test if the
+// client follows the redirect.
 func fakeGitHub(t *testing.T, status int, tag string) *atomic.Int32 {
 	t.Helper()
 	var hits atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		hits.Add(1)
-		if r.URL.Path != "/repos/"+Repo+"/releases/latest" {
+	var srv *httptest.Server
+	srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/"+Repo+"/releases/latest" {
+			t.Errorf("unexpected request %s (the redirect must not be followed)", r.URL.Path)
 			http.NotFound(w, r)
 			return
 		}
-		if status != http.StatusOK {
-			w.WriteHeader(status)
-			return
+		hits.Add(1)
+		if status == http.StatusFound && tag != "" {
+			w.Header().Set("Location", tagURL(srv.URL, tag))
 		}
-		_, _ = w.Write([]byte(`{"tag_name":"` + tag + `","published_at":"2026-10-01T00:00:00Z"}`))
+		w.WriteHeader(status)
 	}))
 	t.Cleanup(srv.Close)
-	old := apiBaseURL
-	apiBaseURL = srv.URL
-	t.Cleanup(func() { apiBaseURL = old })
+	setReleaseBase(t, srv.URL)
 	return &hits
+}
+
+// tagURL is the release page URL GitHub redirects to, escaped like a real
+// Location header.
+func tagURL(base, tag string) string {
+	u, err := url.Parse(base)
+	if err != nil {
+		panic(err)
+	}
+	u.Path = "/" + Repo + "/releases/tag/" + tag
+	return u.String()
+}
+
+func setReleaseBase(t *testing.T, base string) {
+	t.Helper()
+	old := releaseBaseURL
+	releaseBaseURL = base
+	t.Cleanup(func() { releaseBaseURL = old })
 }
 
 func setNow(t *testing.T, at time.Time) {
@@ -86,7 +106,7 @@ func TestNotifierDisabled(t *testing.T) {
 }
 
 func TestStartAnswersFromFreshCacheWithoutNetwork(t *testing.T) {
-	hits := fakeGitHub(t, http.StatusOK, "v0.2.10")
+	hits := fakeGitHub(t, http.StatusFound, "v0.2.10")
 	dir := t.TempDir()
 	setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
 	writeEntry(filepath.Join(dir, cacheFileName), cacheEntry{
@@ -112,7 +132,7 @@ func TestStartAnswersFromFreshCacheWithoutNetwork(t *testing.T) {
 }
 
 func TestStartFetchesWhenStaleAndCaches(t *testing.T) {
-	hits := fakeGitHub(t, http.StatusOK, "v0.2.10")
+	hits := fakeGitHub(t, http.StatusFound, "v0.2.10")
 	dir := t.TempDir()
 	setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
 	writeEntry(filepath.Join(dir, cacheFileName), cacheEntry{
@@ -146,12 +166,10 @@ func TestRefreshKeepsNoticeRecordedDuringFetch(t *testing.T) {
 	release := make(chan struct{})
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		<-release
-		_, _ = w.Write([]byte(`{"tag_name":"v0.2.10"}`))
+		http.Redirect(w, r, "/"+Repo+"/releases/tag/v0.2.10", http.StatusFound)
 	}))
 	t.Cleanup(srv.Close)
-	old := apiBaseURL
-	apiBaseURL = srv.URL
-	t.Cleanup(func() { apiBaseURL = old })
+	setReleaseBase(t, srv.URL)
 	dir := t.TempDir()
 	setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
 
@@ -169,30 +187,111 @@ func TestRefreshKeepsNoticeRecordedDuringFetch(t *testing.T) {
 }
 
 func TestFailedCheckIsCached(t *testing.T) {
-	hits := fakeGitHub(t, http.StatusInternalServerError, "")
-	dir := t.TempDir()
-	setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
+	for _, tc := range []struct {
+		name   string
+		status int
+		tag    string
+	}{
+		{"server error", http.StatusInternalServerError, ""},
+		{"rate limited", http.StatusForbidden, ""},
+		{"redirect without Location", http.StatusFound, ""},
+		{"non-semver tag", http.StatusFound, "v0.2.10-rc.1"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			hits := fakeGitHub(t, tc.status, tc.tag)
+			dir := t.TempDir()
+			setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
 
-	if info := receive(t, Start("0.2.9", dir)); info != nil {
-		t.Errorf("failed check returned %+v", info)
+			if info := receive(t, Start("0.2.9", dir)); info != nil {
+				t.Errorf("failed check returned %+v", info)
+			}
+			if info := receive(t, Start("0.2.9", dir)); info == nil || info.Available {
+				t.Errorf("cached failure answer = %+v, want no update", info)
+			}
+			if hits.Load() != 1 {
+				t.Errorf("GitHub called %d times, want 1 (a failed check is cached)", hits.Load())
+			}
+		})
 	}
-	if info := receive(t, Start("0.2.9", dir)); info == nil || info.Available {
-		t.Errorf("cached failure answer = %+v, want no update", info)
+}
+
+// The latest version comes from the Location of the /releases/latest
+// redirect; anything but a same-host vX.Y.Z tag page is a failed check.
+func TestFetchLatestReadsRedirect(t *testing.T) {
+	var location string
+	status := http.StatusFound
+	var followed atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/"+Repo+"/releases/latest" {
+			followed.Add(1)
+			_, _ = w.Write([]byte("followed"))
+			return
+		}
+		if location != "" {
+			w.Header().Set("Location", location)
+		}
+		w.WriteHeader(status)
+	}))
+	t.Cleanup(srv.Close)
+	setReleaseBase(t, srv.URL)
+	foreign, _ := url.Parse(srv.URL)
+	foreign.Host = "github.com.evil.example"
+
+	for _, tc := range []struct {
+		name     string
+		status   int
+		location string
+		want     string // empty means the check must fail
+	}{
+		{"good tag", http.StatusFound, tagURL(srv.URL, "v0.2.10"), "0.2.10"},
+		{"relative Location", http.StatusFound, "/" + Repo + "/releases/tag/v1.2.3", "1.2.3"},
+		{"missing Location", http.StatusFound, "", ""},
+		{"foreign host", http.StatusFound, tagURL(foreign.String(), "v0.2.10"), ""},
+		{"other repo", http.StatusFound, srv.URL + "/someone/else/releases/tag/v0.2.10", ""},
+		{"no releases yet", http.StatusFound, srv.URL + "/" + Repo + "/releases", ""},
+		{"pre-release tag", http.StatusFound, tagURL(srv.URL, "v0.2.10-rc.1"), ""},
+		{"tag without v", http.StatusFound, tagURL(srv.URL, "0.2.10"), ""},
+		{"terminal escape in tag", http.StatusFound, tagURL(srv.URL, "v1.0.0\x1b[31m"), ""},
+		{"C1 control in foreign query", http.StatusFound, "https://evil.example/x?\x9b2J", ""},
+		{"not a redirect", http.StatusOK, "", ""},
+		{"rate limited", http.StatusForbidden, "", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			status, location = tc.status, tc.location
+			got, err := fetchLatest(explicitTimeout)
+			if tc.want == "" {
+				if err == nil {
+					t.Fatalf("fetchLatest = %q, want an error", got)
+				}
+				// The error reaches the terminal via `grafana update`.
+				for _, b := range []byte(err.Error()) {
+					if b < 0x20 || b >= 0x7f {
+						t.Errorf("error contains raw byte %#x: %q", b, err)
+						break
+					}
+				}
+				return
+			}
+			if err != nil || got != tc.want {
+				t.Fatalf("fetchLatest = %q, %v, want %q", got, err, tc.want)
+			}
+		})
 	}
-	if hits.Load() != 1 {
-		t.Errorf("GitHub called %d times, want 1 (a failed check is cached)", hits.Load())
+	if n := followed.Load(); n != 0 {
+		t.Errorf("client followed the redirect %d times", n)
 	}
 }
 
 func TestCheckRejectsUnexpectedTag(t *testing.T) {
-	fakeGitHub(t, http.StatusOK, "v1.0.0\x1b[31m")
-	if _, err := CheckForUpdateFresh("0.2.9", t.TempDir()); err == nil {
-		t.Fatal("accepted a tag that is not MAJOR.MINOR.PATCH")
+	fakeGitHub(t, http.StatusFound, "v1.0.0\x1b[31m")
+	_, err := CheckForUpdateFresh("0.2.9", t.TempDir())
+	if err == nil || !strings.Contains(err.Error(), "unexpected release tag") {
+		t.Fatalf("err = %v, want an unexpected release tag error", err)
 	}
 }
 
 func TestCheckForUpdateFreshBypassesCache(t *testing.T) {
-	hits := fakeGitHub(t, http.StatusOK, "v0.2.10")
+	hits := fakeGitHub(t, http.StatusFound, "v0.2.10")
 	dir := t.TempDir()
 	setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
 	writeEntry(filepath.Join(dir, cacheFileName), cacheEntry{LastChecked: "2026-10-04T11:00:00Z", LatestVersion: "0.2.9"})
@@ -204,10 +303,43 @@ func TestCheckForUpdateFreshBypassesCache(t *testing.T) {
 	if !info.Available || info.LatestVersion != "0.2.10" || hits.Load() != 1 {
 		t.Errorf("info = %+v, hits = %d", info, hits.Load())
 	}
+	// `update --check` stores its answer, so the notifier agrees with it.
+	if cached := receive(t, Start("0.2.9", dir)); cached == nil || cached.LatestVersion != "0.2.10" || hits.Load() != 1 {
+		t.Errorf("notifier after a fresh check = %+v, hits = %d", cached, hits.Load())
+	}
+}
+
+// The attempt is recorded before the request, so a process that exits before
+// the answer arrives does not make every later command ask GitHub again.
+func TestStartRecordsAttemptBeforeRequest(t *testing.T) {
+	release := make(chan struct{})
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		<-release
+		w.WriteHeader(http.StatusBadGateway)
+	}))
+	t.Cleanup(srv.Close)
+	setReleaseBase(t, srv.URL)
+	dir := t.TempDir()
+	setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
+
+	// Nobody reads this answer during the test, like a command that exited.
+	pending := Start("0.2.9", dir)
+	t.Cleanup(func() { // runs before the seams are restored
+		close(release)
+		<-pending
+	})
+	if entry := readEntry(filepath.Join(dir, cacheFileName)); entry.LastChecked != "2026-10-04T12:00:00Z" {
+		t.Fatalf("attempt not recorded before the request: %+v", entry)
+	}
+	select {
+	case <-Start("0.2.9", dir):
+	default:
+		t.Fatal("second check did not answer from the cache")
+	}
 }
 
 func TestCachedNeverFetches(t *testing.T) {
-	hits := fakeGitHub(t, http.StatusOK, "v0.2.10")
+	hits := fakeGitHub(t, http.StatusFound, "v0.2.10")
 	dir := t.TempDir()
 	setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
 	if info := Cached("0.2.9", dir); info != nil {

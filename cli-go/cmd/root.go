@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
@@ -47,6 +48,10 @@ var (
 
 // OutputFormat is set during PersistentPreRunE and exported for use by main.go.
 var OutputFormat string
+
+// updateNoticeWait is how long PersistentPostRun waits for a background check
+// this run started; the check itself times out after 3 seconds.
+const updateNoticeWait = time.Second
 
 // Test seams for the background update check.
 var (
@@ -228,13 +233,16 @@ Claude Code skill: https://github.com/piyush-gambhir/grafana-cli/blob/main/grafa
 			if updateResult == nil {
 				return
 			}
-			// Print only an answer that is already in; never wait for GitHub.
+			// A cached answer is already in the channel, so this never waits
+			// then. A check this run started (at most once a day) gets up to
+			// updateNoticeWait: it is recorded before the request, so a fast
+			// command that exited first would lose the day's notice.
 			select {
 			case info := <-updateResult:
 				if info != nil && info.Available {
 					update.Notify(cmd.ErrOrStderr(), info, config.ConfigDir(), detectInstallMethod())
 				}
-			default:
+			case <-time.After(updateNoticeWait):
 			}
 		},
 	}
