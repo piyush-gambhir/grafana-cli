@@ -41,7 +41,7 @@ curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/ins
 Install a specific version:
 
 ```bash
-curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | VERSION=0.1.0 sh
+curl -sSfL https://raw.githubusercontent.com/piyush-gambhir/grafana-cli/main/install.sh | VERSION=0.2.7 sh
 ```
 
 Install to a custom directory (e.g. when you do not have root):
@@ -75,6 +75,8 @@ Once installed from a release, the binary can update itself in place (downloads 
 grafana update            # check, prompt, and install the latest release
 grafana update --check    # only report whether an update is available
 ```
+
+On Windows, `grafana update` refuses to install (releases ship Windows as a `.zip`, and a running `.exe` cannot be replaced in place); `grafana update --check` still works. Download `grafana-cli_windows_amd64.zip` from the release page and replace `grafana.exe` with the one inside.
 
 Self-update is disabled for `dev` builds (built from source without release version info). Prebuilt releases also print a one-line update notice to stderr when a newer version exists (this background check is skipped for `update`, `version`, `completion`, and `help`).
 
@@ -197,7 +199,7 @@ Top-level groups: `dashboard`, `datasource`, `folder`, `alert`, `org`, `team`, `
 ```bash
 grafana login                     # interactive login; saves a connection profile
 grafana version                   # print CLI version, commit hash, and build date
-grafana update [--check]          # self-update from GitHub Releases (--check = report only)
+grafana update [--check]          # self-update from GitHub Releases (--check = report only; Windows supports --check only)
 grafana completion <shell>        # emit a shell completion script
 ```
 

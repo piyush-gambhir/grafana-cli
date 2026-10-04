@@ -23,7 +23,7 @@ Available on every command:
 ```
 grafana login                  Interactive login; saves connection profile to ~/.config/grafana-cli/config.yaml
 grafana version                Print CLI version, commit hash, and build date
-grafana update                 Check for and install CLI updates
+grafana update                 Check for and install CLI updates (Windows: --check only)
 grafana completion <shell>     Generate shell completion (bash, zsh, fish, powershell)
 ```
 

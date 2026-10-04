@@ -25,6 +25,13 @@ import (
 
 const updateRepo = "piyush-gambhir/grafana-cli"
 
+// Test seams: goos selects the platform-specific install path and
+// checkForUpdateFresh avoids calling the GitHub API.
+var (
+	goos                = runtime.GOOS
+	checkForUpdateFresh = update.CheckForUpdateFresh
+)
+
 func newUpdateCmd() *cobra.Command {
 	var checkOnly bool
 
@@ -32,8 +39,11 @@ func newUpdateCmd() *cobra.Command {
 		Use:         "update",
 		Annotations: map[string]string{"mutates": "true"},
 		Short:       "Update grafana to the latest version",
-		Long:        "Check for and install the latest version of the grafana CLI from GitHub Releases.",
-		Args:        cobra.NoArgs,
+		Long: `Check for and install the latest version of the grafana CLI from GitHub Releases.
+
+On Windows, only --check is supported: download the Windows .zip from the
+release page and replace grafana.exe yourself.`,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configDir := config.ConfigDir()
 			currentVersion := build.Version
@@ -45,7 +55,7 @@ func newUpdateCmd() *cobra.Command {
 			}
 
 			fmt.Fprintln(cmd.OutOrStdout(), "Checking for updates...")
-			info, err := update.CheckForUpdateFresh(currentVersion, updateRepo, configDir)
+			info, err := checkForUpdateFresh(currentVersion, updateRepo, configDir)
 			if err != nil {
 				return fmt.Errorf("checking for updates: %w", err)
 			}
@@ -72,6 +82,11 @@ func newUpdateCmd() *cobra.Command {
 				}
 			}
 			fmt.Fprintf(cmd.OutOrStdout(), "Release:   %s\n\n", info.ReleaseURL)
+			// Windows releases ship as a .zip, and a running .exe cannot be
+			// renamed over, so point the user at the release page instead.
+			if goos == "windows" {
+				return fmt.Errorf("self-update is not supported on Windows: download the Windows .zip from https://github.com/%s/releases/tag/v%s and replace grafana.exe with the one inside", updateRepo, info.LatestVersion)
+			}
 			if flagNoInput {
 				return fmt.Errorf("update requires confirmation; cannot run with --no-input (use --check to check only)")
 			}
