@@ -161,7 +161,6 @@ Examples:
 			if err := installRelease(cmd.Context(), out, info.LatestVersion, exe); err != nil {
 				return err
 			}
-			_ = update.ClearCache(config.ConfigDir())
 			fmt.Fprintf(out, "Updated grafana v%s -> v%s\n", current, info.LatestVersion)
 			fmt.Fprintf(out, "Release notes: %s\n", info.ReleaseURL)
 			return nil

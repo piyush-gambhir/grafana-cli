@@ -190,17 +190,69 @@ func TestNotifierGoInstallUpdateLine(t *testing.T) {
 	}
 }
 
-// The notice must never wait for a slow GitHub answer.
-func TestNotifierDoesNotWaitForPendingCheck(t *testing.T) {
+// delayedCheck stands in for a release source that answers after delay.
+func delayedCheck(delay time.Duration) func(string, string) <-chan *update.UpdateInfo {
+	return func(string, string) <-chan *update.UpdateInfo {
+		ch := make(chan *update.UpdateInfo, 1)
+		go func() {
+			time.Sleep(delay)
+			info := availableUpdate
+			ch <- &info
+		}()
+		return ch
+	}
+}
+
+// A command that finishes before the day's check answers still gets the
+// notice, since the check is recorded before the request.
+func TestNotifierWaitsBrieflyForCheckStartedThisRun(t *testing.T) {
 	testEnv(t)
-	startUpdateCheck = func(string, string) <-chan *update.UpdateInfo { return make(chan *update.UpdateInfo) }
-	start := time.Now()
+	startUpdateCheck = delayedCheck(200 * time.Millisecond)
 	_, stderr, err := runRoot(t, "", "noop")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if stderr != "" || time.Since(start) > time.Second {
-		t.Errorf("stderr = %q after %s", stderr, time.Since(start))
+	if !strings.Contains(stderr, "A new version of grafana is available: v0.2.9 -> v0.2.10") {
+		t.Errorf("stderr = %q, want the notice", stderr)
+	}
+}
+
+// A release source slower than updateNoticeWait delays the command by at
+// most about a second, and prints nothing.
+func TestNotifierWaitsAtMostOneSecond(t *testing.T) {
+	testEnv(t)
+	startUpdateCheck = delayedCheck(3 * time.Second)
+	start := time.Now()
+	_, stderr, err := runRoot(t, "", "noop")
+	elapsed := time.Since(start)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stderr != "" || elapsed > updateNoticeWait+500*time.Millisecond {
+		t.Errorf("stderr = %q after %s", stderr, elapsed)
+	}
+}
+
+// An answer from the cache never waits.
+func TestNotifierAnswersFromCacheWithoutWaiting(t *testing.T) {
+	testEnv(t)
+	startUpdateCheck = update.Start
+	cacheFile := filepath.Join(os.Getenv("XDG_CONFIG_HOME"), "grafana-cli", "update-check.json")
+	if err := os.MkdirAll(filepath.Dir(cacheFile), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	entry := `{"last_checked":"` + time.Now().UTC().Format(time.RFC3339) + `","latest_version":"0.2.10"}`
+	if err := os.WriteFile(cacheFile, []byte(entry), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Now()
+	_, stderr, err := runRoot(t, "", "noop")
+	elapsed := time.Since(start)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(stderr, "v0.2.9 -> v0.2.10") || elapsed > 500*time.Millisecond {
+		t.Errorf("stderr = %q after %s", stderr, elapsed)
 	}
 }
 
@@ -411,8 +463,10 @@ func TestUpdateInstallsRelease(t *testing.T) {
 			if tc.goos == "windows" {
 				assertFile(t, exe+".old", "old binary")
 			}
-			if _, err := os.Stat(cacheFile); !os.IsNotExist(err) {
-				t.Errorf("update cache not cleared: %v", err)
+			// The cache keeps the check's answer, so the notifier agrees
+			// that the installed version is the latest.
+			if data, err := os.ReadFile(cacheFile); err != nil || !strings.Contains(string(data), `"latest_version":"0.2.10"`) {
+				t.Errorf("update cache = %q, %v; want latest_version 0.2.10 kept", data, err)
 			}
 			assertOnlyFiles(t, dir, tc.goos == "windows", tc.exeName)
 		})
