@@ -1,6 +1,10 @@
 // Package update checks GitHub Releases for a newer grafana CLI and prints the
 // update notice. The background check (Start) runs at most once a day and only
 // in an interactive terminal; see NotifierDisabled for the opt-outs.
+//
+// The latest release is read from the redirect of
+// https://github.com/<repo>/releases/latest, not from api.github.com, whose
+// 60 requests/hour unauthenticated limit is shared by everyone behind one IP.
 package update
 
 import (
@@ -42,14 +46,17 @@ const (
 	cacheFileName     = "update-check.json"
 	backgroundTimeout = 3 * time.Second
 	explicitTimeout   = 15 * time.Second
-	maxAPIResponse    = 1 << 20
 )
 
 // Test seams.
 var (
-	apiBaseURL = "https://api.github.com"
-	now        = time.Now
+	releaseBaseURL = "https://github.com"
+	now            = time.Now
 )
+
+// releaseTagRE matches a plain release tag (vMAJOR.MINOR.PATCH). The version
+// ends up in URLs and terminal output, so nothing else is accepted.
+var releaseTagRE = regexp.MustCompile(`^v\d+\.\d+\.\d+$`)
 
 // semverRE matches MAJOR.MINOR.PATCH with an optional pre-release or build
 // suffix (git describe output such as v0.2.9-3-gabc1234-dirty qualifies).
@@ -62,21 +69,14 @@ type UpdateInfo struct {
 	CurrentVersion string
 	LatestVersion  string
 	ReleaseURL     string
-	PublishedAt    string
 }
 
 // cacheEntry is the on-disk update-check.json.
 type cacheEntry struct {
 	LastChecked     string `json:"last_checked,omitempty"`
 	LatestVersion   string `json:"latest_version,omitempty"`
-	PublishedAt     string `json:"published_at,omitempty"`
 	NotifiedVersion string `json:"notified_version,omitempty"`
 	NotifiedAt      string `json:"notified_at,omitempty"`
-}
-
-type githubRelease struct {
-	TagName     string `json:"tag_name"`
-	PublishedAt string `json:"published_at"`
 }
 
 // IsReleaseVersion reports whether v is a semver release version. "dev",
@@ -251,7 +251,6 @@ func infoFrom(currentVersion string, entry cacheEntry) *UpdateInfo {
 	}
 	info.LatestVersion = entry.LatestVersion
 	info.ReleaseURL = ReleaseURL(entry.LatestVersion)
-	info.PublishedAt = entry.PublishedAt
 	info.Available, _ = isNewer(entry.LatestVersion, current)
 	return info
 }
@@ -262,12 +261,11 @@ func infoFrom(currentVersion string, entry cacheEntry) *UpdateInfo {
 // The entry is re-read after the request so a notice another process recorded
 // meanwhile is kept.
 func fetchAndCache(currentVersion, path string, timeout time.Duration) (*UpdateInfo, error) {
-	latest, publishedAt, err := fetchLatest(timeout)
+	latest, err := fetchLatest(timeout)
 	entry := readEntry(path)
 	entry.LastChecked = now().UTC().Format(time.RFC3339)
 	if err == nil {
 		entry.LatestVersion = latest
-		entry.PublishedAt = publishedAt
 	}
 	writeEntry(path, entry)
 	if err != nil {
@@ -276,35 +274,44 @@ func fetchAndCache(currentVersion, path string, timeout time.Duration) (*UpdateI
 	return infoFrom(currentVersion, entry), nil
 }
 
-func fetchLatest(timeout time.Duration) (version, publishedAt string, err error) {
-	client := &http.Client{Timeout: timeout}
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/repos/%s/releases/latest", apiBaseURL, Repo), nil)
-	if err != nil {
-		return "", "", fmt.Errorf("creating request: %w", err)
+// fetchLatest returns the latest release version (without the "v") from the
+// redirect GitHub sends for /releases/latest. The redirect is not followed:
+// its Location must be https://github.com/<repo>/releases/tag/vX.Y.Z on the
+// same host, or the check fails.
+func fetchLatest(timeout time.Duration) (string, error) {
+	client := &http.Client{
+		Timeout: timeout,
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
 	}
-	req.Header.Set("Accept", "application/vnd.github+json")
+	latestURL := fmt.Sprintf("%s/%s/releases/latest", releaseBaseURL, Repo)
+	req, err := http.NewRequest(http.MethodGet, latestURL, nil)
+	if err != nil {
+		return "", fmt.Errorf("creating request: %w", err)
+	}
 	req.Header.Set("User-Agent", "grafana-cli")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", "", fmt.Errorf("checking for updates: %w", err)
+		return "", fmt.Errorf("requesting %s: %w", latestURL, err)
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return "", "", fmt.Errorf("GitHub API returned status %d", resp.StatusCode)
+	_ = resp.Body.Close()
+	if resp.StatusCode < 300 || resp.StatusCode > 399 {
+		return "", fmt.Errorf("%s returned status %d, expected a redirect to the latest release", latestURL, resp.StatusCode)
 	}
-
-	var release githubRelease
-	if err := json.NewDecoder(io.LimitReader(resp.Body, maxAPIResponse)).Decode(&release); err != nil {
-		return "", "", fmt.Errorf("decoding release: %w", err)
+	loc, err := resp.Location()
+	if err != nil {
+		return "", fmt.Errorf("%s redirect has no usable Location header", latestURL)
 	}
-	// The version ends up in URLs and terminal output, so accept only a
-	// plain MAJOR.MINOR.PATCH tag.
-	version = strings.TrimPrefix(release.TagName, "v")
-	if !IsReleaseVersion(version) || strings.ContainsAny(version, "-+") {
-		return "", "", fmt.Errorf("unexpected release tag %q", release.TagName)
+	tag, ok := strings.CutPrefix(loc.Path, "/"+Repo+"/releases/tag/")
+	if loc.Scheme != req.URL.Scheme || loc.Host != req.URL.Host || !ok {
+		return "", fmt.Errorf("%s redirected to %s, not a %s release tag", latestURL, loc.Redacted(), Repo)
 	}
-	return version, release.PublishedAt, nil
+	if !releaseTagRE.MatchString(tag) {
+		return "", fmt.Errorf("unexpected release tag %q", tag)
+	}
+	return strings.TrimPrefix(tag, "v"), nil
 }
 
 func readEntry(path string) cacheEntry {
