@@ -41,6 +41,11 @@ export const suite: readonly SuiteProject[] = [
     repository: 'https://github.com/piyush-gambhir/bing-webmaster-cli',
   },
   {
+    name: 'gsc-cli',
+    website: 'https://projects.piyushgambhir.com/gsc-cli',
+    repository: 'https://github.com/piyush-gambhir/gsc-cli',
+  },
+  {
     name: 'reckon',
     website: 'https://projects.piyushgambhir.com/reckon',
     repository: 'https://github.com/piyush-gambhir/reckon',
