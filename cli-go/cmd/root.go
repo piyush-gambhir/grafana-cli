@@ -261,6 +261,7 @@ Claude Code skill: https://github.com/piyush-gambhir/grafana-cli/blob/main/grafa
 	rootCmd.PersistentFlags().BoolVarP(&flagVerbose, "verbose", "v", false, "Enable verbose HTTP logging")
 
 	// Register subcommands.
+	rootCmd.AddCommand(newCommandsCmd())
 	rootCmd.AddCommand(newVersionCmd())
 	rootCmd.AddCommand(newUpdateCmd())
 	rootCmd.AddCommand(newLoginCmd(f))

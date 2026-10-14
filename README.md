@@ -2,7 +2,7 @@
 
 A command-line interface for managing Grafana instances -- dashboards, datasources, folders, alerts, orgs, teams, users, service accounts, and more.
 
-Designed for both human operators and coding agents (LLMs). All commands support `--help` for detailed usage, and `-o json` / `-o yaml` for machine-readable output.
+Designed for both human operators and coding agents (LLMs). All commands support `--help` for detailed usage, and `-o json` / `-o yaml` for machine-readable output. Use `grafana commands resolve -- <arguments>` to inspect the command, effect, flags, and positional arguments offline, always as JSON.
 
 [![Go Version](https://img.shields.io/github/go-mod/go-version/piyush-gambhir/grafana-cli)](https://go.dev/)
 [![Release](https://img.shields.io/github/v/release/piyush-gambhir/grafana-cli)](https://github.com/piyush-gambhir/grafana-cli/releases)

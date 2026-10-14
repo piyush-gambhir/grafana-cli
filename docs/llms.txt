@@ -14,6 +14,15 @@ The Grafana CLI talks to the standard Grafana HTTP API. It wraps the API surface
 - **Written in Go** (module `github.com/piyush-gambhir/grafana-cli`, Go 1.27+, using `spf13/cobra`).
 - **Designed for agents:** comprehensive `--help` on every command, structured `-o json` output, idempotency flags (`--if-not-exists`, `--if-exists`), a non-interactive mode (`--no-input`), and a safety mode (`--read-only`).
 
+## Offline command resolution
+
+`grafana commands resolve -- <arguments>` uses a fresh Cobra command tree to report what the arguments would run without executing the command, reading config or credentials, or making network requests. Output is always JSON with `command`, `effect` (`read`, `remote_write`, or `local_write`), `conditional`, `interactive`, `secret_output`, explicitly set `flags`, and positional `args`. Effects follow command annotations. Unknown commands, command groups, and invalid flags return an error with exit status 1.
+
+```bash
+grafana commands resolve -- dashboard list
+grafana commands resolve -- -o json dashboard delete abc123 --confirm
+```
+
 ## Links
 
 - Home: https://projects.piyushgambhir.com/grafana-cli
