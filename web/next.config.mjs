@@ -7,6 +7,7 @@ const basePath = '/grafana-cli';
 
 /** @type {import('next').NextConfig} */
 const config = {
+  experimental: { agentUpgrade: 'security' },
   basePath,
   // Client code that builds URLs by hand (the search index) needs the prefix too.
   env: { NEXT_PUBLIC_BASE_PATH: basePath },
