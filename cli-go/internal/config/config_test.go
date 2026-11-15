@@ -87,7 +87,6 @@ func TestSaveConfig(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Read it back.
 	loaded, err := LoadFrom(path)
 	if err != nil {
 		t.Fatalf("unexpected error loading saved config: %v", err)
@@ -99,7 +98,6 @@ func TestSaveConfig(t *testing.T) {
 		t.Errorf("got token %q, want %q", loaded.Profiles["default"].Token, "test-token")
 	}
 
-	// Verify file permissions (owner read/write only).
 	info, err := os.Stat(path)
 	if err != nil {
 		t.Fatalf("stat error: %v", err)
@@ -121,7 +119,6 @@ func TestAddProfile(t *testing.T) {
 		t.Error("expected prod profile to exist")
 	}
 
-	// Adding duplicate should fail.
 	err = cfg.CreateProfile("prod", Profile{URL: "https://other.example.com"})
 	if err == nil {
 		t.Error("expected error for duplicate profile")
@@ -156,7 +153,6 @@ func TestGetProfile_NotFound(t *testing.T) {
 		t.Error("expected nil profile for nonexistent name")
 	}
 
-	// Also test empty current profile.
 	cfg.CurrentProfile = ""
 	p = cfg.CurrentProfileConfig()
 	if p != nil {
@@ -173,7 +169,6 @@ func TestDeleteProfile(t *testing.T) {
 		},
 	}
 
-	// Delete current profile should unset it.
 	err := cfg.DeleteProfile("prod")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -185,14 +180,12 @@ func TestDeleteProfile(t *testing.T) {
 		t.Errorf("expected empty current profile, got %q", cfg.CurrentProfile)
 	}
 
-	// Delete non-current profile.
 	cfg.CurrentProfile = "staging"
 	err = cfg.DeleteProfile("staging")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Delete non-existent should error.
 	err = cfg.DeleteProfile("nonexistent")
 	if err == nil {
 		t.Error("expected error for deleting nonexistent profile")
@@ -215,7 +208,6 @@ func TestSetCurrentProfile(t *testing.T) {
 		t.Errorf("got current profile %q, want %q", cfg.CurrentProfile, "staging")
 	}
 
-	// Setting nonexistent should error.
 	err = cfg.SetCurrentProfile("nonexistent")
 	if err == nil {
 		t.Error("expected error for nonexistent profile")
@@ -223,7 +215,6 @@ func TestSetCurrentProfile(t *testing.T) {
 }
 
 func TestConfigDir(t *testing.T) {
-	// Test with XDG_CONFIG_HOME set.
 	t.Setenv("XDG_CONFIG_HOME", "/tmp/xdg-test")
 	dir := ConfigDir()
 	expected := filepath.Join("/tmp/xdg-test", "grafana-cli")
@@ -231,7 +222,6 @@ func TestConfigDir(t *testing.T) {
 		t.Errorf("got config dir %q, want %q", dir, expected)
 	}
 
-	// Test with XDG_CONFIG_HOME unset (falls back to ~/.config).
 	t.Setenv("XDG_CONFIG_HOME", "")
 	dir = ConfigDir()
 	home, _ := os.UserHomeDir()

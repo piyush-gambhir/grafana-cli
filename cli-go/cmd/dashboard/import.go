@@ -55,7 +55,6 @@ Examples:
 				return err
 			}
 
-			// Remove id to allow import.
 			delete(dashboardData, "id")
 
 			req := client.DashboardCreateRequest{

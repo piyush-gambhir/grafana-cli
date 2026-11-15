@@ -64,7 +64,6 @@ Examples:
 				return err
 			}
 
-			// Apply client-side filters.
 			var filtered []client.OrgUser
 			for _, u := range results {
 				if role != "" && !strings.EqualFold(u.Role, role) {

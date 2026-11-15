@@ -37,7 +37,6 @@ Examples:
 			reader := bufio.NewReader(os.Stdin)
 			out := f.IOStreams.Out
 
-			// Prompt for URL.
 			fmt.Fprint(out, "Grafana URL: ")
 			urlStr, _ := reader.ReadString('\n')
 			urlStr = strings.TrimSpace(urlStr)
@@ -45,7 +44,6 @@ Examples:
 				return fmt.Errorf("URL is required")
 			}
 
-			// Prompt for auth method.
 			fmt.Fprint(out, "Auth method (token/basic) [token]: ")
 			authMethod, _ := reader.ReadString('\n')
 			authMethod = strings.TrimSpace(authMethod)
@@ -82,7 +80,6 @@ Examples:
 				return fmt.Errorf("invalid auth method: %s (use token or basic)", authMethod)
 			}
 
-			// Test the connection.
 			fmt.Fprintln(out, "Testing connection...")
 			resolved := &config.ResolvedConfig{
 				URL:      profile.URL,
@@ -104,7 +101,6 @@ Examples:
 				Name string `json:"name"`
 			}
 			if err := resp.JSON(&orgResult); err != nil {
-				// Try health endpoint as fallback.
 				resp2, err2 := c.Get(cmd.Context(), "/api/health")
 				if err2 != nil {
 					return fmt.Errorf("connection test failed: %w", err2)
@@ -117,7 +113,6 @@ Examples:
 				fmt.Fprintf(out, "Connection successful! Org: %s (ID: %d)\n", orgResult.Name, orgResult.ID)
 			}
 
-			// Prompt for profile name.
 			fmt.Fprint(out, "Profile name [default]: ")
 			profileName, _ := reader.ReadString('\n')
 			profileName = strings.TrimSpace(profileName)

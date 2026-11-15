@@ -13,11 +13,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/output"
 )
 
-// parseAnnotationTime accepts RFC3339, Unix seconds (int or float),
-// epoch milliseconds, or epoch nanoseconds and returns epoch ms. Grafana's
-// annotation API expects milliseconds — historically this command took
-// an int64 flag which silently treated RFC3339 input as 0 and returned
-// annotations from 1970. Accepting both formats removes that footgun.
 func parseAnnotationTime(s string) (int64, error) {
 	s = strings.TrimSpace(s)
 	if s == "" {
@@ -26,30 +21,25 @@ func parseAnnotationTime(s string) (int64, error) {
 	if t, err := time.Parse(time.RFC3339, s); err == nil {
 		return t.UnixMilli(), nil
 	}
-	// Numeric input — decide between seconds, milliseconds, and nanoseconds
-	// using magnitude thresholds. Values < 1e12 are seconds (through year
-	// 33658), 1e12-1e15 are milliseconds, >= 1e15 are nanoseconds.
 	if n, err := strconv.ParseInt(s, 10, 64); err == nil {
 		switch {
-		case n >= 1_000_000_000_000_000: // 1e15 → nanoseconds
+		case n >= 1_000_000_000_000_000:
 			return n / 1_000_000, nil
-		case n >= 1_000_000_000_000: // 1e12 → milliseconds
+		case n >= 1_000_000_000_000:
 			return n, nil
-		case n > 0: // seconds
+		case n > 0:
 			return n * 1000, nil
 		default:
 			return 0, nil
 		}
 	}
 	if f, err := strconv.ParseFloat(s, 64); err == nil {
-		// Apply the same magnitude thresholds as integer input so a
-		// float-formatted ms/ns epoch is not misread as seconds.
 		switch {
-		case f >= 1e15: // nanoseconds
+		case f >= 1e15:
 			return int64(f / 1e6), nil
-		case f >= 1e12: // milliseconds
+		case f >= 1e12:
 			return int64(f), nil
-		case f > 0: // seconds
+		case f > 0:
 			return int64(f * 1000), nil
 		default:
 			return 0, nil

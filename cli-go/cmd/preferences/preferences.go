@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdPreferences returns the preferences parent command.
 func NewCmdPreferences(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "preferences",

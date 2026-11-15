@@ -41,9 +41,6 @@ var noUpdate = update.UpdateInfo{
 	ReleaseURL:     "https://github.com/piyush-gambhir/grafana-cli/releases/tag/v0.2.9",
 }
 
-// testEnv isolates a test from the developer's environment and the package
-// seams: release build 0.2.9, an empty config dir, no opt-out variables, an
-// interactive stderr, and a GitHub check that fails the test if called.
 func testEnv(t *testing.T) {
 	t.Helper()
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
@@ -82,12 +79,10 @@ func testEnv(t *testing.T) {
 	}
 }
 
-// stubFreshCheck answers `grafana update` release lookups with info.
 func stubFreshCheck(info update.UpdateInfo) {
 	checkForUpdateFresh = func(string, string) (*update.UpdateInfo, error) { return &info, nil }
 }
 
-// runRoot runs the root command (plus a no-op "noop" command) with args.
 func runRoot(t *testing.T, stdin string, args ...string) (stdout, stderr string, err error) {
 	t.Helper()
 	root := newRootCmd()
@@ -124,7 +119,7 @@ func TestNotifierSuppressed(t *testing.T) {
 		{"update command", func(t *testing.T) { stubFreshCheck(noUpdate) }, []string{"update", "--check"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			testEnv(t) // startUpdateCheck fails the test if it is called
+			testEnv(t)
 			tc.setup(t)
 			_, stderr, err := runRoot(t, "", tc.args...)
 			if err != nil {
@@ -190,7 +185,6 @@ func TestNotifierGoInstallUpdateLine(t *testing.T) {
 	}
 }
 
-// delayedCheck stands in for a release source that answers after delay.
 func delayedCheck(delay time.Duration) func(string, string) <-chan *update.UpdateInfo {
 	return func(string, string) <-chan *update.UpdateInfo {
 		ch := make(chan *update.UpdateInfo, 1)
@@ -203,8 +197,6 @@ func delayedCheck(delay time.Duration) func(string, string) <-chan *update.Updat
 	}
 }
 
-// A command that finishes before the day's check answers still gets the
-// notice, since the check is recorded before the request.
 func TestNotifierWaitsBrieflyForCheckStartedThisRun(t *testing.T) {
 	testEnv(t)
 	startUpdateCheck = delayedCheck(200 * time.Millisecond)
@@ -217,8 +209,6 @@ func TestNotifierWaitsBrieflyForCheckStartedThisRun(t *testing.T) {
 	}
 }
 
-// A release source slower than updateNoticeWait delays the command by at
-// most about a second, and prints nothing.
 func TestNotifierWaitsAtMostOneSecond(t *testing.T) {
 	testEnv(t)
 	startUpdateCheck = delayedCheck(3 * time.Second)
@@ -233,7 +223,6 @@ func TestNotifierWaitsAtMostOneSecond(t *testing.T) {
 	}
 }
 
-// An answer from the cache never waits.
 func TestNotifierAnswersFromCacheWithoutWaiting(t *testing.T) {
 	testEnv(t)
 	startUpdateCheck = update.Start
@@ -256,8 +245,6 @@ func TestNotifierAnswersFromCacheWithoutWaiting(t *testing.T) {
 	}
 }
 
-// Only the top-level commands skip the check; `dashboard update` is an
-// ordinary command.
 func TestSkipsUpdateCheckOnlyForTopLevelCommands(t *testing.T) {
 	root := newRootCmd()
 	for _, tc := range []struct {
@@ -280,8 +267,6 @@ func TestSkipsUpdateCheckOnlyForTopLevelCommands(t *testing.T) {
 	}
 }
 
-// `dashboard update` shares its name with `grafana update`; it must still get
-// the client setup and the read-only check (it used to skip both and panic).
 func TestNestedUpdateCommandIsReadOnlyChecked(t *testing.T) {
 	testEnv(t)
 	stderrIsTerminal = func() bool { return false }
@@ -406,7 +391,7 @@ func TestUpdateGoInstallPrintsCommandInsteadOfReplacing(t *testing.T) {
 	exe := writeFakeExe(t, t.TempDir(), "grafana")
 	executablePath = func() (string, error) { return exe, nil }
 	installMethodFor = func(string) string { return update.MethodGo }
-	releaseDownloadBase = "http://127.0.0.1:1" // any download attempt fails
+	releaseDownloadBase = "http://127.0.0.1:1"
 
 	stdout, _, err := runRoot(t, "", "update", "--yes")
 	if err != nil {
@@ -449,7 +434,6 @@ func TestUpdateInstallsRelease(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			// Pressing Enter at the [Y/n] prompt means yes.
 			stdout, _, err := runRoot(t, "\n", "update")
 			if err != nil {
 				t.Fatalf("update: %v\n%s", err, stdout)
@@ -463,8 +447,6 @@ func TestUpdateInstallsRelease(t *testing.T) {
 			if tc.goos == "windows" {
 				assertFile(t, exe+".old", "old binary")
 			}
-			// The cache keeps the check's answer, so the notifier agrees
-			// that the installed version is the latest.
 			if data, err := os.ReadFile(cacheFile); err != nil || !strings.Contains(string(data), `"latest_version":"0.2.10"`) {
 				t.Errorf("update cache = %q, %v; want latest_version 0.2.10 kept", data, err)
 			}
@@ -539,7 +521,6 @@ func TestInstallUnwritableDirKeepsOldBinary(t *testing.T) {
 	}
 	assertFile(t, exe, "old binary")
 
-	// The replace step itself refuses the same way.
 	src := filepath.Join(t.TempDir(), "grafana")
 	if err := os.WriteFile(src, []byte("new binary"), 0o755); err != nil {
 		t.Fatal(err)
@@ -590,7 +571,6 @@ func TestReplaceExecutableWindowsMovesOldAside(t *testing.T) {
 	assertFile(t, exe+".old", "old binary")
 	assertOnlyFiles(t, dir, true, "grafana.exe")
 
-	// A later start deletes the leftover, only on Windows.
 	cleanupOldExecutable("linux", exe)
 	assertFile(t, exe+".old", "old binary")
 	cleanupOldExecutable("windows", exe)
@@ -677,9 +657,6 @@ func TestVersionShowsCachedLatestWithoutNetwork(t *testing.T) {
 	}
 }
 
-// --- helpers ---
-
-// discardStdout silences commands that write to os.Stdout directly.
 func discardStdout(t *testing.T) {
 	devNull, err := os.OpenFile(os.DevNull, os.O_WRONLY, 0)
 	if err != nil {
@@ -695,7 +672,6 @@ type archiveEntry struct {
 	dir              bool
 }
 
-// releaseArchive builds a zip (Windows) or tar.gz archive in memory.
 func releaseArchive(t *testing.T, osName string, entries []archiveEntry) []byte {
 	t.Helper()
 	var buf bytes.Buffer
@@ -761,7 +737,6 @@ func checksumLine(data []byte, name string) string {
 	return hex.EncodeToString(sum[:]) + "  " + name + "\n"
 }
 
-// serveRelease serves the v0.2.10 release assets and points the installer at it.
 func serveRelease(t *testing.T, name string, archive []byte, checksums string) {
 	t.Helper()
 	prefix := "/" + update.Repo + "/releases/download/v0.2.10/"
@@ -797,7 +772,6 @@ func assertFile(t *testing.T, path, want string) {
 	}
 }
 
-// assertOnlyFiles checks that no temp files were left next to the executable.
 func assertOnlyFiles(t *testing.T, dir string, withOld bool, exeName string) {
 	t.Helper()
 	entries, err := os.ReadDir(dir)

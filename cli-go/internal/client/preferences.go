@@ -2,7 +2,6 @@ package client
 
 import "context"
 
-// Preferences represents user/org preferences.
 type Preferences struct {
 	Theme            string                 `json:"theme"`
 	HomeDashboardID  int64                  `json:"homeDashboardId"`
@@ -13,12 +12,10 @@ type Preferences struct {
 	QueryHistory     QueryHistoryPreference `json:"queryHistory,omitempty"`
 }
 
-// QueryHistoryPreference holds the query history preference.
 type QueryHistoryPreference struct {
 	HomeTab string `json:"homeTab"`
 }
 
-// PreferencesUpdateRequest is the request body for updating preferences.
 type PreferencesUpdateRequest struct {
 	Theme            string `json:"theme,omitempty"`
 	HomeDashboardID  int64  `json:"homeDashboardId,omitempty"`
@@ -28,7 +25,6 @@ type PreferencesUpdateRequest struct {
 	Language         string `json:"language,omitempty"`
 }
 
-// GetPreferences returns the current user's preferences.
 func (c *Client) GetPreferences(ctx context.Context) (*Preferences, error) {
 	var result Preferences
 	resp, err := c.Get(ctx, "/api/user/preferences")
@@ -41,7 +37,6 @@ func (c *Client) GetPreferences(ctx context.Context) (*Preferences, error) {
 	return &result, nil
 }
 
-// UpdatePreferences updates the current user's preferences.
 func (c *Client) UpdatePreferences(ctx context.Context, req PreferencesUpdateRequest) error {
 	resp, err := c.Put(ctx, "/api/user/preferences", req)
 	if err != nil {
@@ -50,7 +45,6 @@ func (c *Client) UpdatePreferences(ctx context.Context, req PreferencesUpdateReq
 	return resp.JSON(nil)
 }
 
-// GetOrgPreferences returns the current org's preferences.
 func (c *Client) GetOrgPreferences(ctx context.Context) (*Preferences, error) {
 	var result Preferences
 	resp, err := c.Get(ctx, "/api/org/preferences")
@@ -63,7 +57,6 @@ func (c *Client) GetOrgPreferences(ctx context.Context) (*Preferences, error) {
 	return &result, nil
 }
 
-// UpdateOrgPreferences updates the current org's preferences.
 func (c *Client) UpdateOrgPreferences(ctx context.Context, req PreferencesUpdateRequest) error {
 	resp, err := c.Put(ctx, "/api/org/preferences", req)
 	if err != nil {

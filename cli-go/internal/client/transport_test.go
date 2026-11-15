@@ -35,7 +35,6 @@ func TestVerboseTransport_RedactsAuthHeaders(t *testing.T) {
 
 	output := logBuf.String()
 
-	// Authorization header should be redacted.
 	if strings.Contains(output, "super-secret-token") {
 		t.Errorf("verbose output should NOT contain the actual token, got:\n%s", output)
 	}
@@ -43,12 +42,10 @@ func TestVerboseTransport_RedactsAuthHeaders(t *testing.T) {
 		t.Errorf("verbose output should contain [REDACTED], got:\n%s", output)
 	}
 
-	// Non-auth headers should be visible.
 	if !strings.Contains(output, "X-Request-Id") {
 		t.Errorf("verbose output should show X-Request-Id header, got:\n%s", output)
 	}
 
-	// Set-Cookie in response should be redacted.
 	if strings.Contains(output, "secret123") {
 		t.Errorf("verbose output should NOT contain Set-Cookie value, got:\n%s", output)
 	}
@@ -80,7 +77,6 @@ func TestVerboseTransport_NonAuthHeadersVisible(t *testing.T) {
 
 	output := logBuf.String()
 
-	// These debugging headers should be visible.
 	if !strings.Contains(output, "Content-Type") {
 		t.Errorf("verbose output should show Content-Type header, got:\n%s", output)
 	}
@@ -101,7 +97,6 @@ func TestRedactAuthHeaders(t *testing.T) {
 
 	redacted := redactAuthHeaders(h)
 
-	// Auth headers should be redacted.
 	for _, key := range []string{"Authorization", "Cookie", "Set-Cookie", "X-Api-Key"} {
 		vals := redacted.Values(key)
 		if len(vals) != 1 || vals[0] != "[REDACTED]" {
@@ -109,7 +104,6 @@ func TestRedactAuthHeaders(t *testing.T) {
 		}
 	}
 
-	// Non-auth headers should be preserved.
 	if redacted.Get("Content-Type") != "application/json" {
 		t.Errorf("Content-Type should be preserved, got %q", redacted.Get("Content-Type"))
 	}
@@ -120,7 +114,6 @@ func TestRedactAuthHeaders(t *testing.T) {
 		t.Errorf("X-Grafana-Org-Id should be preserved, got %q", redacted.Get("X-Grafana-Org-Id"))
 	}
 
-	// Original headers should not be modified.
 	if h.Get("Authorization") != "Bearer secret-token" {
 		t.Error("original Authorization header was modified")
 	}
@@ -142,7 +135,6 @@ func TestVerboseTransport_CookieHeaderRedacted(t *testing.T) {
 	var logBuf bytes.Buffer
 	c.EnableVerboseLogging(&logBuf)
 
-	// Manually create request with Cookie header.
 	req, _ := http.NewRequest("GET", ts.URL+"/api/test", nil)
 	req.Header.Set("Cookie", "grafana_session=mysecretcookie")
 	c.HTTPClient.Do(req)

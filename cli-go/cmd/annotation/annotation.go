@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdAnnotation returns the annotation parent command.
 func NewCmdAnnotation(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "annotation",

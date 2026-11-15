@@ -62,7 +62,6 @@ func TestNewClient(t *testing.T) {
 			if c.BaseURL == "" {
 				t.Fatal("expected BaseURL to be set")
 			}
-			// Check trailing slash is trimmed
 			if c.BaseURL[len(c.BaseURL)-1] == '/' {
 				t.Errorf("BaseURL should not end with /, got %q", c.BaseURL)
 			}
@@ -150,7 +149,6 @@ func TestGet_ContentType(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// GET should not set Content-Type since it has no body.
 	if gotContentType != "" {
 		t.Errorf("GET should not set Content-Type, got %q", gotContentType)
 	}

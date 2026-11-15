@@ -6,14 +6,11 @@ import (
 	"net/http"
 )
 
-// Response wraps an http.Response with convenience methods.
 type Response struct {
 	HTTPResponse *http.Response
 	RequestURL   string
 }
 
-// JSON reads the response body and unmarshals it into v.
-// It also checks for error status codes.
 func (r *Response) JSON(v interface{}) error {
 	defer r.HTTPResponse.Body.Close()
 
@@ -24,7 +21,6 @@ func (r *Response) JSON(v interface{}) error {
 
 	if r.HTTPResponse.StatusCode >= 400 {
 		msg := string(body)
-		// Try to extract message from JSON response.
 		var apiMsg struct {
 			Message string `json:"message"`
 		}
@@ -47,8 +43,6 @@ func (r *Response) JSON(v interface{}) error {
 	return nil
 }
 
-// Error checks if the response indicates an error and returns an APIError.
-// It always closes the response body to prevent leaks.
 func (r *Response) Error() error {
 	defer r.HTTPResponse.Body.Close()
 
@@ -77,12 +71,10 @@ func (r *Response) Error() error {
 	return nil
 }
 
-// StatusCode returns the HTTP status code.
 func (r *Response) StatusCode() int {
 	return r.HTTPResponse.StatusCode
 }
 
-// RawBody reads and returns the raw response body.
 func (r *Response) RawBody() ([]byte, error) {
 	defer r.HTTPResponse.Body.Close()
 	return readAllLimited(r.HTTPResponse.Body)

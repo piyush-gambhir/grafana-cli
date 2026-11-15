@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdDatasource returns the datasource parent command.
 func NewCmdDatasource(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "datasource",

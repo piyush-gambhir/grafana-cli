@@ -51,7 +51,6 @@ Examples:
 		},
 	}
 
-	// For table output of a single dashboard, we display key-value pairs.
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		c, err := f.Client()
 		if err != nil {

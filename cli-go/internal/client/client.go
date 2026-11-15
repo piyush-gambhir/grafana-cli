@@ -15,7 +15,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/config"
 )
 
-// Client is the Grafana HTTP API client.
 type Client struct {
 	BaseURL    string
 	HTTPClient *http.Client
@@ -26,7 +25,6 @@ type Client struct {
 	UserAgent  string
 }
 
-// NewClient creates a new client from a ResolvedConfig.
 func NewClient(rc *config.ResolvedConfig) (*Client, error) {
 	if rc.URL == "" {
 		return nil, fmt.Errorf("grafana URL is required (use --url, GRAFANA_URL, or configure a profile)")
@@ -59,27 +57,22 @@ func NewClient(rc *config.ResolvedConfig) (*Client, error) {
 	}, nil
 }
 
-// Get sends a GET request.
 func (c *Client) Get(ctx context.Context, path string) (*Response, error) {
 	return c.do(ctx, http.MethodGet, path, nil)
 }
 
-// Post sends a POST request with a JSON body.
 func (c *Client) Post(ctx context.Context, path string, body interface{}) (*Response, error) {
 	return c.do(ctx, http.MethodPost, path, body)
 }
 
-// Put sends a PUT request with a JSON body.
 func (c *Client) Put(ctx context.Context, path string, body interface{}) (*Response, error) {
 	return c.do(ctx, http.MethodPut, path, body)
 }
 
-// Patch sends a PATCH request with a JSON body.
 func (c *Client) Patch(ctx context.Context, path string, body interface{}) (*Response, error) {
 	return c.do(ctx, http.MethodPatch, path, body)
 }
 
-// Delete sends a DELETE request.
 func (c *Client) Delete(ctx context.Context, path string) (*Response, error) {
 	return c.do(ctx, http.MethodDelete, path, nil)
 }
@@ -108,7 +101,6 @@ func (c *Client) do(ctx context.Context, method, path string, body interface{}) 
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	// Auth: Bearer token takes precedence over Basic auth.
 	if c.Token != "" {
 		req.Header.Set("Authorization", "Bearer "+c.Token)
 	} else if c.Username != "" && c.Password != "" {

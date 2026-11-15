@@ -6,7 +6,6 @@ import (
 	"net/url"
 )
 
-// Snapshot represents a dashboard snapshot.
 type Snapshot struct {
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
@@ -21,13 +20,11 @@ type Snapshot struct {
 	URL         string `json:"url,omitempty"`
 }
 
-// SnapshotDetail represents a snapshot with its full dashboard data.
 type SnapshotDetail struct {
 	Meta      SnapshotMeta           `json:"meta"`
 	Dashboard map[string]interface{} `json:"dashboard"`
 }
 
-// SnapshotMeta holds snapshot metadata.
 type SnapshotMeta struct {
 	IsSnapshot bool   `json:"isSnapshot"`
 	Type       string `json:"type"`
@@ -36,7 +33,6 @@ type SnapshotMeta struct {
 	Expires    string `json:"expires"`
 }
 
-// SnapshotCreateRequest is the body for creating a snapshot.
 type SnapshotCreateRequest struct {
 	Dashboard map[string]interface{} `json:"dashboard"`
 	Name      string                 `json:"name,omitempty"`
@@ -45,7 +41,6 @@ type SnapshotCreateRequest struct {
 	Key       string                 `json:"key,omitempty"`
 }
 
-// SnapshotCreateResponse is the response from creating a snapshot.
 type SnapshotCreateResponse struct {
 	ID        int64  `json:"id"`
 	Key       string `json:"key"`
@@ -54,7 +49,6 @@ type SnapshotCreateResponse struct {
 	DeleteURL string `json:"deleteUrl"`
 }
 
-// ListSnapshots returns all snapshots. If limit > 0, only that many are returned.
 func (c *Client) ListSnapshots(ctx context.Context, limit int) ([]Snapshot, error) {
 	v := url.Values{}
 	if limit > 0 {
@@ -76,7 +70,6 @@ func (c *Client) ListSnapshots(ctx context.Context, limit int) ([]Snapshot, erro
 	return results, nil
 }
 
-// GetSnapshot returns a snapshot by key.
 func (c *Client) GetSnapshot(ctx context.Context, key string) (*SnapshotDetail, error) {
 	var result SnapshotDetail
 	resp, err := c.Get(ctx, "/api/snapshots/"+key)
@@ -89,7 +82,6 @@ func (c *Client) GetSnapshot(ctx context.Context, key string) (*SnapshotDetail, 
 	return &result, nil
 }
 
-// CreateSnapshot creates a new dashboard snapshot.
 func (c *Client) CreateSnapshot(ctx context.Context, req SnapshotCreateRequest) (*SnapshotCreateResponse, error) {
 	var result SnapshotCreateResponse
 	resp, err := c.Post(ctx, "/api/snapshots", req)
@@ -102,7 +94,6 @@ func (c *Client) CreateSnapshot(ctx context.Context, req SnapshotCreateRequest) 
 	return &result, nil
 }
 
-// DeleteSnapshot deletes a snapshot by key.
 func (c *Client) DeleteSnapshot(ctx context.Context, key string) error {
 	resp, err := c.Delete(ctx, "/api/snapshots/"+key)
 	if err != nil {

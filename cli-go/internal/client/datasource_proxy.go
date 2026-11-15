@@ -7,36 +7,16 @@ import (
 	"net/url"
 )
 
-// --- Loki response types ---
-//
-// Loki query responses come in three shapes depending on the query:
-//
-//   resultType=streams  → raw log lines    → LokiStream
-//   resultType=vector   → instant samples  → PrometheusResult (Prometheus-compatible)
-//   resultType=matrix   → range samples    → PrometheusResult (Prometheus-compatible)
-//
-// A LogQL aggregation like `sum(count_over_time({job="x"}[5m]))` returns
-// vector or matrix shapes — not streams. Decoding the whole payload into
-// []LokiStream fails ("cannot unmarshal number into Go struct field … of
-// type string") and historically dropped data silently on instant queries.
-// We deserialize Result as a RawMessage and decode based on ResultType.
-
-// LokiQueryResponse is the top-level response from Loki query endpoints.
 type LokiQueryResponse struct {
 	Status string        `json:"status"`
 	Data   LokiQueryData `json:"data"`
 }
 
-// LokiQueryData holds the result type and the raw result payload. Use
-// Streams() / Vector() / Matrix() to decode based on ResultType.
 type LokiQueryData struct {
 	ResultType string          `json:"resultType"`
 	Result     json.RawMessage `json:"result"`
 }
 
-// Streams decodes the result as []LokiStream when ResultType == "streams".
-// An empty ResultType is treated as streams for older Loki responses that
-// omit the field; a missing/empty result payload decodes to no streams.
 func (d *LokiQueryData) Streams() ([]LokiStream, error) {
 	if d.ResultType != "streams" && d.ResultType != "" {
 		return nil, fmt.Errorf("resultType is %q, expected %q", d.ResultType, "streams")
@@ -51,8 +31,6 @@ func (d *LokiQueryData) Streams() ([]LokiStream, error) {
 	return out, nil
 }
 
-// Vector decodes the result as []PrometheusResult (instant samples) when
-// ResultType == "vector".
 func (d *LokiQueryData) Vector() ([]PrometheusResult, error) {
 	if d.ResultType != "vector" {
 		return nil, fmt.Errorf("resultType is %q, expected %q", d.ResultType, "vector")
@@ -67,8 +45,6 @@ func (d *LokiQueryData) Vector() ([]PrometheusResult, error) {
 	return out, nil
 }
 
-// Matrix decodes the result as []PrometheusResult (range samples) when
-// ResultType == "matrix".
 func (d *LokiQueryData) Matrix() ([]PrometheusResult, error) {
 	if d.ResultType != "matrix" {
 		return nil, fmt.Errorf("resultType is %q, expected %q", d.ResultType, "matrix")
@@ -83,32 +59,21 @@ func (d *LokiQueryData) Matrix() ([]PrometheusResult, error) {
 	return out, nil
 }
 
-// LokiStream represents a single log stream with its entries.
 type LokiStream struct {
 	Stream map[string]string `json:"stream"`
-	Values [][]string        `json:"values"` // Each: [timestamp_ns, log_line]
+	Values [][]string        `json:"values"`
 }
 
-// --- Prometheus response types ---
-
-// PrometheusQueryResponse is the top-level response from Prometheus query endpoints.
 type PrometheusQueryResponse struct {
 	Status string              `json:"status"`
 	Data   PrometheusQueryData `json:"data"`
 }
 
-// PrometheusQueryData holds the result type and results from a Prometheus query.
 type PrometheusQueryData struct {
 	ResultType string             `json:"resultType"`
 	Result     []PrometheusResult `json:"result"`
 }
 
-// UnmarshalJSON decodes the result payload based on resultType. Vector and
-// matrix results are arrays of objects, but scalar and string results are a
-// single [timestamp, value] pair — decoding those into []PrometheusResult
-// used to fail with "cannot unmarshal number into Go struct field". They are
-// normalized into a single PrometheusResult with the pair in Value. A
-// missing or null result decodes to an empty slice.
 func (d *PrometheusQueryData) UnmarshalJSON(b []byte) error {
 	var raw struct {
 		ResultType string          `json:"resultType"`
@@ -130,7 +95,7 @@ func (d *PrometheusQueryData) UnmarshalJSON(b []byte) error {
 		}
 		d.Result = []PrometheusResult{{Value: pair}}
 		return nil
-	default: // vector, matrix
+	default:
 		if err := json.Unmarshal(raw.Result, &d.Result); err != nil {
 			return fmt.Errorf("decoding %s result: %w", raw.ResultType, err)
 		}
@@ -138,14 +103,12 @@ func (d *PrometheusQueryData) UnmarshalJSON(b []byte) error {
 	}
 }
 
-// PrometheusResult represents a single result from a Prometheus query.
 type PrometheusResult struct {
 	Metric map[string]string `json:"metric"`
-	Value  []interface{}     `json:"value,omitempty"`  // instant: [timestamp, "value"]
-	Values [][]interface{}   `json:"values,omitempty"` // range: [[timestamp, "value"], ...]
+	Value  []interface{}     `json:"value,omitempty"`
+	Values [][]interface{}   `json:"values,omitempty"`
 }
 
-// DatasourceProxyQueryLoki queries a Loki datasource through Grafana's datasource proxy.
 func (c *Client) DatasourceProxyQueryLoki(ctx context.Context, uid string, queryType string, expr string, start, end string, limit int, direction string) (*LokiQueryResponse, error) {
 	v := url.Values{}
 	v.Set("query", expr)
@@ -163,7 +126,7 @@ func (c *Client) DatasourceProxyQueryLoki(ctx context.Context, uid string, query
 		if end != "" {
 			v.Set("time", end)
 		}
-	default: // range
+	default:
 		endpoint = "loki/api/v1/query_range"
 		if start != "" {
 			v.Set("start", start)
@@ -186,7 +149,6 @@ func (c *Client) DatasourceProxyQueryLoki(ctx context.Context, uid string, query
 	return &result, nil
 }
 
-// DatasourceProxyQueryPrometheus queries a Prometheus datasource through Grafana's datasource proxy.
 func (c *Client) DatasourceProxyQueryPrometheus(ctx context.Context, uid string, queryType string, expr string, start, end, step string) (*PrometheusQueryResponse, error) {
 	v := url.Values{}
 	v.Set("query", expr)
@@ -198,7 +160,7 @@ func (c *Client) DatasourceProxyQueryPrometheus(ctx context.Context, uid string,
 		if end != "" {
 			v.Set("time", end)
 		}
-	default: // range
+	default:
 		endpoint = "api/v1/query_range"
 		if start != "" {
 			v.Set("start", start)

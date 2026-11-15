@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdFolder returns the folder parent command.
 func NewCmdFolder(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "folder",

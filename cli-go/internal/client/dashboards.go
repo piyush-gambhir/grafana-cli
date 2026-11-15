@@ -6,7 +6,6 @@ import (
 	"net/url"
 )
 
-// DashboardSearchResult represents a single search result.
 type DashboardSearchResult struct {
 	ID          int64    `json:"id"`
 	UID         string   `json:"uid"`
@@ -23,13 +22,11 @@ type DashboardSearchResult struct {
 	FolderURL   string   `json:"folderUrl"`
 }
 
-// DashboardFullResponse is the response from GET /api/dashboards/uid/:uid.
 type DashboardFullResponse struct {
 	Meta      DashboardMeta          `json:"meta"`
 	Dashboard map[string]interface{} `json:"dashboard"`
 }
 
-// DashboardMeta holds dashboard metadata.
 type DashboardMeta struct {
 	IsStarred bool   `json:"isStarred"`
 	Slug      string `json:"slug"`
@@ -40,7 +37,6 @@ type DashboardMeta struct {
 	Version   int    `json:"version"`
 }
 
-// DashboardCreateRequest is the request body for creating/updating a dashboard.
 type DashboardCreateRequest struct {
 	Dashboard map[string]interface{} `json:"dashboard"`
 	FolderID  int64                  `json:"folderId,omitempty"`
@@ -49,7 +45,6 @@ type DashboardCreateRequest struct {
 	Message   string                 `json:"message,omitempty"`
 }
 
-// DashboardCreateResponse is the response from creating/updating a dashboard.
 type DashboardCreateResponse struct {
 	ID      int64  `json:"id"`
 	UID     string `json:"uid"`
@@ -59,7 +54,6 @@ type DashboardCreateResponse struct {
 	Slug    string `json:"slug"`
 }
 
-// DashboardVersion represents a dashboard version.
 type DashboardVersion struct {
 	ID            int    `json:"id"`
 	DashboardID   int64  `json:"dashboardId"`
@@ -70,12 +64,10 @@ type DashboardVersion struct {
 	Message       string `json:"message"`
 }
 
-// DashboardRestoreRequest is the request to restore a dashboard version.
 type DashboardRestoreRequest struct {
 	Version int `json:"version"`
 }
 
-// DashboardPermission represents a permission entry.
 type DashboardPermission struct {
 	ID             int64  `json:"id"`
 	DashboardID    int64  `json:"dashboardId"`
@@ -90,7 +82,6 @@ type DashboardPermission struct {
 	PermissionName string `json:"permissionName"`
 }
 
-// DashboardPermissionUpdate represents a permission update item.
 type DashboardPermissionUpdate struct {
 	UserID     int64  `json:"userId,omitempty"`
 	TeamID     int64  `json:"teamId,omitempty"`
@@ -98,12 +89,10 @@ type DashboardPermissionUpdate struct {
 	Permission int    `json:"permission"`
 }
 
-// DashboardPermissionsUpdateRequest is the request to update permissions.
 type DashboardPermissionsUpdateRequest struct {
 	Items []DashboardPermissionUpdate `json:"items"`
 }
 
-// SearchDashboards searches for dashboards.
 func (c *Client) SearchDashboards(ctx context.Context, query, tag, folderUID string, page PageParams) ([]DashboardSearchResult, error) {
 	v := url.Values{}
 	v.Set("type", "dash-db")
@@ -129,7 +118,6 @@ func (c *Client) SearchDashboards(ctx context.Context, query, tag, folderUID str
 	return results, nil
 }
 
-// GetDashboardByUID retrieves a dashboard by UID.
 func (c *Client) GetDashboardByUID(ctx context.Context, uid string) (*DashboardFullResponse, error) {
 	var result DashboardFullResponse
 	resp, err := c.Get(ctx, "/api/dashboards/uid/"+uid)
@@ -142,7 +130,6 @@ func (c *Client) GetDashboardByUID(ctx context.Context, uid string) (*DashboardF
 	return &result, nil
 }
 
-// CreateDashboard creates or updates a dashboard.
 func (c *Client) CreateDashboard(ctx context.Context, req DashboardCreateRequest) (*DashboardCreateResponse, error) {
 	var result DashboardCreateResponse
 	resp, err := c.Post(ctx, "/api/dashboards/db", req)
@@ -155,7 +142,6 @@ func (c *Client) CreateDashboard(ctx context.Context, req DashboardCreateRequest
 	return &result, nil
 }
 
-// DeleteDashboard deletes a dashboard by UID.
 func (c *Client) DeleteDashboard(ctx context.Context, uid string) error {
 	resp, err := c.Delete(ctx, "/api/dashboards/uid/"+uid)
 	if err != nil {
@@ -164,12 +150,10 @@ func (c *Client) DeleteDashboard(ctx context.Context, uid string) error {
 	return resp.JSON(nil)
 }
 
-// DashboardVersionsResponse is the wrapped response from GET /api/dashboards/uid/:uid/versions.
 type DashboardVersionsResponse struct {
 	Versions []DashboardVersion `json:"versions"`
 }
 
-// GetDashboardVersions lists versions of a dashboard by UID.
 func (c *Client) GetDashboardVersions(ctx context.Context, uid string, limit, start int) ([]DashboardVersion, error) {
 	v := url.Values{}
 	if limit > 0 {
@@ -195,7 +179,6 @@ func (c *Client) GetDashboardVersions(ctx context.Context, uid string, limit, st
 	return result.Versions, nil
 }
 
-// RestoreDashboardVersion restores a dashboard to a specific version by UID.
 func (c *Client) RestoreDashboardVersion(ctx context.Context, uid string, version int) error {
 	path := fmt.Sprintf("/api/dashboards/uid/%s/restore", uid)
 	req := DashboardRestoreRequest{Version: version}
@@ -206,7 +189,6 @@ func (c *Client) RestoreDashboardVersion(ctx context.Context, uid string, versio
 	return resp.JSON(nil)
 }
 
-// GetDashboardPermissions gets the permissions for a dashboard.
 func (c *Client) GetDashboardPermissions(ctx context.Context, uid string) ([]DashboardPermission, error) {
 	var results []DashboardPermission
 	resp, err := c.Get(ctx, "/api/dashboards/uid/"+uid+"/permissions")
@@ -219,7 +201,6 @@ func (c *Client) GetDashboardPermissions(ctx context.Context, uid string) ([]Das
 	return results, nil
 }
 
-// UpdateDashboardPermissions updates the permissions for a dashboard.
 func (c *Client) UpdateDashboardPermissions(ctx context.Context, uid string, req DashboardPermissionsUpdateRequest) error {
 	resp, err := c.Post(ctx, "/api/dashboards/uid/"+uid+"/permissions", req)
 	if err != nil {

@@ -58,7 +58,6 @@ Examples:
 				return err
 			}
 
-			// Apply client-side filters since the Grafana API returns all datasources.
 			var filtered []client.Datasource
 			for _, d := range results {
 				if dsType != "" && !strings.EqualFold(d.Type, dsType) {

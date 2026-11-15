@@ -6,7 +6,6 @@ import (
 	"net/url"
 )
 
-// Annotation represents a Grafana annotation.
 type Annotation struct {
 	ID           int64    `json:"id"`
 	AlertID      int64    `json:"alertId,omitempty"`
@@ -25,7 +24,6 @@ type Annotation struct {
 	Updated      int64    `json:"updated,omitempty"`
 }
 
-// AnnotationCreateRequest is the body for creating an annotation.
 type AnnotationCreateRequest struct {
 	DashboardID  int64    `json:"dashboardId,omitempty"`
 	DashboardUID string   `json:"dashboardUID,omitempty"`
@@ -36,13 +34,11 @@ type AnnotationCreateRequest struct {
 	Text         string   `json:"text"`
 }
 
-// AnnotationCreateResponse is the response from creating an annotation.
 type AnnotationCreateResponse struct {
 	ID      int64  `json:"id"`
 	Message string `json:"message"`
 }
 
-// AnnotationUpdateRequest is the body for updating an annotation.
 type AnnotationUpdateRequest struct {
 	Time    int64    `json:"time,omitempty"`
 	TimeEnd int64    `json:"timeEnd,omitempty"`
@@ -50,20 +46,17 @@ type AnnotationUpdateRequest struct {
 	Text    string   `json:"text"`
 }
 
-// AnnotationTagsResult represents the result of listing annotation tags.
 type AnnotationTagsResult struct {
 	Result struct {
 		Tags []AnnotationTag `json:"tags"`
 	} `json:"result"`
 }
 
-// AnnotationTag represents a tag with its count.
 type AnnotationTag struct {
 	Tag   string `json:"tag"`
 	Count int64  `json:"count"`
 }
 
-// ListAnnotations returns annotations matching the given filters.
 func (c *Client) ListAnnotations(ctx context.Context, dashboardID, panelID int64, from, to int64, tags []string, limit int64, annType string) ([]Annotation, error) {
 	v := url.Values{}
 	if dashboardID > 0 {
@@ -100,7 +93,6 @@ func (c *Client) ListAnnotations(ctx context.Context, dashboardID, panelID int64
 	return results, nil
 }
 
-// GetAnnotation returns an annotation by ID.
 func (c *Client) GetAnnotation(ctx context.Context, id int64) (*Annotation, error) {
 	var result Annotation
 	resp, err := c.Get(ctx, fmt.Sprintf("/api/annotations/%d", id))
@@ -113,7 +105,6 @@ func (c *Client) GetAnnotation(ctx context.Context, id int64) (*Annotation, erro
 	return &result, nil
 }
 
-// CreateAnnotation creates a new annotation.
 func (c *Client) CreateAnnotation(ctx context.Context, req AnnotationCreateRequest) (*AnnotationCreateResponse, error) {
 	var result AnnotationCreateResponse
 	resp, err := c.Post(ctx, "/api/annotations", req)
@@ -126,7 +117,6 @@ func (c *Client) CreateAnnotation(ctx context.Context, req AnnotationCreateReque
 	return &result, nil
 }
 
-// UpdateAnnotation updates an existing annotation.
 func (c *Client) UpdateAnnotation(ctx context.Context, id int64, req AnnotationUpdateRequest) error {
 	resp, err := c.Put(ctx, fmt.Sprintf("/api/annotations/%d", id), req)
 	if err != nil {
@@ -135,7 +125,6 @@ func (c *Client) UpdateAnnotation(ctx context.Context, id int64, req AnnotationU
 	return resp.JSON(nil)
 }
 
-// DeleteAnnotation deletes an annotation by ID.
 func (c *Client) DeleteAnnotation(ctx context.Context, id int64) error {
 	resp, err := c.Delete(ctx, fmt.Sprintf("/api/annotations/%d", id))
 	if err != nil {
@@ -144,7 +133,6 @@ func (c *Client) DeleteAnnotation(ctx context.Context, id int64) error {
 	return resp.JSON(nil)
 }
 
-// GetAnnotationTags returns annotation tags, optionally filtered by tag prefix and limited.
 func (c *Client) GetAnnotationTags(ctx context.Context, tag string, limit int64) (*AnnotationTagsResult, error) {
 	v := url.Values{}
 	if tag != "" {

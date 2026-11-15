@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdMember returns the team member parent command.
 func NewCmdMember(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "member",

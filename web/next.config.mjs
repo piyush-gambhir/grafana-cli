@@ -2,14 +2,11 @@ import { createMDX } from 'fumadocs-mdx/next';
 
 const withMDX = createMDX();
 
-// The site is served under projects.piyushgambhir.com/grafana-cli.
 const basePath = '/grafana-cli';
 
-/** @type {import('next').NextConfig} */
 const config = {
   experimental: { agentUpgrade: 'security' },
   basePath,
-  // Client code that builds URLs by hand (the search index) needs the prefix too.
   env: { NEXT_PUBLIC_BASE_PATH: basePath },
   output: 'export',
   reactStrictMode: true,

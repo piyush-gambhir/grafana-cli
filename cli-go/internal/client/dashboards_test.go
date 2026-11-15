@@ -199,7 +199,6 @@ func TestGetDashboardVersions(t *testing.T) {
 		if r.URL.Path != "/api/dashboards/uid/abc123/versions" {
 			t.Errorf("unexpected path: %s", r.URL.Path)
 		}
-		// Verify query params
 		if r.URL.Query().Get("limit") != "10" {
 			t.Errorf("expected limit=10, got %s", r.URL.Query().Get("limit"))
 		}

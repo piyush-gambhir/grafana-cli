@@ -5,7 +5,6 @@ import (
 	"fmt"
 )
 
-// Datasource represents a Grafana data source.
 type Datasource struct {
 	ID               int64                  `json:"id"`
 	UID              string                 `json:"uid"`
@@ -27,7 +26,6 @@ type Datasource struct {
 	SecureJSONFields map[string]bool        `json:"secureJsonFields,omitempty"`
 }
 
-// DatasourceCreateRequest is the body for creating a data source.
 type DatasourceCreateRequest struct {
 	Name            string                 `json:"name"`
 	Type            string                 `json:"type"`
@@ -43,7 +41,6 @@ type DatasourceCreateRequest struct {
 	SecureJSONData  map[string]string      `json:"secureJsonData,omitempty"`
 }
 
-// DatasourceCreateResponse is the response from creating a data source.
 type DatasourceCreateResponse struct {
 	Datasource Datasource `json:"datasource"`
 	ID         int64      `json:"id"`
@@ -51,7 +48,6 @@ type DatasourceCreateResponse struct {
 	Name       string     `json:"name"`
 }
 
-// ListDatasources returns all data sources.
 func (c *Client) ListDatasources(ctx context.Context) ([]Datasource, error) {
 	var results []Datasource
 	resp, err := c.Get(ctx, "/api/datasources")
@@ -64,7 +60,6 @@ func (c *Client) ListDatasources(ctx context.Context) ([]Datasource, error) {
 	return results, nil
 }
 
-// GetDatasource returns a data source by ID.
 func (c *Client) GetDatasource(ctx context.Context, id int64) (*Datasource, error) {
 	var result Datasource
 	resp, err := c.Get(ctx, fmt.Sprintf("/api/datasources/%d", id))
@@ -77,7 +72,6 @@ func (c *Client) GetDatasource(ctx context.Context, id int64) (*Datasource, erro
 	return &result, nil
 }
 
-// GetDatasourceByUID returns a data source by UID.
 func (c *Client) GetDatasourceByUID(ctx context.Context, uid string) (*Datasource, error) {
 	var result Datasource
 	resp, err := c.Get(ctx, "/api/datasources/uid/"+uid)
@@ -90,7 +84,6 @@ func (c *Client) GetDatasourceByUID(ctx context.Context, uid string) (*Datasourc
 	return &result, nil
 }
 
-// CreateDatasource creates a new data source.
 func (c *Client) CreateDatasource(ctx context.Context, req DatasourceCreateRequest) (*DatasourceCreateResponse, error) {
 	var result DatasourceCreateResponse
 	resp, err := c.Post(ctx, "/api/datasources", req)
@@ -103,7 +96,6 @@ func (c *Client) CreateDatasource(ctx context.Context, req DatasourceCreateReque
 	return &result, nil
 }
 
-// UpdateDatasource updates an existing data source.
 func (c *Client) UpdateDatasource(ctx context.Context, id int64, req DatasourceCreateRequest) (*DatasourceCreateResponse, error) {
 	var result DatasourceCreateResponse
 	resp, err := c.Put(ctx, fmt.Sprintf("/api/datasources/%d", id), req)
@@ -116,7 +108,6 @@ func (c *Client) UpdateDatasource(ctx context.Context, id int64, req DatasourceC
 	return &result, nil
 }
 
-// DeleteDatasource deletes a data source by ID.
 func (c *Client) DeleteDatasource(ctx context.Context, id int64) error {
 	resp, err := c.Delete(ctx, fmt.Sprintf("/api/datasources/%d", id))
 	if err != nil {
@@ -125,7 +116,6 @@ func (c *Client) DeleteDatasource(ctx context.Context, id int64) error {
 	return resp.JSON(nil)
 }
 
-// DeleteDatasourceByUID deletes a data source by UID.
 func (c *Client) DeleteDatasourceByUID(ctx context.Context, uid string) error {
 	resp, err := c.Delete(ctx, "/api/datasources/uid/"+uid)
 	if err != nil {

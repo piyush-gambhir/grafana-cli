@@ -14,7 +14,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/output"
 )
 
-// queryResultRow is a flattened row for table rendering.
 type queryResultRow struct {
 	Timestamp string
 	Labels    string
@@ -73,7 +72,6 @@ Examples:
 			ctx := cmd.Context()
 			uid := args[0]
 
-			// Auto-detect datasource type.
 			ds, err := c.GetDatasourceByUID(ctx, uid)
 			if err != nil {
 				return fmt.Errorf("fetching datasource: %w", err)
@@ -84,7 +82,6 @@ Examples:
 				return fmt.Errorf("datasource %q is type %q; query supports loki and prometheus", uid, dsType)
 			}
 
-			// Resolve time range.
 			startStr, endStr, err := resolveTimeRange(last, from, to, dsType)
 			if err != nil {
 				return err
@@ -122,11 +119,6 @@ func queryLoki(ctx context.Context, c *client.Client, f *cmdutil.Factory, uid, q
 		return fmt.Errorf("loki query failed with status: %s", result.Status)
 	}
 
-	// JSON/YAML output: emit a shape-aware envelope so consumers can
-	// distinguish streams (log lines) from vector/matrix (sample series).
-	// Without this, callers parsing .data.result generically got either a
-	// crash (vector → expected []LokiStream of strings) or a silently
-	// stripped payload.
 	if f.Resolved.Output != "table" && f.Resolved.Output != "" {
 		envelope, err := lokiJSONEnvelope(result)
 		if err != nil {
@@ -135,7 +127,6 @@ func queryLoki(ctx context.Context, c *client.Client, f *cmdutil.Factory, uid, q
 		return output.Print(f.IOStreams.Out, f.Resolved.Output, envelope, nil)
 	}
 
-	// Table output is shape-specific.
 	switch result.Data.ResultType {
 	case "streams", "":
 		return renderLokiStreams(f, result)
@@ -146,14 +137,11 @@ func queryLoki(ctx context.Context, c *client.Client, f *cmdutil.Factory, uid, q
 	}
 }
 
-// lokiJSONEnvelope decodes the shape-specific result and returns a struct
-// suitable for JSON/YAML serialization with stable field names.
 func lokiJSONEnvelope(r *client.LokiQueryResponse) (interface{}, error) {
 	switch r.Data.ResultType {
 	case "streams", "":
 		streams, err := r.Data.Streams()
 		if err != nil {
-			// Fall back to empty so we still emit a well-formed envelope.
 			streams = nil
 		}
 		return struct {
@@ -290,18 +278,15 @@ func queryPrometheus(ctx context.Context, c *client.Client, f *cmdutil.Factory, 
 		return fmt.Errorf("prometheus query failed with status: %s", result.Status)
 	}
 
-	// For JSON/YAML, output the raw response.
 	if f.Resolved.Output != "table" && f.Resolved.Output != "" {
 		return output.Print(f.IOStreams.Out, f.Resolved.Output, result, nil)
 	}
 
-	// Flatten results into rows.
 	var rows []queryResultRow
 	for _, r := range result.Data.Result {
 		labels := formatLabels(r.Metric)
 
 		if len(r.Value) >= 2 {
-			// Instant query result.
 			ts := formatPromTimestamp(r.Value[0])
 			val := fmt.Sprintf("%v", r.Value[1])
 			rows = append(rows, queryResultRow{Timestamp: ts, Labels: labels, Value: val})
@@ -331,8 +316,6 @@ func queryPrometheus(ctx context.Context, c *client.Client, f *cmdutil.Factory, 
 	})
 }
 
-// resolveTimeRange computes start/end strings from flags.
-// For Loki, returns nanosecond epoch strings. For Prometheus, returns Unix second strings.
 func resolveTimeRange(last, from, to, dsType string) (string, string, error) {
 	now := time.Now()
 
@@ -360,21 +343,15 @@ func resolveTimeRange(last, from, to, dsType string) (string, string, error) {
 }
 
 func parseTime(s string) (time.Time, error) {
-	// Try RFC3339 first.
 	if t, err := time.Parse(time.RFC3339, s); err == nil {
 		return t, nil
 	}
-	// Integer epochs: nanoseconds when the magnitude is too large to be
-	// seconds, otherwise seconds. This check must run before the float
-	// branch — ParseFloat accepts every integer string, so a nanosecond
-	// epoch would otherwise be misread as seconds.
 	if n, err := strconv.ParseInt(s, 10, 64); err == nil {
 		if n > 1e15 {
 			return time.Unix(0, n), nil
 		}
 		return time.Unix(n, 0), nil
 	}
-	// Fractional Unix epoch seconds.
 	if f, err := strconv.ParseFloat(s, 64); err == nil {
 		sec := int64(f)
 		nsec := int64((f - float64(sec)) * 1e9)
@@ -387,7 +364,7 @@ func formatTime(t time.Time, dsType string) string {
 	switch dsType {
 	case "loki":
 		return fmt.Sprintf("%d", t.UnixNano())
-	default: // prometheus
+	default:
 		return fmt.Sprintf("%.3f", float64(t.UnixNano())/1e9)
 	}
 }

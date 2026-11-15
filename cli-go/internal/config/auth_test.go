@@ -56,7 +56,6 @@ func TestResolveAuth_EnvOverridesConfig(t *testing.T) {
 }
 
 func TestResolveAuth_ConfigFallback(t *testing.T) {
-	// Clear any env vars.
 	t.Setenv("GRAFANA_URL", "")
 	t.Setenv("GRAFANA_TOKEN", "")
 	t.Setenv("GRAFANA_USERNAME", "")
@@ -87,7 +86,6 @@ func TestResolveAuth_ConfigFallback(t *testing.T) {
 }
 
 func TestResolveAuth_MissingURL_Error(t *testing.T) {
-	// When no URL is provided from any source, it should be empty.
 	t.Setenv("GRAFANA_URL", "")
 	t.Setenv("GRAFANA_TOKEN", "")
 	t.Setenv("GRAFANA_USERNAME", "")
@@ -98,7 +96,6 @@ func TestResolveAuth_MissingURL_Error(t *testing.T) {
 	if rc.URL != "" {
 		t.Errorf("expected empty URL, got %q", rc.URL)
 	}
-	// The error is raised by NewClient, not Resolve. Verify URL is empty.
 }
 
 func TestResolveAuth_BearerToken(t *testing.T) {
@@ -143,20 +140,17 @@ func TestResolveAuth_OrgID(t *testing.T) {
 	t.Setenv("GRAFANA_PASSWORD", "")
 	t.Setenv("GRAFANA_ORG_ID", "")
 
-	// Flag OrgID takes precedence.
 	rc := Resolve("http://localhost:3000", "", "", "", 42, &Profile{OrgID: 10}, Defaults{})
 	if rc.OrgID != 42 {
 		t.Errorf("got OrgID %d, want %d", rc.OrgID, 42)
 	}
 
-	// Env OrgID is next.
 	t.Setenv("GRAFANA_ORG_ID", "99")
 	rc = Resolve("http://localhost:3000", "", "", "", 0, &Profile{OrgID: 10}, Defaults{})
 	if rc.OrgID != 99 {
 		t.Errorf("got OrgID %d, want %d", rc.OrgID, 99)
 	}
 
-	// Profile OrgID is last.
 	t.Setenv("GRAFANA_ORG_ID", "")
 	rc = Resolve("http://localhost:3000", "", "", "", 0, &Profile{OrgID: 10}, Defaults{})
 	if rc.OrgID != 10 {

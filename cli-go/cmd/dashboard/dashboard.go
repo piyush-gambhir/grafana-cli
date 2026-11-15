@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdDashboard returns the dashboard parent command.
 func NewCmdDashboard(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "dashboard",

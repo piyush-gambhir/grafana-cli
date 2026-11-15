@@ -6,7 +6,6 @@ import (
 	"net/url"
 )
 
-// LibraryElement represents a Grafana library element (panel or variable).
 type LibraryElement struct {
 	ID          int64                  `json:"id"`
 	OrgID       int64                  `json:"orgId"`
@@ -22,7 +21,6 @@ type LibraryElement struct {
 	Meta        LibraryElementMeta     `json:"meta"`
 }
 
-// LibraryElementMeta holds library element metadata.
 type LibraryElementMeta struct {
 	FolderName          string             `json:"folderName"`
 	FolderUID           string             `json:"folderUid"`
@@ -33,19 +31,16 @@ type LibraryElementMeta struct {
 	UpdatedBy           LibraryElementUser `json:"updatedBy"`
 }
 
-// LibraryElementUser represents a user in library element metadata.
 type LibraryElementUser struct {
 	ID        int64  `json:"id"`
 	Name      string `json:"name"`
 	AvatarURL string `json:"avatarUrl"`
 }
 
-// LibraryElementSearchResult is the result of searching library elements.
 type LibraryElementSearchResult struct {
 	Result LibraryElementSearchData `json:"result"`
 }
 
-// LibraryElementSearchData holds the search result data.
 type LibraryElementSearchData struct {
 	TotalCount int              `json:"totalCount"`
 	Elements   []LibraryElement `json:"elements"`
@@ -53,12 +48,10 @@ type LibraryElementSearchData struct {
 	PerPage    int              `json:"perPage"`
 }
 
-// LibraryElementResult wraps a single library element response.
 type LibraryElementResult struct {
 	Result LibraryElement `json:"result"`
 }
 
-// LibraryElementCreateRequest is the body for creating a library element.
 type LibraryElementCreateRequest struct {
 	FolderID  int64                  `json:"folderId,omitempty"`
 	FolderUID string                 `json:"folderUid,omitempty"`
@@ -67,7 +60,6 @@ type LibraryElementCreateRequest struct {
 	Model     map[string]interface{} `json:"model"`
 }
 
-// LibraryElementUpdateRequest is the body for updating a library element.
 type LibraryElementUpdateRequest struct {
 	FolderID  int64                  `json:"folderId,omitempty"`
 	FolderUID string                 `json:"folderUid,omitempty"`
@@ -77,7 +69,6 @@ type LibraryElementUpdateRequest struct {
 	Version   int64                  `json:"version"`
 }
 
-// LibraryElementConnection represents a connection to a dashboard.
 type LibraryElementConnection struct {
 	ID            int64              `json:"id"`
 	Kind          int                `json:"kind"`
@@ -88,12 +79,10 @@ type LibraryElementConnection struct {
 	CreatedBy     LibraryElementUser `json:"createdBy"`
 }
 
-// LibraryElementConnectionsResult wraps connection results.
 type LibraryElementConnectionsResult struct {
 	Result []LibraryElementConnection `json:"result"`
 }
 
-// ListLibraryElements searches for library elements.
 func (c *Client) ListLibraryElements(ctx context.Context, searchString string, kind int, folderFilter string, page PageParams) (*LibraryElementSearchResult, error) {
 	v := url.Values{}
 	if searchString != "" {
@@ -119,7 +108,6 @@ func (c *Client) ListLibraryElements(ctx context.Context, searchString string, k
 	return &result, nil
 }
 
-// GetLibraryElement returns a library element by UID.
 func (c *Client) GetLibraryElement(ctx context.Context, uid string) (*LibraryElementResult, error) {
 	var result LibraryElementResult
 	resp, err := c.Get(ctx, "/api/library-elements/"+uid)
@@ -132,7 +120,6 @@ func (c *Client) GetLibraryElement(ctx context.Context, uid string) (*LibraryEle
 	return &result, nil
 }
 
-// CreateLibraryElement creates a new library element.
 func (c *Client) CreateLibraryElement(ctx context.Context, req LibraryElementCreateRequest) (*LibraryElementResult, error) {
 	var result LibraryElementResult
 	resp, err := c.Post(ctx, "/api/library-elements", req)
@@ -145,7 +132,6 @@ func (c *Client) CreateLibraryElement(ctx context.Context, req LibraryElementCre
 	return &result, nil
 }
 
-// UpdateLibraryElement updates a library element.
 func (c *Client) UpdateLibraryElement(ctx context.Context, uid string, req LibraryElementUpdateRequest) (*LibraryElementResult, error) {
 	var result LibraryElementResult
 	resp, err := c.Patch(ctx, "/api/library-elements/"+uid, req)
@@ -158,7 +144,6 @@ func (c *Client) UpdateLibraryElement(ctx context.Context, uid string, req Libra
 	return &result, nil
 }
 
-// DeleteLibraryElement deletes a library element by UID.
 func (c *Client) DeleteLibraryElement(ctx context.Context, uid string) error {
 	resp, err := c.Delete(ctx, "/api/library-elements/"+uid)
 	if err != nil {
@@ -167,7 +152,6 @@ func (c *Client) DeleteLibraryElement(ctx context.Context, uid string) error {
 	return resp.JSON(nil)
 }
 
-// GetLibraryElementConnections returns dashboards connected to a library element.
 func (c *Client) GetLibraryElementConnections(ctx context.Context, uid string) (*LibraryElementConnectionsResult, error) {
 	var result LibraryElementConnectionsResult
 	resp, err := c.Get(ctx, "/api/library-elements/"+uid+"/connections/")

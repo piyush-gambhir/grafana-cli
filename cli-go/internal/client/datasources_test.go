@@ -203,9 +203,6 @@ func TestDeleteDatasourceByUID(t *testing.T) {
 }
 
 func TestGetDatasourceByName(t *testing.T) {
-	// The Grafana API supports GET /api/datasources/name/:name.
-	// Our client doesn't have a dedicated method, so we test GetDatasourceByUID
-	// with a 404 scenario to verify error handling.
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(map[string]string{"message": "Data source not found"})
