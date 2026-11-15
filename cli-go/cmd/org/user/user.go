@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdOrgUser returns the org user parent command.
 func NewCmdOrgUser(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "user",

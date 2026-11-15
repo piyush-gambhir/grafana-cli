@@ -11,7 +11,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/output"
 )
 
-// resolution describes what arguments would run, using the real command parser.
 type resolution struct {
 	Command     string            `json:"command"`
 	Effect      string            `json:"effect"`
@@ -30,7 +29,6 @@ func newCommandsCmd() *cobra.Command {
 		DisableFlagParsing: true,
 		Example:            "  grafana commands resolve -- dashboard list\n  grafana commands resolve -- -o json dashboard delete abc123 --confirm",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			// Bypass config, credentials and the background update check.
 			OutputFormat = "json"
 			return nil
 		},

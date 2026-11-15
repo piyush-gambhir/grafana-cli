@@ -166,7 +166,6 @@ func TestGetAnnotationTags(t *testing.T) {
 		if r.URL.Path != "/api/annotations/tags" {
 			t.Errorf("unexpected path: %s", r.URL.Path)
 		}
-		// Verify query params for tag filter and limit
 		if r.URL.Query().Get("tag") != "deploy" {
 			t.Errorf("expected tag=deploy, got %s", r.URL.Query().Get("tag"))
 		}

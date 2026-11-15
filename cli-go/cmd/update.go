@@ -33,8 +33,6 @@ const (
 	maxChecksumsSize = 1 << 20
 )
 
-// Test seams: tests point these at temp dirs, fake platforms, and httptest
-// servers so nothing touches the real network or the test binary.
 var (
 	goos                = runtime.GOOS
 	goarch              = runtime.GOARCH
@@ -46,7 +44,6 @@ var (
 	downloadClient      = &http.Client{Timeout: 120 * time.Second}
 )
 
-// updateCheckResult is the `update --check` report.
 type updateCheckResult struct {
 	CurrentVersion  string `json:"current_version" yaml:"current_version"`
 	LatestVersion   string `json:"latest_version" yaml:"latest_version"`
@@ -136,7 +133,6 @@ Examples:
 				return exeErr
 			}
 
-			// update skips the root's config setup, so enforce --read-only here.
 			resolved, _, err := loadAndResolveConfig(cmd)
 			if err != nil {
 				return err
@@ -206,7 +202,6 @@ func printUpdateCheck(w io.Writer, info *update.UpdateInfo, current, method stri
 	return nil
 }
 
-// confirmUpdate asks "Update now? [Y/n]"; an empty answer means yes.
 func confirmUpdate(in io.Reader, w io.Writer) bool {
 	fmt.Fprint(w, "Update now? [Y/n] ")
 	line, err := bufio.NewReader(in).ReadString('\n')
@@ -232,16 +227,12 @@ func currentExecutable() (string, error) {
 	return exe, nil
 }
 
-// cleanupOldExecutable deletes the grafana.exe.old a Windows update leaves
-// behind (it cannot be deleted while it is still running). Best-effort.
 func cleanupOldExecutable(osName, exe string) {
 	if osName == "windows" && exe != "" {
 		_ = os.Remove(exe + ".old")
 	}
 }
 
-// archiveName is the GoReleaser archive for a platform (see .goreleaser.yaml:
-// "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}", zip on Windows).
 func archiveName(osName, arch string) string {
 	ext := ".tar.gz"
 	if osName == "windows" {
@@ -250,7 +241,6 @@ func archiveName(osName, arch string) string {
 	return fmt.Sprintf("grafana-cli_%s_%s%s", osName, arch, ext)
 }
 
-// binaryName is the executable inside the release archive.
 func binaryName(osName string) string {
 	if osName == "windows" {
 		return "grafana.exe"
@@ -258,8 +248,6 @@ func binaryName(osName string) string {
 	return "grafana"
 }
 
-// installRelease downloads, verifies, and installs version over exe. Any
-// failure leaves the current executable in place.
 func installRelease(ctx context.Context, w io.Writer, version, exe string) error {
 	if err := checkWritableDir(filepath.Dir(exe)); err != nil {
 		return err
@@ -294,8 +282,6 @@ func installRelease(ctx context.Context, w io.Writer, version, exe string) error
 	return replaceExecutable(goos, binaryPath, exe)
 }
 
-// checkWritableDir fails early, before any download, when the new binary
-// could not be written next to the current one.
 func checkWritableDir(dir string) error {
 	f, err := os.CreateTemp(dir, ".grafana-update-*")
 	if err != nil {
@@ -344,8 +330,6 @@ func downloadFile(ctx context.Context, dst, url string) error {
 	return out.Close()
 }
 
-// verifyChecksum checks filePath against the archive's entry in the release's
-// checksums.txt and refuses a mismatch or a missing entry.
 func verifyChecksum(ctx context.Context, filePath, checksumURL, archive string) error {
 	req, err := newRequest(ctx, checksumURL)
 	if err != nil {
@@ -367,7 +351,6 @@ func verifyChecksum(ctx context.Context, filePath, checksumURL, archive string) 
 		return errors.New("checksums.txt is too large")
 	}
 
-	// Format: "<sha256>  <filename>" per line.
 	var expected string
 	for _, line := range strings.Split(string(body), "\n") {
 		fields := strings.Fields(line)
@@ -398,11 +381,6 @@ func verifyChecksum(ctx context.Context, filePath, checksumURL, archive string) 
 	return nil
 }
 
-// extractBinary writes the release binary from the archive to destDir under
-// the fixed name "grafana", so no part of an archive entry name ever reaches
-// the file system (CodeQL go/zipslip). It refuses entries with absolute or
-// parent-relative paths, a binary entry that is not a regular file, and a
-// binary larger than the release size limit.
 func extractBinary(archivePath, destDir, osName string) (string, error) {
 	outPath := filepath.Join(destDir, "grafana")
 	want := binaryName(osName)
@@ -506,8 +484,6 @@ func extractFromZip(archivePath, outPath, want string) (bool, error) {
 	return found, nil
 }
 
-// archiveEntryName returns name without a leading "./" or trailing "/",
-// refusing absolute paths, drive letters, backslashes, and ".." components.
 func archiveEntryName(name string) (string, error) {
 	if path.IsAbs(name) || strings.ContainsAny(name, `\:`) {
 		return "", fmt.Errorf("unsafe path %q in the release archive", name)
@@ -532,11 +508,6 @@ func writeExtracted(outPath string, r io.Reader) error {
 	return out.Close()
 }
 
-// replaceExecutable installs the binary at src over exe. The new file is
-// written next to exe first, so a failure never leaves exe half-written.
-// macOS/Linux rename it over exe. Windows cannot overwrite a running .exe but
-// can rename it, so exe moves aside to exe.old (deleted on a later start by
-// cleanupOldExecutable) and is restored if the final rename fails.
 func replaceExecutable(osName, src, exe string) error {
 	dir := filepath.Dir(exe)
 	tmp, err := os.CreateTemp(dir, ".grafana-update-*")
@@ -576,7 +547,7 @@ func replaceExecutable(osName, src, exe string) error {
 	}
 
 	old := exe + ".old"
-	_ = os.Remove(old) // left over from an earlier update
+	_ = os.Remove(old)
 	if err := os.Rename(exe, old); err != nil {
 		return fmt.Errorf("moving %s aside: %w", exe, err)
 	}

@@ -22,7 +22,6 @@ func TestJSONFormatter_Output(t *testing.T) {
 
 	output := strings.TrimSpace(buf.String())
 
-	// Should be valid JSON.
 	var parsed map[string]interface{}
 	if err := json.Unmarshal([]byte(output), &parsed); err != nil {
 		t.Fatalf("output is not valid JSON: %v\nOutput: %s", err, output)
@@ -44,7 +43,6 @@ func TestJSONFormatter_PrettyPrint(t *testing.T) {
 	}
 
 	output := buf.String()
-	// Pretty-printed JSON should contain newlines and indentation.
 	if !strings.Contains(output, "\n") {
 		t.Error("expected pretty-printed JSON with newlines")
 	}
@@ -107,7 +105,6 @@ func TestTableFormatter_Headers(t *testing.T) {
 		t.Fatalf("expected at least 3 lines (header + 2 rows), got %d:\n%s", len(lines), output)
 	}
 
-	// Headers should be uppercase.
 	if !strings.Contains(lines[0], "NAME") {
 		t.Errorf("expected NAME in header, got: %s", lines[0])
 	}
@@ -115,7 +112,6 @@ func TestTableFormatter_Headers(t *testing.T) {
 		t.Errorf("expected AGE in header, got: %s", lines[0])
 	}
 
-	// Check data rows.
 	if !strings.Contains(lines[1], "Alice") {
 		t.Errorf("expected Alice in first row, got: %s", lines[1])
 	}

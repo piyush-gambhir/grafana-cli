@@ -1,10 +1,3 @@
-// Package update checks GitHub Releases for a newer grafana CLI and prints the
-// update notice. The background check (Start) runs at most once a day and only
-// in an interactive terminal; see NotifierDisabled for the opt-outs.
-//
-// The latest release is read from the redirect of
-// https://github.com/<repo>/releases/latest, not from api.github.com, whose
-// 60 requests/hour unauthenticated limit is shared by everyone behind one IP.
 package update
 
 import (
@@ -22,24 +15,14 @@ import (
 )
 
 const (
-	// Repo is the GitHub repository that publishes releases.
 	Repo = "piyush-gambhir/grafana-cli"
-	// BinaryName is the executable name used in notices.
 	BinaryName = "grafana"
-	// EnvPrefix is the CLI's environment variable prefix.
 	EnvPrefix = "GRAFANA"
 
-	// MethodSelf means `grafana update` replaces the binary in place.
 	MethodSelf = "self"
-	// MethodGo means the binary lives in a Go bin directory, where `make
-	// install` from a source checkout put it; it is never self-replaced.
 	MethodGo = "go"
 
-	// SelfUpdateCommand updates a release binary.
 	SelfUpdateCommand = BinaryName + " update"
-	// SourceUpdateCommand updates a binary built from source. The main package
-	// is named cli-go, so `go install .../cli-go@latest` would install a binary
-	// named cli-go; the repo documents `make install` instead.
 	SourceUpdateCommand = "git pull && make install (in your grafana-cli/cli-go checkout)"
 
 	cacheDuration     = 24 * time.Hour
@@ -48,22 +31,15 @@ const (
 	explicitTimeout   = 15 * time.Second
 )
 
-// Test seams.
 var (
 	releaseBaseURL = "https://github.com"
 	now            = time.Now
 )
 
-// releaseTagRE matches a plain release tag (vMAJOR.MINOR.PATCH). The version
-// ends up in URLs and terminal output, so nothing else is accepted.
 var releaseTagRE = regexp.MustCompile(`^v\d+\.\d+\.\d+$`)
 
-// semverRE matches MAJOR.MINOR.PATCH with an optional pre-release or build
-// suffix (git describe output such as v0.2.9-3-gabc1234-dirty qualifies).
 var semverRE = regexp.MustCompile(`^v?(\d+)\.(\d+)\.(\d+)([-+][0-9A-Za-z.+-]+)?$`)
 
-// UpdateInfo describes the latest release relative to the running version.
-// Versions are stored without the leading "v".
 type UpdateInfo struct {
 	Available      bool
 	CurrentVersion string
@@ -71,7 +47,6 @@ type UpdateInfo struct {
 	ReleaseURL     string
 }
 
-// cacheEntry is the on-disk update-check.json.
 type cacheEntry struct {
 	LastChecked     string `json:"last_checked,omitempty"`
 	LatestVersion   string `json:"latest_version,omitempty"`
@@ -79,19 +54,14 @@ type cacheEntry struct {
 	NotifiedAt      string `json:"notified_at,omitempty"`
 }
 
-// IsReleaseVersion reports whether v is a semver release version. "dev",
-// empty, and commit-hash versions are development builds.
 func IsReleaseVersion(v string) bool {
 	return semverRE.MatchString(v)
 }
 
-// ReleaseURL returns the release notes page for version.
 func ReleaseURL(version string) string {
 	return fmt.Sprintf("https://github.com/%s/releases/tag/v%s", Repo, strings.TrimPrefix(version, "v"))
 }
 
-// NotifierDisabled reports whether the background check must be skipped: a
-// non-terminal stderr, CI, an opt-out variable, quiet mode, or a dev build.
 func NotifierDisabled(getenv func(string) string, version string, quiet, stderrIsTerminal bool) bool {
 	if !stderrIsTerminal || quiet || !IsReleaseVersion(version) {
 		return true
@@ -104,12 +74,6 @@ func NotifierDisabled(getenv func(string) string, version string, quiet, stderrI
 	return false
 }
 
-// Start begins the background check and returns a channel that receives the
-// answer. A cache entry less than 24 hours old answers synchronously (no
-// network), so the notice never depends on goroutine timing. Otherwise the
-// attempt is recorded first, then GitHub is asked in a goroutine (3-second
-// timeout) and the outcome is cached. A failed check, or one the process
-// exits before, is not retried for 24 hours.
 func Start(currentVersion, configDir string) <-chan *UpdateInfo {
 	ch := make(chan *UpdateInfo, 1)
 	path := filepath.Join(configDir, cacheFileName)
@@ -127,14 +91,10 @@ func Start(currentVersion, configDir string) <-chan *UpdateInfo {
 	return ch
 }
 
-// CheckForUpdateFresh always asks GitHub, bypassing the cache, and stores the
-// answer in it so the notice agrees with `grafana update`.
 func CheckForUpdateFresh(currentVersion, configDir string) (*UpdateInfo, error) {
 	return fetchAndCache(currentVersion, filepath.Join(configDir, cacheFileName), explicitTimeout)
 }
 
-// Cached returns the cached answer without touching the network, or nil when
-// there is no successful check from the last 24 hours.
 func Cached(currentVersion, configDir string) *UpdateInfo {
 	entry := readEntry(filepath.Join(configDir, cacheFileName))
 	if !fresh(entry) || entry.LatestVersion == "" {
@@ -143,9 +103,6 @@ func Cached(currentVersion, configDir string) *UpdateInfo {
 	return infoFrom(currentVersion, entry)
 }
 
-// Notify prints the notice unless it was already shown for this latest
-// version in the last 24 hours, then records that it was shown. It reports
-// whether the notice was printed.
 func Notify(w io.Writer, info *UpdateInfo, configDir, method string) bool {
 	if info == nil || !info.Available {
 		return false
@@ -166,14 +123,12 @@ func Notify(w io.Writer, info *UpdateInfo, configDir, method string) bool {
 	return true
 }
 
-// PrintNotice writes the update notice, preceded by a blank line.
 func PrintNotice(w io.Writer, info *UpdateInfo, method string) {
 	fmt.Fprintf(w, "\nA new version of %s is available: v%s -> v%s\n", BinaryName, info.CurrentVersion, info.LatestVersion)
 	fmt.Fprintf(w, "Update with: %s\n", UpdateCommand(method))
 	fmt.Fprintf(w, "Release notes: %s\n", info.ReleaseURL)
 }
 
-// UpdateCommand returns the command that updates a binary installed by method.
 func UpdateCommand(method string) string {
 	if method == MethodGo {
 		return SourceUpdateCommand
@@ -181,15 +136,11 @@ func UpdateCommand(method string) string {
 	return SelfUpdateCommand
 }
 
-// DetectInstallMethod reports MethodGo when exePath lives in a Go bin
-// directory ($GOBIN, $GOPATH/bin, or ~/go/bin), else MethodSelf.
 func DetectInstallMethod(exePath string) string {
 	home, _ := os.UserHomeDir()
 	return InstallMethodFor(exePath, os.Getenv, home)
 }
 
-// InstallMethodFor is DetectInstallMethod with the environment and home
-// directory supplied by the caller.
 func InstallMethodFor(exePath string, getenv func(string) string, home string) string {
 	var dirs []string
 	if gobin := getenv("GOBIN"); gobin != "" {
@@ -250,11 +201,6 @@ func infoFrom(currentVersion string, entry cacheEntry) *UpdateInfo {
 	return info
 }
 
-// fetchAndCache asks GitHub for the latest release and records the outcome.
-// On failure it keeps the last known latest version but still stamps
-// last_checked, so a broken network does not cause a request per command.
-// The entry is re-read after the request so a notice another process recorded
-// meanwhile is kept.
 func fetchAndCache(currentVersion, path string, timeout time.Duration) (*UpdateInfo, error) {
 	latest, err := fetchLatest(timeout)
 	entry := readEntry(path)
@@ -269,10 +215,6 @@ func fetchAndCache(currentVersion, path string, timeout time.Duration) (*UpdateI
 	return infoFrom(currentVersion, entry), nil
 }
 
-// fetchLatest returns the latest release version (without the "v") from the
-// redirect GitHub sends for /releases/latest. The redirect is not followed:
-// its Location must be https://github.com/<repo>/releases/tag/vX.Y.Z on the
-// same host, or the check fails.
 func fetchLatest(timeout time.Duration) (string, error) {
 	client := &http.Client{
 		Timeout: timeout,
@@ -324,8 +266,6 @@ func readEntry(path string) cacheEntry {
 	return entry
 }
 
-// writeEntry saves the cache best-effort via a temp file and rename, so a
-// concurrent reader never sees a partial file.
 func writeEntry(path string, entry cacheEntry) {
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0o700); err != nil {
@@ -346,7 +286,6 @@ func writeEntry(path string, entry cacheEntry) {
 	}
 }
 
-// isNewer reports whether latest is a higher MAJOR.MINOR.PATCH than current.
 func isNewer(latest, current string) (bool, error) {
 	l, err := parseSemver(latest)
 	if err != nil {

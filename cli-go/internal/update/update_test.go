@@ -13,10 +13,6 @@ import (
 	"time"
 )
 
-// fakeGitHub serves /<repo>/releases/latest like github.com: a 302 to the tag
-// page when status is 302 and tag is set (no Location when tag is empty), or
-// a bare status otherwise. It counts requests and fails the test if the
-// client follows the redirect.
 func fakeGitHub(t *testing.T, status int, tag string) *atomic.Int32 {
 	t.Helper()
 	var hits atomic.Int32
@@ -38,8 +34,6 @@ func fakeGitHub(t *testing.T, status int, tag string) *atomic.Int32 {
 	return &hits
 }
 
-// tagURL is the release page URL GitHub redirects to, escaped like a real
-// Location header.
 func tagURL(base, tag string) string {
 	u, err := url.Parse(base)
 	if err != nil {
@@ -114,7 +108,6 @@ func TestStartAnswersFromFreshCacheWithoutNetwork(t *testing.T) {
 		LatestVersion: "0.2.10",
 	})
 
-	// A fresh cache answers synchronously: the value is already there.
 	select {
 	case info := <-Start("0.2.9", dir):
 		if !info.Available || info.LatestVersion != "0.2.10" {
@@ -136,7 +129,7 @@ func TestStartFetchesWhenStaleAndCaches(t *testing.T) {
 	dir := t.TempDir()
 	setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
 	writeEntry(filepath.Join(dir, cacheFileName), cacheEntry{
-		LastChecked:     "2026-10-03T11:00:00Z", // 25h ago
+		LastChecked:     "2026-10-03T11:00:00Z",
 		LatestVersion:   "0.2.9",
 		NotifiedVersion: "0.2.9",
 		NotifiedAt:      "2026-10-03T11:00:00Z",
@@ -160,8 +153,6 @@ func TestStartFetchesWhenStaleAndCaches(t *testing.T) {
 	}
 }
 
-// A notice recorded by another process while the GitHub request is in flight
-// must survive the cache refresh, or the next command repeats the notice.
 func TestRefreshKeepsNoticeRecordedDuringFetch(t *testing.T) {
 	release := make(chan struct{})
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -173,7 +164,7 @@ func TestRefreshKeepsNoticeRecordedDuringFetch(t *testing.T) {
 	dir := t.TempDir()
 	setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
 
-	ch := Start("0.2.9", dir) // empty cache: fetch in the background
+	ch := Start("0.2.9", dir)
 	info := &UpdateInfo{Available: true, CurrentVersion: "0.2.9", LatestVersion: "0.2.10", ReleaseURL: ReleaseURL("0.2.10")}
 	if !Notify(&bytes.Buffer{}, info, dir, MethodSelf) {
 		t.Fatal("notice not shown")
@@ -215,8 +206,6 @@ func TestFailedCheckIsCached(t *testing.T) {
 	}
 }
 
-// The latest version comes from the Location of the /releases/latest
-// redirect; anything but a same-host vX.Y.Z tag page is a failed check.
 func TestFetchLatestReadsRedirect(t *testing.T) {
 	var location string
 	status := http.StatusFound
@@ -241,7 +230,7 @@ func TestFetchLatestReadsRedirect(t *testing.T) {
 		name     string
 		status   int
 		location string
-		want     string // empty means the check must fail
+		want     string
 	}{
 		{"good tag", http.StatusFound, tagURL(srv.URL, "v0.2.10"), "0.2.10"},
 		{"relative Location", http.StatusFound, "/" + Repo + "/releases/tag/v1.2.3", "1.2.3"},
@@ -263,7 +252,6 @@ func TestFetchLatestReadsRedirect(t *testing.T) {
 				if err == nil {
 					t.Fatalf("fetchLatest = %q, want an error", got)
 				}
-				// The error reaches the terminal via `grafana update`.
 				for _, b := range []byte(err.Error()) {
 					if b < 0x20 || b >= 0x7f {
 						t.Errorf("error contains raw byte %#x: %q", b, err)
@@ -303,14 +291,11 @@ func TestCheckForUpdateFreshBypassesCache(t *testing.T) {
 	if !info.Available || info.LatestVersion != "0.2.10" || hits.Load() != 1 {
 		t.Errorf("info = %+v, hits = %d", info, hits.Load())
 	}
-	// `update --check` stores its answer, so the notifier agrees with it.
 	if cached := receive(t, Start("0.2.9", dir)); cached == nil || cached.LatestVersion != "0.2.10" || hits.Load() != 1 {
 		t.Errorf("notifier after a fresh check = %+v, hits = %d", cached, hits.Load())
 	}
 }
 
-// The attempt is recorded before the request, so a process that exits before
-// the answer arrives does not make every later command ask GitHub again.
 func TestStartRecordsAttemptBeforeRequest(t *testing.T) {
 	release := make(chan struct{})
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -322,9 +307,8 @@ func TestStartRecordsAttemptBeforeRequest(t *testing.T) {
 	dir := t.TempDir()
 	setNow(t, time.Date(2026, 10, 4, 12, 0, 0, 0, time.UTC))
 
-	// Nobody reads this answer during the test, like a command that exited.
 	pending := Start("0.2.9", dir)
-	t.Cleanup(func() { // runs before the seams are restored
+	t.Cleanup(func() {
 		close(release)
 		<-pending
 	})

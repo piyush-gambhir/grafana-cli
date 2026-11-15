@@ -13,7 +13,6 @@ import (
 )
 
 func TestCommandsResolve(t *testing.T) {
-	// Invalid config and an enabled notifier must never affect offline resolution.
 	configHome := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", configHome)
 	if err := os.MkdirAll(filepath.Join(configHome, "grafana-cli"), 0700); err != nil {

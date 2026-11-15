@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdTemplate returns the notification template parent command.
 func NewCmdTemplate(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "template",

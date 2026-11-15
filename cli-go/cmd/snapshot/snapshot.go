@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdSnapshot returns the snapshot parent command.
 func NewCmdSnapshot(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "snapshot",

@@ -4,10 +4,8 @@ import (
 	"context"
 )
 
-// AdminSettings represents the Grafana admin settings.
 type AdminSettings map[string]map[string]string
 
-// AdminStats represents Grafana admin statistics.
 type AdminStats struct {
 	Orgs               int `json:"orgs"`
 	Dashboards         int `json:"dashboards"`
@@ -30,7 +28,6 @@ type AdminStats struct {
 	MonthlyActiveUsers int `json:"monthlyActiveUsers"`
 }
 
-// GetAdminSettings returns the Grafana admin settings.
 func (c *Client) GetAdminSettings(ctx context.Context) (AdminSettings, error) {
 	var result AdminSettings
 	resp, err := c.Get(ctx, "/api/admin/settings")
@@ -43,7 +40,6 @@ func (c *Client) GetAdminSettings(ctx context.Context) (AdminSettings, error) {
 	return result, nil
 }
 
-// GetAdminStats returns the Grafana admin statistics.
 func (c *Client) GetAdminStats(ctx context.Context) (*AdminStats, error) {
 	var result AdminStats
 	resp, err := c.Get(ctx, "/api/admin/stats")
@@ -56,7 +52,6 @@ func (c *Client) GetAdminStats(ctx context.Context) (*AdminStats, error) {
 	return &result, nil
 }
 
-// ReloadDashboards reloads provisioned dashboards.
 func (c *Client) ReloadDashboards(ctx context.Context) error {
 	resp, err := c.Post(ctx, "/api/admin/provisioning/dashboards/reload", nil)
 	if err != nil {
@@ -65,7 +60,6 @@ func (c *Client) ReloadDashboards(ctx context.Context) error {
 	return resp.JSON(nil)
 }
 
-// ReloadDatasources reloads provisioned datasources.
 func (c *Client) ReloadDatasources(ctx context.Context) error {
 	resp, err := c.Post(ctx, "/api/admin/provisioning/datasources/reload", nil)
 	if err != nil {
@@ -74,7 +68,6 @@ func (c *Client) ReloadDatasources(ctx context.Context) error {
 	return resp.JSON(nil)
 }
 
-// ReloadPlugins reloads provisioned plugins.
 func (c *Client) ReloadPlugins(ctx context.Context) error {
 	resp, err := c.Post(ctx, "/api/admin/provisioning/plugins/reload", nil)
 	if err != nil {
@@ -83,7 +76,6 @@ func (c *Client) ReloadPlugins(ctx context.Context) error {
 	return resp.JSON(nil)
 }
 
-// ReloadAccessControl reloads provisioned access control.
 func (c *Client) ReloadAccessControl(ctx context.Context) error {
 	resp, err := c.Post(ctx, "/api/admin/provisioning/access-control/reload", nil)
 	if err != nil {
@@ -92,7 +84,6 @@ func (c *Client) ReloadAccessControl(ctx context.Context) error {
 	return resp.JSON(nil)
 }
 
-// ReloadAlerting reloads provisioned alerting configuration.
 func (c *Client) ReloadAlerting(ctx context.Context) error {
 	resp, err := c.Post(ctx, "/api/admin/provisioning/alerting/reload", nil)
 	if err != nil {

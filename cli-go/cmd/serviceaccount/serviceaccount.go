@@ -7,7 +7,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdServiceAccount returns the service account parent command.
 func NewCmdServiceAccount(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "service-account",

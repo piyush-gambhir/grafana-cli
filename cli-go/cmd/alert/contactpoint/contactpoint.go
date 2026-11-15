@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdContactPoint returns the contact point parent command.
 func NewCmdContactPoint(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "contact-point",

@@ -6,7 +6,6 @@ import (
 	"net/url"
 )
 
-// ServiceAccount represents a Grafana service account.
 type ServiceAccount struct {
 	ID         int64  `json:"id"`
 	Name       string `json:"name"`
@@ -18,7 +17,6 @@ type ServiceAccount struct {
 	AvatarURL  string `json:"avatarUrl,omitempty"`
 }
 
-// ServiceAccountSearchResult represents the result of a service account search.
 type ServiceAccountSearchResult struct {
 	TotalCount      int              `json:"totalCount"`
 	ServiceAccounts []ServiceAccount `json:"serviceAccounts"`
@@ -26,21 +24,18 @@ type ServiceAccountSearchResult struct {
 	PerPage         int              `json:"perPage"`
 }
 
-// ServiceAccountCreateRequest is the body for creating a service account.
 type ServiceAccountCreateRequest struct {
 	Name       string `json:"name"`
 	Role       string `json:"role,omitempty"`
 	IsDisabled bool   `json:"isDisabled,omitempty"`
 }
 
-// ServiceAccountUpdateRequest is the body for updating a service account.
 type ServiceAccountUpdateRequest struct {
 	Name       string `json:"name,omitempty"`
 	Role       string `json:"role,omitempty"`
 	IsDisabled *bool  `json:"isDisabled,omitempty"`
 }
 
-// ServiceAccountToken represents a service account token.
 type ServiceAccountToken struct {
 	ID         int64  `json:"id"`
 	Name       string `json:"name"`
@@ -51,13 +46,11 @@ type ServiceAccountToken struct {
 	HasExpired bool   `json:"hasExpired"`
 }
 
-// ServiceAccountTokenCreateRequest is the body for creating a token.
 type ServiceAccountTokenCreateRequest struct {
 	Name          string `json:"name"`
 	SecondsToLive int64  `json:"secondsToLive,omitempty"`
 }
 
-// ListServiceAccounts returns all service accounts.
 func (c *Client) ListServiceAccounts(ctx context.Context, query string, page PageParams) (*ServiceAccountSearchResult, error) {
 	v := url.Values{}
 	if query != "" {
@@ -77,7 +70,6 @@ func (c *Client) ListServiceAccounts(ctx context.Context, query string, page Pag
 	return &result, nil
 }
 
-// GetServiceAccount returns a service account by ID.
 func (c *Client) GetServiceAccount(ctx context.Context, id int64) (*ServiceAccount, error) {
 	var result ServiceAccount
 	resp, err := c.Get(ctx, fmt.Sprintf("/api/serviceaccounts/%d", id))
@@ -90,7 +82,6 @@ func (c *Client) GetServiceAccount(ctx context.Context, id int64) (*ServiceAccou
 	return &result, nil
 }
 
-// CreateServiceAccount creates a new service account.
 func (c *Client) CreateServiceAccount(ctx context.Context, req ServiceAccountCreateRequest) (*ServiceAccount, error) {
 	var result ServiceAccount
 	resp, err := c.Post(ctx, "/api/serviceaccounts", req)
@@ -103,7 +94,6 @@ func (c *Client) CreateServiceAccount(ctx context.Context, req ServiceAccountCre
 	return &result, nil
 }
 
-// UpdateServiceAccount updates a service account.
 func (c *Client) UpdateServiceAccount(ctx context.Context, id int64, req ServiceAccountUpdateRequest) (*ServiceAccount, error) {
 	var result ServiceAccount
 	resp, err := c.Patch(ctx, fmt.Sprintf("/api/serviceaccounts/%d", id), req)
@@ -116,7 +106,6 @@ func (c *Client) UpdateServiceAccount(ctx context.Context, id int64, req Service
 	return &result, nil
 }
 
-// DeleteServiceAccount deletes a service account by ID.
 func (c *Client) DeleteServiceAccount(ctx context.Context, id int64) error {
 	resp, err := c.Delete(ctx, fmt.Sprintf("/api/serviceaccounts/%d", id))
 	if err != nil {
@@ -125,7 +114,6 @@ func (c *Client) DeleteServiceAccount(ctx context.Context, id int64) error {
 	return resp.JSON(nil)
 }
 
-// ListServiceAccountTokens returns tokens for a service account.
 func (c *Client) ListServiceAccountTokens(ctx context.Context, saID int64) ([]ServiceAccountToken, error) {
 	var results []ServiceAccountToken
 	resp, err := c.Get(ctx, fmt.Sprintf("/api/serviceaccounts/%d/tokens", saID))
@@ -138,7 +126,6 @@ func (c *Client) ListServiceAccountTokens(ctx context.Context, saID int64) ([]Se
 	return results, nil
 }
 
-// CreateServiceAccountToken creates a new token for a service account.
 func (c *Client) CreateServiceAccountToken(ctx context.Context, saID int64, req ServiceAccountTokenCreateRequest) (*ServiceAccountToken, error) {
 	var result ServiceAccountToken
 	resp, err := c.Post(ctx, fmt.Sprintf("/api/serviceaccounts/%d/tokens", saID), req)
@@ -151,7 +138,6 @@ func (c *Client) CreateServiceAccountToken(ctx context.Context, saID int64, req 
 	return &result, nil
 }
 
-// DeleteServiceAccountToken deletes a token for a service account.
 func (c *Client) DeleteServiceAccountToken(ctx context.Context, saID, tokenID int64) error {
 	resp, err := c.Delete(ctx, fmt.Sprintf("/api/serviceaccounts/%d/tokens/%d", saID, tokenID))
 	if err != nil {

@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdLibraryElement returns the library element parent command.
 func NewCmdLibraryElement(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "library-element",

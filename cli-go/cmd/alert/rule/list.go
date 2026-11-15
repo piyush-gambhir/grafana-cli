@@ -62,7 +62,6 @@ Examples:
 				return err
 			}
 
-			// Apply client-side filters.
 			var filtered []client.AlertRule
 			for _, r := range rules {
 				if folder != "" && !strings.EqualFold(r.FolderUID, folder) {
@@ -74,7 +73,6 @@ Examples:
 				filtered = append(filtered, r)
 			}
 
-			// Apply pagination.
 			total := len(filtered)
 			if limit > 0 {
 				start := (page - 1) * limit

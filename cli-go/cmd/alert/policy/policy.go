@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdPolicy returns the notification policy parent command.
 func NewCmdPolicy(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "policy",

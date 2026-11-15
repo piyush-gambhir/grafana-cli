@@ -6,7 +6,6 @@ import (
 	"net/url"
 )
 
-// Playlist represents a Grafana playlist.
 type Playlist struct {
 	ID       int64          `json:"id"`
 	UID      string         `json:"uid"`
@@ -15,7 +14,6 @@ type Playlist struct {
 	Items    []PlaylistItem `json:"items,omitempty"`
 }
 
-// PlaylistItem represents an item in a playlist.
 type PlaylistItem struct {
 	Type  string `json:"type"`
 	Value string `json:"value"`
@@ -23,21 +21,18 @@ type PlaylistItem struct {
 	Title string `json:"title"`
 }
 
-// PlaylistCreateRequest is the body for creating a playlist.
 type PlaylistCreateRequest struct {
 	Name     string         `json:"name"`
 	Interval string         `json:"interval"`
 	Items    []PlaylistItem `json:"items"`
 }
 
-// PlaylistUpdateRequest is the body for updating a playlist.
 type PlaylistUpdateRequest struct {
 	Name     string         `json:"name"`
 	Interval string         `json:"interval"`
 	Items    []PlaylistItem `json:"items"`
 }
 
-// ListPlaylists returns all playlists. If limit > 0, only that many are returned.
 func (c *Client) ListPlaylists(ctx context.Context, query string, limit int) ([]Playlist, error) {
 	v := url.Values{}
 	if query != "" {
@@ -62,7 +57,6 @@ func (c *Client) ListPlaylists(ctx context.Context, query string, limit int) ([]
 	return results, nil
 }
 
-// GetPlaylist returns a playlist by UID.
 func (c *Client) GetPlaylist(ctx context.Context, uid string) (*Playlist, error) {
 	var result Playlist
 	resp, err := c.Get(ctx, "/api/playlists/"+uid)
@@ -75,7 +69,6 @@ func (c *Client) GetPlaylist(ctx context.Context, uid string) (*Playlist, error)
 	return &result, nil
 }
 
-// CreatePlaylist creates a new playlist.
 func (c *Client) CreatePlaylist(ctx context.Context, req PlaylistCreateRequest) (*Playlist, error) {
 	var result Playlist
 	resp, err := c.Post(ctx, "/api/playlists", req)
@@ -88,7 +81,6 @@ func (c *Client) CreatePlaylist(ctx context.Context, req PlaylistCreateRequest) 
 	return &result, nil
 }
 
-// UpdatePlaylist updates an existing playlist.
 func (c *Client) UpdatePlaylist(ctx context.Context, uid string, req PlaylistUpdateRequest) (*Playlist, error) {
 	var result Playlist
 	resp, err := c.Put(ctx, fmt.Sprintf("/api/playlists/%s", uid), req)
@@ -101,7 +93,6 @@ func (c *Client) UpdatePlaylist(ctx context.Context, uid string, req PlaylistUpd
 	return &result, nil
 }
 
-// DeletePlaylist deletes a playlist by UID.
 func (c *Client) DeletePlaylist(ctx context.Context, uid string) error {
 	resp, err := c.Delete(ctx, "/api/playlists/"+uid)
 	if err != nil {

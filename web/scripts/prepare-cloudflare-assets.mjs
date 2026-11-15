@@ -15,8 +15,6 @@ await rm(destinationRoot, { recursive: true, force: true });
 await mkdir(destination, { recursive: true });
 await cp(source, destination, { recursive: true });
 
-// Wrangler reads _redirects only from the assets root, while the site lives
-// under /<sitePath>: move the file up and prefix every rule's paths.
 const siteRedirects = path.join(destination, "_redirects");
 let rules;
 try {

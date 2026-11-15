@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdPlaylist returns the playlist parent command.
 func NewCmdPlaylist(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "playlist",

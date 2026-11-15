@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdSilence returns the silence parent command.
 func NewCmdSilence(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "silence",

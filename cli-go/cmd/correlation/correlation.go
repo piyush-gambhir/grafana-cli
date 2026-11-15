@@ -6,7 +6,6 @@ import (
 	"github.com/piyush-gambhir/grafana-cli/cli-go/internal/cmdutil"
 )
 
-// NewCmdCorrelation returns the correlation parent command.
 func NewCmdCorrelation(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "correlation",

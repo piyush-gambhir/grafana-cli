@@ -68,7 +68,6 @@ Examples:
 				return err
 			}
 
-			// Remove id to ensure creation.
 			delete(dashboardData, "id")
 
 			req := client.DashboardCreateRequest{
