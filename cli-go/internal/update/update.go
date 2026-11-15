@@ -15,14 +15,14 @@ import (
 )
 
 const (
-	Repo = "piyush-gambhir/grafana-cli"
+	Repo       = "piyush-gambhir/grafana-cli"
 	BinaryName = "grafana"
-	EnvPrefix = "GRAFANA"
+	EnvPrefix  = "GRAFANA"
 
 	MethodSelf = "self"
-	MethodGo = "go"
+	MethodGo   = "go"
 
-	SelfUpdateCommand = BinaryName + " update"
+	SelfUpdateCommand   = BinaryName + " update"
 	SourceUpdateCommand = "git pull && make install (in your grafana-cli/cli-go checkout)"
 
 	cacheDuration     = 24 * time.Hour
