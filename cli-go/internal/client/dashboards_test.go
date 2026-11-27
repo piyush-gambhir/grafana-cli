@@ -284,3 +284,19 @@ func TestGetDashboardPermissions(t *testing.T) {
 		t.Errorf("got permission name %q, want %q", perms[0].PermissionName, "View")
 	}
 }
+
+func TestSearchDashboards_PaginationUsesLimit(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		if q.Get("limit") != "50" || q.Get("page") != "2" || q.Has("perpage") {
+			t.Errorf("unexpected pagination query: %s", r.URL.RawQuery)
+		}
+		json.NewEncoder(w).Encode([]DashboardSearchResult{})
+	}))
+	defer ts.Close()
+
+	c := &Client{BaseURL: ts.URL, HTTPClient: ts.Client(), UserAgent: "test"}
+	if _, err := c.SearchDashboards(context.Background(), "", "", "", PageParams{Page: 2, PerPage: 50}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

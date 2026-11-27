@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 type Folder struct {
@@ -58,7 +59,12 @@ type FolderPermissionsUpdateRequest struct {
 }
 
 func (c *Client) ListFolders(ctx context.Context, page PageParams) ([]Folder, error) {
-	path := page.AppendToPath("/api/folders")
+	v := url.Values{}
+	page.apply(v, "limit")
+	path := "/api/folders"
+	if len(v) > 0 {
+		path += "?" + v.Encode()
+	}
 	var results []Folder
 	resp, err := c.Get(ctx, path)
 	if err != nil {

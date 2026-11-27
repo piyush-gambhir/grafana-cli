@@ -30,7 +30,7 @@ Examples:
   grafana user list
 
   # Search users
-  grafana user list -q "john"
+  grafana user list --query "john"
 
   # Paginate
   grafana user list --page 2 --limit 50
@@ -38,6 +38,7 @@ Examples:
   # Output as JSON
   grafana user list -o json`,
 		Aliases: []string{"ls"},
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {

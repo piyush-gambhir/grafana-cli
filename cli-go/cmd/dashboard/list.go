@@ -37,7 +37,7 @@ Examples:
   grafana dashboard list
 
   # Search by title
-  grafana dashboard list -q "production"
+  grafana dashboard list --query "production"
 
   # Filter by tag
   grafana dashboard list --tag monitoring
@@ -54,6 +54,7 @@ Examples:
   # Output as YAML
   grafana dashboard list -o yaml`,
 		Aliases: []string{"ls"},
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {
@@ -90,6 +91,8 @@ Examples:
 	cmd.Flags().StringVarP(&tag, "tag", "t", "", "Filter by tag")
 	cmd.Flags().StringVar(&folderUID, "folder", "", "Filter by folder UID")
 	cmdutil.AddPaginationFlags(cmd, &page, &limit)
+	cmd.Flags().Lookup("limit").DefValue = "1000"
+	limit = 1000
 
 	return cmd
 }

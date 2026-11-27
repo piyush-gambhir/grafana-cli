@@ -2,25 +2,31 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 )
 
 type AlertRule struct {
-	ID           int64             `json:"id"`
-	UID          string            `json:"uid"`
-	OrgID        int64             `json:"orgID"`
-	FolderUID    string            `json:"folderUID"`
-	RuleGroup    string            `json:"ruleGroup"`
-	Title        string            `json:"title"`
-	Condition    string            `json:"condition"`
-	Data         []AlertQuery      `json:"data"`
-	NoDataState  string            `json:"noDataState"`
-	ExecErrState string            `json:"execErrState"`
-	For          string            `json:"for"`
-	Annotations  map[string]string `json:"annotations,omitempty"`
-	Labels       map[string]string `json:"labels,omitempty"`
-	Updated      string            `json:"updated,omitempty"`
-	Provenance   string            `json:"provenance,omitempty"`
+	ID                          int64                  `json:"id"`
+	UID                         string                 `json:"uid"`
+	OrgID                       int64                  `json:"orgID"`
+	FolderUID                   string                 `json:"folderUID"`
+	RuleGroup                   string                 `json:"ruleGroup"`
+	Title                       string                 `json:"title"`
+	Condition                   string                 `json:"condition"`
+	Data                        []AlertQuery           `json:"data"`
+	NoDataState                 string                 `json:"noDataState"`
+	ExecErrState                string                 `json:"execErrState"`
+	For                         string                 `json:"for"`
+	KeepFiringFor               string                 `json:"keep_firing_for,omitempty"`
+	Annotations                 map[string]string      `json:"annotations,omitempty"`
+	Labels                      map[string]string      `json:"labels,omitempty"`
+	Updated                     string                 `json:"updated,omitempty"`
+	Provenance                  string                 `json:"provenance,omitempty"`
+	IsPaused                    bool                   `json:"isPaused"`
+	NotificationSettings        map[string]interface{} `json:"notification_settings,omitempty"`
+	Record                      map[string]interface{} `json:"record,omitempty"`
+	MissingSeriesEvalsToResolve *int64                 `json:"missingSeriesEvalsToResolve,omitempty"`
 }
 
 type AlertQuery struct {
@@ -112,6 +118,16 @@ type Matcher struct {
 	Value   string `json:"value"`
 	IsRegex bool   `json:"isRegex"`
 	IsEqual bool   `json:"isEqual"`
+}
+
+func (m *Matcher) UnmarshalJSON(data []byte) error {
+	type plain Matcher
+	p := plain{IsEqual: true}
+	if err := json.Unmarshal(data, &p); err != nil {
+		return err
+	}
+	*m = Matcher(p)
+	return nil
 }
 
 type SilenceCreateRequest struct {

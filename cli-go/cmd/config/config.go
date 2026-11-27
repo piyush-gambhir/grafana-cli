@@ -29,14 +29,17 @@ func newCmdConfigView(f *cmdutil.Factory) *cobra.Command {
 	return &cobra.Command{
 		Use:   "view",
 		Short: "Display the current configuration",
-		Args:  cobra.NoArgs,
+		Long: `Display the current configuration file in YAML format.
+
+Sensitive fields (token, password) are masked.`,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := config.Load()
 			if err != nil {
 				return err
 			}
 
-			data, err := yaml.Marshal(cfg)
+			data, err := yaml.Marshal(sanitizeConfig(cfg))
 			if err != nil {
 				return fmt.Errorf("marshaling config: %w", err)
 			}
@@ -45,6 +48,21 @@ func newCmdConfigView(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func sanitizeConfig(cfg *config.Config) *config.Config {
+	out := *cfg
+	out.Profiles = make(map[string]config.Profile, len(cfg.Profiles))
+	for name, p := range cfg.Profiles {
+		if p.Token != "" {
+			p.Token = "****"
+		}
+		if p.Password != "" {
+			p.Password = "****"
+		}
+		out.Profiles[name] = p
+	}
+	return &out
 }
 
 func newCmdConfigSet(f *cmdutil.Factory) *cobra.Command {

@@ -29,7 +29,7 @@ Examples:
   grafana team list
 
   # Search teams by name
-  grafana team list -q "backend"
+  grafana team list --query "backend"
 
   # Paginate results
   grafana team list --page 1 --limit 20
@@ -37,6 +37,7 @@ Examples:
   # Output as JSON
   grafana team list -o json`,
 		Aliases: []string{"ls"},
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {

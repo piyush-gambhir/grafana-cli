@@ -29,7 +29,7 @@ Examples:
   grafana service-account list
 
   # Search by name
-  grafana service-account list -q "ci-bot"
+  grafana service-account list --query "ci-bot"
 
   # Paginate
   grafana service-account list --page 1 --limit 20
@@ -37,6 +37,7 @@ Examples:
   # Output as JSON
   grafana service-account list -o json`,
 		Aliases: []string{"ls"},
+		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {

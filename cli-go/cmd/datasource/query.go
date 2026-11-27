@@ -41,7 +41,9 @@ The datasource type is auto-detected from its UID. Supported types: loki, promet
 
 For Loki, the expression should be a LogQL query. For Prometheus, a PromQL query.
 Time range defaults to the last 1 hour. Use --last for relative ranges or
---from/--to for absolute times (RFC3339 or Unix epoch).
+--from/--to for absolute times (RFC3339 or Unix epoch in seconds,
+milliseconds, microseconds, or nanoseconds). With --last and --to, the range ends at --to.
+Prometheus range queries without --step use range/250 (at least 1s).
 
 Examples:
   # Query Loki logs
@@ -86,6 +88,9 @@ Examples:
 			if err != nil {
 				return err
 			}
+			if dsType == "prometheus" && queryType != "instant" && step == "" {
+				step = defaultPromStep(startStr, endStr)
+			}
 
 			switch dsType {
 			case "loki":
@@ -103,7 +108,7 @@ Examples:
 	cmd.Flags().StringVar(&to, "to", "", "End time (RFC3339 or Unix epoch)")
 	cmd.Flags().IntVar(&limit, "limit", 100, "Max entries to return (Loki only)")
 	cmd.Flags().StringVar(&direction, "direction", "backward", "Log ordering: backward or forward (Loki only)")
-	cmd.Flags().StringVar(&step, "step", "", "Query resolution step (e.g. 15s, 1m; Prometheus only)")
+	cmd.Flags().StringVar(&step, "step", "", "Query resolution step (e.g. 15s, 1m; Prometheus only; default range/250, at least 1s)")
 	cmd.Flags().StringVar(&queryType, "query-type", "range", "Query type: range or instant")
 
 	return cmd
@@ -317,19 +322,19 @@ func queryPrometheus(ctx context.Context, c *client.Client, f *cmdutil.Factory, 
 }
 
 func resolveTimeRange(last, from, to, dsType string) (string, string, error) {
-	now := time.Now()
+	endTime := time.Now()
+	if to != "" {
+		t, err := parseTime(to)
+		if err != nil {
+			return "", "", fmt.Errorf("invalid --to: %w", err)
+		}
+		endTime = t
+	}
 
 	if from != "" {
 		startTime, err := parseTime(from)
 		if err != nil {
 			return "", "", fmt.Errorf("invalid --from: %w", err)
-		}
-		endTime := now
-		if to != "" {
-			endTime, err = parseTime(to)
-			if err != nil {
-				return "", "", fmt.Errorf("invalid --to: %w", err)
-			}
 		}
 		return formatTime(startTime, dsType), formatTime(endTime, dsType), nil
 	}
@@ -338,8 +343,20 @@ func resolveTimeRange(last, from, to, dsType string) (string, string, error) {
 	if err != nil {
 		return "", "", fmt.Errorf("invalid --last duration: %w", err)
 	}
-	startTime := now.Add(-dur)
-	return formatTime(startTime, dsType), formatTime(now, dsType), nil
+	startTime := endTime.Add(-dur)
+	return formatTime(startTime, dsType), formatTime(endTime, dsType), nil
+}
+
+func defaultPromStep(start, end string) string {
+	s, err := strconv.ParseFloat(start, 64)
+	if err != nil {
+		return ""
+	}
+	e, err := strconv.ParseFloat(end, 64)
+	if err != nil {
+		return ""
+	}
+	return strconv.FormatInt(max(int64((e-s)/250), 1), 10)
 }
 
 func parseTime(s string) (time.Time, error) {
@@ -347,8 +364,13 @@ func parseTime(s string) (time.Time, error) {
 		return t, nil
 	}
 	if n, err := strconv.ParseInt(s, 10, 64); err == nil {
-		if n > 1e15 {
+		switch {
+		case n >= 1e17:
 			return time.Unix(0, n), nil
+		case n >= 1e14:
+			return time.UnixMicro(n), nil
+		case n >= 1e11:
+			return time.UnixMilli(n), nil
 		}
 		return time.Unix(n, 0), nil
 	}

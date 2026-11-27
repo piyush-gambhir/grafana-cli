@@ -155,7 +155,7 @@ Search and list dashboards with optional filters.
 
 ```bash
 grafana dashboard list                          # list all
-grafana dashboard list -q "production"          # search by title
+grafana dashboard list --query "production"     # search by title
 grafana dashboard list --tag monitoring         # filter by tag
 grafana dashboard list --folder abc123          # filter by folder UID
 grafana dashboard list --page 2 --limit 50      # paginate
@@ -166,11 +166,11 @@ grafana dashboard list -o json                  # JSON output
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--query`, `-q` | | Search query string |
+| `--query` | | Search query string |
 | `--tag`, `-t` | | Filter by tag |
 | `--folder` | | Filter by folder UID |
 | `--page` | `1` | Page number |
-| `--limit` | `100` | Results per page |
+| `--limit` | `1000` | Results per page |
 
 #### `grafana dashboard get <uid>`
 
@@ -212,7 +212,7 @@ grafana dashboard update -f dashboard.json --folder newFolderUid
 grafana dashboard update -f dashboard.json -m "Add new panels"
 ```
 
-**Flags:** Same as `create`, except `--overwrite` defaults to `true`.
+**Flags:** Same as `create`, except `--overwrite` defaults to `true`. Without `--folder`, the dashboard stays in its current folder.
 
 #### `grafana dashboard delete <uid>`
 
@@ -359,11 +359,11 @@ grafana datasource query <prom-uid> --expr 'rate(http_requests_total[5m])' --las
 |------|-------------|
 | `--expr`, `-e` | Query expression (LogQL or PromQL). Required. |
 | `--last` | Lookback duration, e.g. `1h`, `30m` (default `1h`) |
-| `--from` | Start time (RFC3339 or Unix epoch). Overrides `--last`. |
-| `--to` | End time (RFC3339 or Unix epoch). Defaults to now. |
+| `--from` | Start time (RFC3339 or Unix epoch in seconds, ms, us, or ns). Overrides `--last`. |
+| `--to` | End time (RFC3339 or Unix epoch in seconds, ms, us, or ns). Defaults to now; `--last` counts back from it. |
 | `--limit` | Max log entries (Loki only, default `100`) |
 | `--direction` | Log ordering: `backward` (default) or `forward` (Loki only) |
-| `--step` | Query resolution step, e.g. `15s` (Prometheus range queries only) |
+| `--step` | Query resolution step, e.g. `15s` (Prometheus range queries only; default range/250, at least `1s`) |
 | `--query-type` | `range` (default) or `instant` |
 
 ---
@@ -374,7 +374,7 @@ Manage Grafana folders.
 
 #### `grafana folder list`
 
-List all folders.
+List all folders (default `--limit` is `1000`).
 
 ```bash
 grafana folder list
@@ -682,7 +682,7 @@ List users in an organization with optional filters.
 grafana org user list 1                          # list all users in org 1
 grafana org user list 1 --role Admin             # filter by role
 grafana org user list 1 --query "john"           # search by name/email/login
-grafana org user list 1 --role Editor -q "dev"   # combine filters
+grafana org user list 1 --role Editor --query "dev"   # combine filters
 ```
 
 **Flags:**
@@ -690,7 +690,7 @@ grafana org user list 1 --role Editor -q "dev"   # combine filters
 | Flag | Description |
 |------|-------------|
 | `--role` | Filter by role: `Viewer`, `Editor`, `Admin` |
-| `--query`, `-q` | Search by login, email, or name |
+| `--query` | Search by login, email, or name |
 
 ##### `grafana org user add <org-id>`
 
@@ -722,7 +722,7 @@ Manage Grafana teams, members, and preferences.
 
 ```bash
 grafana team list
-grafana team list -q "backend"
+grafana team list --query "backend"
 grafana team list --page 1 --limit 20
 ```
 
@@ -730,7 +730,7 @@ grafana team list --page 1 --limit 20
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--query`, `-q` | | Search query |
+| `--query` | | Search query |
 | `--page` | `1` | Page number |
 | `--limit` | `100` | Results per page |
 
@@ -804,7 +804,7 @@ Manage Grafana users (most commands require server admin).
 ```bash
 grafana user list
 grafana user list --all
-grafana user list -q "john"
+grafana user list --query "john"
 grafana user list --page 2 --limit 50
 ```
 
@@ -812,7 +812,7 @@ grafana user list --page 2 --limit 50
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--query`, `-q` | | Search query |
+| `--query` | | Search query |
 | `--page` | `1` | Page number |
 | `--limit` | `100` | Results per page |
 | `--all` | `false` | Fetch all matching users across every page |
@@ -879,7 +879,7 @@ Manage service accounts and their API tokens. Alias: `sa`.
 
 ```bash
 grafana service-account list
-grafana service-account list -q "ci-bot"
+grafana service-account list --query "ci-bot"
 grafana service-account list --page 1 --limit 20
 ```
 
@@ -887,7 +887,7 @@ grafana service-account list --page 1 --limit 20
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--query`, `-q` | | Search query |
+| `--query` | | Search query |
 | `--page` | `1` | Page number |
 | `--limit` | `100` | Results per page |
 
@@ -1059,7 +1059,7 @@ grafana playlist list --limit 10
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--query`, `-q` | | Search query |
+| `--query` | | Search query |
 | `--limit` | `0` (all) | Maximum number of results |
 
 #### `grafana playlist get <uid>`
@@ -1099,7 +1099,7 @@ grafana library-element list                     # list all
 grafana library-element list --kind 1            # panels only
 grafana library-element list --kind 2            # variables only
 grafana library-element list --search "CPU"      # search by name
-grafana library-element list --folder "General"  # filter by folder
+grafana library-element list --folder abc123     # filter by folder UID
 grafana library-element list --page 2 --limit 20
 ```
 
@@ -1107,9 +1107,9 @@ grafana library-element list --page 2 --limit 20
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--search`, `-q` | | Search string for element name |
+| `--search` | | Search string for element name |
 | `--kind` | `0` (all) | Kind: `1` = panel, `2` = variable |
-| `--folder` | | Filter by folder name |
+| `--folder` | | Filter by folder UID |
 | `--page` | `1` | Page number |
 | `--limit` | `100` | Results per page |
 
@@ -1243,7 +1243,7 @@ Manage CLI configuration.
 
 #### `grafana config view`
 
-Display the current configuration file.
+Display the current configuration file. Tokens and passwords are masked as `****`.
 
 ```bash
 grafana config view

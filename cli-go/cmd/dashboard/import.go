@@ -57,6 +57,16 @@ Examples:
 
 			delete(dashboardData, "id")
 
+			if uid, _ := dashboardData["uid"].(string); uid != "" && overwrite && !cmd.Flags().Changed("folder") {
+				existing, err := c.GetDashboardByUID(cmd.Context(), uid)
+				if err != nil && !client.IsNotFound(err) {
+					return err
+				}
+				if existing != nil {
+					folderUID = existing.Meta.FolderUID
+				}
+			}
+
 			req := client.DashboardCreateRequest{
 				Dashboard: dashboardData,
 				FolderUID: folderUID,

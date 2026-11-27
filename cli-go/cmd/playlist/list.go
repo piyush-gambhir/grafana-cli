@@ -37,6 +37,7 @@ Examples:
 
   # Output as JSON
   grafana playlist list -o json`,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {

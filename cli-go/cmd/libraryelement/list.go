@@ -29,8 +29,8 @@ The output includes UID, Name, Kind (panel or variable), Type, Folder,
 and the number of connected dashboards.
 
 The --kind flag accepts 1 for panels or 2 for variables. The --folder flag
-filters by folder filter (accepts folder name for the Grafana API). The
---search flag performs a search on the element name.
+filters by folder UID. The --search flag performs a search on the element
+name.
 
 Examples:
   # List all library elements
@@ -45,14 +45,15 @@ Examples:
   # Search by name
   grafana library-element list --search "CPU"
 
-  # Filter by folder
-  grafana library-element list --folder "General"
+  # Filter by folder UID
+  grafana library-element list --folder abc123
 
   # Paginate results
   grafana library-element list --page 2 --limit 20
 
   # Output as JSON
   grafana library-element list -o json`,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			c, err := f.Client()
 			if err != nil {
@@ -92,7 +93,7 @@ Examples:
 
 	cmd.Flags().StringVar(&search, "search", "", "Search string for element name")
 	cmd.Flags().IntVar(&kind, "kind", 0, "Kind filter (1=panel, 2=variable)")
-	cmd.Flags().StringVar(&folderFilter, "folder", "", "Filter by folder name")
+	cmd.Flags().StringVar(&folderFilter, "folder", "", "Filter by folder UID")
 	cmdutil.AddPaginationFlags(cmd, &page, &limit)
 
 	return cmd
