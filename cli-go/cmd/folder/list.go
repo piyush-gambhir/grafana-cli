@@ -66,6 +66,8 @@ Examples:
 	}
 
 	cmdutil.AddPaginationFlags(cmd, &page, &limit)
+	cmd.Flags().Lookup("limit").DefValue = "1000"
+	limit = 1000
 
 	return cmd
 }

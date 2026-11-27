@@ -15,11 +15,15 @@ func DefaultPageParams() PageParams {
 }
 
 func (p PageParams) Apply(v url.Values) {
+	p.apply(v, "perpage")
+}
+
+func (p PageParams) apply(v url.Values, sizeParam string) {
 	if p.Page > 0 {
 		v.Set("page", fmt.Sprintf("%d", p.Page))
 	}
 	if p.PerPage > 0 {
-		v.Set("perpage", fmt.Sprintf("%d", p.PerPage))
+		v.Set(sizeParam, fmt.Sprintf("%d", p.PerPage))
 	}
 }
 

@@ -151,3 +151,34 @@ func TestNewFormatter_Default(t *testing.T) {
 		})
 	}
 }
+
+func TestYAMLFormatter_UsesJSONFieldNames(t *testing.T) {
+	type rule struct {
+		FolderUID string   `json:"folderUID"`
+		GroupBy   []string `json:"group_by,omitempty"`
+		Updated   int64    `json:"updated"`
+		Note      string   `json:"note"`
+	}
+
+	var buf bytes.Buffer
+	if err := (&YAMLFormatter{}).Format(&buf, []rule{{FolderUID: "abc", GroupBy: []string{"alertname"}, Updated: 1730462400000, Note: "123"}}, nil); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	want := "- folderUID: abc\n  group_by:\n    - alertname\n  updated: 1730462400000\n  note: \"123\"\n"
+	if buf.String() != want {
+		t.Errorf("got:\n%s\nwant:\n%s", buf.String(), want)
+	}
+}
+
+func TestYAMLFormatter_KeepsQuotesOnAmbiguousStrings(t *testing.T) {
+	var buf bytes.Buffer
+	data := map[string]string{"on": "on", "answer": "yes", "t": "1:20"}
+	if err := (&YAMLFormatter{}).Format(&buf, data, nil); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	for _, want := range []string{"answer: \"yes\"", "t: \"1:20\"", "\"on\": \"on\""} {
+		if !strings.Contains(buf.String(), want) {
+			t.Errorf("missing %q in:\n%s", want, buf.String())
+		}
+	}
+}

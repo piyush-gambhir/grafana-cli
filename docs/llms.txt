@@ -240,7 +240,7 @@ grafana completion <shell>        # emit a shell completion script
 ### config, Manage CLI configuration
 
 ```bash
-grafana config view                       # print the current config file (YAML)
+grafana config view                       # print the current config file (YAML), token and password masked
 grafana config set <key> <value>          # set a config value
 grafana config use-profile <name>         # set the active profile
 grafana config list-profiles              # list profiles (* marks the active one)
@@ -271,11 +271,11 @@ grafana dashboard permissions get <uid>
 grafana dashboard permissions update <uid> -f <file>
 ```
 
-`dashboard list` flags: `--query` (search by title), `--tag`/`-t` (filter by tag), `--folder` (folder UID), `--page` (default `1`), `--limit` (default `100`).
+`dashboard list` flags: `--query` (search by title), `--tag`/`-t` (filter by tag), `--folder` (folder UID), `--page` (default `1`), `--limit` (default `1000`).
 
 `dashboard create` flags: `--file`/`-f`, `--folder` (folder UID), `--overwrite` (default `false`), `--message`/`-m` (version-history note), `--if-not-exists`.
 
-`dashboard update` flags: `--file`/`-f`, `--folder`, `--overwrite` (default `true`), `--message`/`-m`.
+`dashboard update` flags: `--file`/`-f`, `--folder` (default: keep the dashboard's current folder), `--overwrite` (default `true`), `--message`/`-m`. The target dashboard is the `uid` inside the file; the command takes no positional argument.
 
 `dashboard import` flags: `--file`/`-f`, `--folder`, `--overwrite` (default `false`), `--message`/`-m`.
 
@@ -316,12 +316,12 @@ grafana datasource query <uid> [flags]                # Loki/Prometheus via prox
 | Flag | Short | Default | Description |
 |---|---|---|---|
 | `--expr` | `-e` | | Query expression, LogQL (Loki) or PromQL (Prometheus). Required. |
-| `--last` | | `1h` | Lookback duration (e.g. `1h`, `30m`). Ignored when `--from` is set. |
-| `--from` | | | Start time (RFC3339 or Unix epoch). Overrides `--last`. |
-| `--to` | | | End time (RFC3339 or Unix epoch). Defaults to now. |
+| `--last` | | `1h` | Lookback duration (e.g. `1h`, `30m`), ending at `--to` (or now). Ignored when `--from` is set. |
+| `--from` | | | Start time (RFC3339 or Unix epoch in seconds, ms, us, or ns). Overrides `--last`. |
+| `--to` | | | End time (RFC3339 or Unix epoch in seconds, ms, us, or ns). Defaults to now. |
 | `--limit` | | `100` | Max log entries (Loki only). |
 | `--direction` | | `backward` | Log ordering: `backward` (newest first) or `forward` (Loki only). |
-| `--step` | | | Resolution step, e.g. `15s` (Prometheus range queries only). |
+| `--step` | | range/250, at least `1s` | Resolution step, e.g. `15s` (Prometheus range queries only). |
 | `--query-type` | | `range` | `range` or `instant`. |
 
 Examples:
@@ -356,7 +356,7 @@ grafana folder permissions get <uid>
 grafana folder permissions update <uid> -f <file>
 ```
 
-`folder list` flags: `--page` (default `1`), `--limit` (default `100`).
+`folder list` flags: `--page` (default `1`), `--limit` (default `1000`).
 
 ```bash
 grafana folder list -o json
@@ -679,7 +679,7 @@ grafana library-element delete <uid> [--confirm] [--if-exists]
 grafana library-element connections <uid>             # dashboards using this element
 ```
 
-`library-element list` flags: `--search` (element name; no `-q` alias), `--kind` (`1`=panel, `2`=variable; default `0` = no kind filter / all), `--folder` (folder name), `--page` (default `1`), `--limit` (default `100`).
+`library-element list` flags: `--search` (element name; no `-q` alias), `--kind` (`1`=panel, `2`=variable; default `0` = no kind filter / all), `--folder` (folder UID), `--page` (default `1`), `--limit` (default `100`).
 
 ```bash
 grafana library-element list --kind 1 --search "CPU" -o json

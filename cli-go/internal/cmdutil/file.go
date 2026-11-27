@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"go.yaml.in/yaml/v3"
+	"sigs.k8s.io/yaml"
 )
 
 func ReadInput(path string) ([]byte, error) {

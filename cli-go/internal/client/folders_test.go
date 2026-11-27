@@ -204,3 +204,19 @@ func TestUpdateFolderPermissions(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+func TestListFolders_PaginationUsesLimit(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		if q.Get("limit") != "50" || q.Get("page") != "2" || q.Has("perpage") {
+			t.Errorf("unexpected pagination query: %s", r.URL.RawQuery)
+		}
+		json.NewEncoder(w).Encode([]Folder{})
+	}))
+	defer ts.Close()
+
+	c := &Client{BaseURL: ts.URL, HTTPClient: ts.Client(), UserAgent: "test"}
+	if _, err := c.ListFolders(context.Background(), PageParams{Page: 2, PerPage: 50}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

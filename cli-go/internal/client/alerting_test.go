@@ -298,3 +298,70 @@ func TestListSilences(t *testing.T) {
 		t.Errorf("got comment %q, want %q", silences[0].Comment, "Maintenance window")
 	}
 }
+
+func TestCreateSilence_OmittedIsEqualDefaultsToTrue(t *testing.T) {
+	var body struct {
+		Matchers []map[string]interface{} `json:"matchers"`
+	}
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Errorf("decoding body: %v", err)
+		}
+		json.NewEncoder(w).Encode(SilenceCreateResponse{SilenceID: "s1"})
+	}))
+	defer ts.Close()
+
+	var req SilenceCreateRequest
+	if err := json.Unmarshal([]byte(`{"matchers":[{"name":"severity","value":"warning","isRegex":false},{"name":"team","value":"a","isRegex":false,"isEqual":false}]}`), &req); err != nil {
+		t.Fatal(err)
+	}
+	c := &Client{BaseURL: ts.URL, HTTPClient: ts.Client(), UserAgent: "test"}
+	if _, err := c.CreateSilence(context.Background(), req); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(body.Matchers) != 2 {
+		t.Fatalf("expected 2 matchers, got %d", len(body.Matchers))
+	}
+	if got := body.Matchers[0]["isEqual"]; got != true {
+		t.Errorf("omitted isEqual sent as %v, want true", got)
+	}
+	if got := body.Matchers[1]["isEqual"]; got != false {
+		t.Errorf("explicit isEqual false sent as %v, want false", got)
+	}
+}
+
+func TestUpdateAlertRule_KeepsPauseRecordAndNotificationFields(t *testing.T) {
+	var body map[string]interface{}
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Errorf("decoding body: %v", err)
+		}
+		json.NewEncoder(w).Encode(AlertRule{UID: "r1"})
+	}))
+	defer ts.Close()
+
+	var rule AlertRule
+	in := `{"uid":"r1","title":"t","isPaused":true,"keep_firing_for":"2m","notification_settings":{"receiver":"email"},"record":{"metric":"m","from":"A"},"missingSeriesEvalsToResolve":2}`
+	if err := json.Unmarshal([]byte(in), &rule); err != nil {
+		t.Fatal(err)
+	}
+	c := &Client{BaseURL: ts.URL, HTTPClient: ts.Client(), UserAgent: "test"}
+	if _, err := c.UpdateAlertRule(context.Background(), "r1", rule); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if body["isPaused"] != true {
+		t.Errorf("isPaused = %v, want true", body["isPaused"])
+	}
+	if body["keep_firing_for"] != "2m" {
+		t.Errorf("keep_firing_for = %v, want 2m", body["keep_firing_for"])
+	}
+	if ns, _ := body["notification_settings"].(map[string]interface{}); ns["receiver"] != "email" {
+		t.Errorf("notification_settings = %v", body["notification_settings"])
+	}
+	if rec, _ := body["record"].(map[string]interface{}); rec["metric"] != "m" {
+		t.Errorf("record = %v", body["record"])
+	}
+	if body["missingSeriesEvalsToResolve"] != float64(2) {
+		t.Errorf("missingSeriesEvalsToResolve = %v, want 2", body["missingSeriesEvalsToResolve"])
+	}
+}

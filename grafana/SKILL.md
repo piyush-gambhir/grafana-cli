@@ -49,7 +49,7 @@ grafana config list-profiles              # list all profiles
 - **Many create/update commands require `-f <file>`** pointing to a JSON or YAML file. Prepare the file first, then pass it. You can also pipe via stdin with `-f -`.
 - **For bulk operations:** list with `-o json`, parse with `jq`, then loop over results.
 - **For destructive operations** (delete, reset), the CLI requires `--confirm` to skip the interactive confirmation prompt. Always use `--confirm` in scripts.
-- **Pagination** is available on list commands via `--page` and `--limit`.
+- **Pagination** is available on list commands via `--page` and `--limit`.  `dashboard list` and `folder list` default to `--limit 1000`; other list commands default to 100.
 - **Annotation times** (`--from`, `--to`) are in epoch **milliseconds**, not seconds.
 - **Always verify connection** before running operations: `grafana config view`.
 - **Updating the CLI:** `grafana update --check -o json` reports `current_version`, `latest_version`, and `update_available`; `grafana update --yes` installs the latest release (macOS, Linux, Windows). The "new version" notice is printed only when stderr is a terminal, so it never appears in agent output; `GRAFANA_NO_UPDATE_NOTIFIER=1` turns it off everywhere.
@@ -64,7 +64,7 @@ grafana config list-profiles              # list all profiles
 grafana dashboard list -o json
 
 # Search dashboards by title
-grafana dashboard list -q "production" -o json
+grafana dashboard list --query "production" -o json
 
 # Filter by tag
 grafana dashboard list --tag monitoring -o json
@@ -76,7 +76,7 @@ grafana dashboard list --folder <folder-uid> -o json
 grafana dashboard get <uid> -o json
 
 # Extract just dashboard UIDs from search results
-grafana dashboard list -q "production" -o json | jq -r '.[].uid'
+grafana dashboard list --query "production" -o json | jq -r '.[].uid'
 
 # Count panels in a dashboard
 grafana dashboard export <uid> | jq '.panels | length'
@@ -184,6 +184,8 @@ grafana datasource query <loki-uid> --expr '{job="api"}' --from 2026-01-01T00:00
 - `--direction` — `backward` (newest first, default) or `forward` (Loki only).
 - `--step` — Resolution step for Prometheus range queries (e.g. `15s`, `1m`).
 - `--query-type` — `range` (default) or `instant`.
+
+With `--last` and `--to`, the range ends at `--to`. Epoch values may be seconds, milliseconds, microseconds, or nanoseconds. Prometheus range queries without `--step` use range/250 (at least `1s`).
 
 ### Manage folders
 
@@ -396,7 +398,7 @@ grafana user current -o json
 grafana user list --all -o json
 
 # Search users
-grafana user list -q "john" -o json
+grafana user list --query "john" -o json
 
 # Get user details
 grafana user get <id> -o json
@@ -430,7 +432,7 @@ grafana org user list <org-id> -o json
 grafana org user list <org-id> --role Admin -o json
 
 # Search org users
-grafana org user list <org-id> -q "dev" -o json
+grafana org user list <org-id> --query "dev" -o json
 
 # Add a user to an org
 echo '{"loginOrEmail":"newuser@example.com","role":"Viewer"}' | grafana org user add <org-id> -f -
@@ -449,7 +451,7 @@ grafana org user remove <org-id> <user-id> --confirm
 grafana team list -o json
 
 # Search teams
-grafana team list -q "backend" -o json
+grafana team list --query "backend" -o json
 
 # Get team details
 grafana team get <id> -o json
@@ -502,7 +504,7 @@ grafana snapshot delete <key> --confirm
 grafana playlist list -o json
 
 # Search playlists
-grafana playlist list -q "production" -o json
+grafana playlist list --query "production" -o json
 
 # Get a playlist
 grafana playlist get <uid> -o json
@@ -533,7 +535,7 @@ grafana library-element list --kind 2 -o json
 grafana library-element list --search "CPU" -o json
 
 # Filter by folder
-grafana library-element list --folder "General" -o json
+grafana library-element list --folder <folder-uid> -o json
 
 # Get a library element
 grafana library-element get <uid> -o json
@@ -608,7 +610,7 @@ grafana user star remove <dashboard-id>
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| `401 Unauthorized` | Invalid or expired token | Check token with `grafana config view`; re-run `grafana login` |
+| `401 Unauthorized` | Invalid or expired token | Check the active profile with `grafana config view` (tokens are masked); re-run `grafana login` |
 | `403 Forbidden` | Token lacks required permissions | Use a token with Admin role for admin operations |
 | `404 Not Found` | Wrong UID, wrong org context, or resource does not exist | Verify UID; check org with `grafana org current` |
 | Connection refused / timeout | Wrong URL or server down | Verify URL with `grafana config view`; use `--url` to override |

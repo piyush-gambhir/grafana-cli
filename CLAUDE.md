@@ -39,7 +39,7 @@ All list/get commands support three output formats via `-o`:
 grafana dashboard list -o json
 
 # Search dashboards by title
-grafana dashboard list -q "production" -o json
+grafana dashboard list --query "production" -o json
 
 # Filter by tag
 grafana dashboard list --tag monitoring -o json
@@ -245,10 +245,10 @@ grafana config use-profile staging
 
 - Always use `-o json` when you need to parse output programmatically.
 - Dashboard UIDs are more stable than numeric IDs; prefer UIDs for cross-instance references.
-- Use `--query` or `-q` flags on `dashboard list` to filter results server-side before parsing.
+- Use `--query` on `dashboard list` to filter results server-side before parsing. `-q` is the global `--quiet` flag, not a query shorthand.
 - For bulk operations: list with `-o json`, parse with jq, then loop over results.
 - Many create/update commands require a `-f` flag pointing to a JSON or YAML file. Prepare the file first, then pass it.
-- Pagination is available on list commands via `--page` and `--limit` flags.
+- Pagination is available on list commands via `--page` and `--limit` flags.  `dashboard list` and `folder list` default to `--limit 1000`; others default to 100.
 - The `dashboard` command has aliases: `dash`, `db`. The `datasource` command has alias `ds`. The `service-account` command has alias `sa`. The `library-element` command has alias `le`. The `preferences` command has alias `prefs`.
 - Use `grafana config view` to check current connection settings and confirm which profile is active.
 - Annotation time values (`--from`, `--to`) are in epoch milliseconds, not seconds.
@@ -277,10 +277,10 @@ grafana config use-profile staging
 
 | Command | Description |
 |---------|-------------|
-| `grafana dashboard list` | Search and list dashboards (flags: -q, --tag, --folder, --page, --limit) |
+| `grafana dashboard list` | Search and list dashboards (flags: --query, --tag, --folder, --page, --limit) |
 | `grafana dashboard get <uid>` | Get a dashboard by UID |
 | `grafana dashboard create -f <file>` | Create a dashboard from a JSON/YAML file |
-| `grafana dashboard update <uid> -f <file>` | Update a dashboard from file |
+| `grafana dashboard update -f <file>` | Update a dashboard from file (target is the `uid` in the file) |
 | `grafana dashboard delete <uid>` | Delete a dashboard |
 | `grafana dashboard export <uid>` | Export dashboard JSON (--output-file for file) |
 | `grafana dashboard import -f <file>` | Import a dashboard (--folder, --overwrite, -m) |

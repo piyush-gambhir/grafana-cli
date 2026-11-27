@@ -26,7 +26,8 @@ func newCmdDashboardUpdate(f *cmdutil.Factory) *cobra.Command {
 
 The input file must contain a valid Grafana dashboard model with a UID
 that matches an existing dashboard. The --overwrite flag defaults to true
-for updates. Use --folder to move the dashboard to a different folder.
+for updates. The dashboard stays in its current folder unless --folder is
+set; use --folder to move it to a different folder.
 
 Examples:
   # Update a dashboard from a JSON file
@@ -40,6 +41,7 @@ Examples:
 
   # Read from stdin
   cat dashboard.json | grafana dashboard update -f -`,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file == "" {
 				return fmt.Errorf("--file/-f is required")
@@ -53,6 +55,16 @@ Examples:
 			var dashboardData map[string]interface{}
 			if err := cmdutil.UnmarshalInput(file, &dashboardData); err != nil {
 				return err
+			}
+
+			if uid, _ := dashboardData["uid"].(string); uid != "" && !cmd.Flags().Changed("folder") {
+				existing, err := c.GetDashboardByUID(cmd.Context(), uid)
+				if err != nil && !client.IsNotFound(err) {
+					return err
+				}
+				if existing != nil {
+					folderUID = existing.Meta.FolderUID
+				}
 			}
 
 			req := client.DashboardCreateRequest{

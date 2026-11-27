@@ -49,18 +49,24 @@ Examples:
 					s := item.(client.Silence)
 					var matchers []string
 					for _, m := range s.Matchers {
-						op := "="
-						if !m.IsEqual {
-							op = "!="
-						}
-						if m.IsRegex {
-							op += "~"
-						}
-						matchers = append(matchers, fmt.Sprintf("%s%s%s", m.Name, op, m.Value))
+						matchers = append(matchers, formatMatcher(m))
 					}
 					return []string{s.ID, s.Status.State, strings.Join(matchers, ", "), s.StartsAt, s.EndsAt, s.Comment, s.CreatedBy}
 				},
 			})
 		},
 	}
+}
+
+func formatMatcher(m client.Matcher) string {
+	op := "="
+	switch {
+	case m.IsRegex && m.IsEqual:
+		op = "=~"
+	case m.IsRegex:
+		op = "!~"
+	case !m.IsEqual:
+		op = "!="
+	}
+	return m.Name + op + m.Value
 }

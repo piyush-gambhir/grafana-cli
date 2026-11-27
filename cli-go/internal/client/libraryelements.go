@@ -92,9 +92,9 @@ func (c *Client) ListLibraryElements(ctx context.Context, searchString string, k
 		v.Set("kind", fmt.Sprintf("%d", kind))
 	}
 	if folderFilter != "" {
-		v.Set("folderFilter", folderFilter)
+		v.Set("folderFilterUIDs", folderFilter)
 	}
-	page.Apply(v)
+	page.apply(v, "perPage")
 
 	path := "/api/library-elements?" + v.Encode()
 	var result LibraryElementSearchResult

@@ -105,7 +105,7 @@ func (c *Client) SearchDashboards(ctx context.Context, query, tag, folderUID str
 	if folderUID != "" {
 		v.Set("folderUIDs", folderUID)
 	}
-	page.Apply(v)
+	page.apply(v, "limit")
 
 	var results []DashboardSearchResult
 	resp, err := c.Get(ctx, "/api/search?"+v.Encode())
